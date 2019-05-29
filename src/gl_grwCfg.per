@@ -1,0 +1,73 @@
+
+#+
+#+ $Id: gl_grwCfg.per -1   $
+
+LAYOUT( TEXT=%"Configuration",  STYLE="dialog2", VERSION="$Id: gl_grwCfg.per -1   $")
+HBOX
+GRID gr2
+{
+<G gp1                 >
+ [aa1                 ]
+ [ori                 ]
+
+<G gp2                 >
+ [aa3                 ]
+ [lab |val            ]
+ [lab2|fname          ]
+ [lab3|pname          ]
+
+<G gp3                 >
+ [act                 ]
+ [conf                ]
+ [do                  ]
+
+<                      >
+[""]
+[   :accept|cancel:   ]
+}
+END -- GRID
+GRID
+{
+<G gp4                        >
+ [img                        ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+ [                           ]
+}
+END -- GRID
+END -- HBOX
+END -- LAYOUT
+ATTRIBUTES
+	GROUP gp1 : rlayouts, TEXT=%"Report layouts";
+  COMBOBOX aa1=FORMONLY.r_filename, INITIALIZER=glGRW_fileCombo, NOT NULL, COMMENT=%"Select from available .4rp report layouts";
+  RADIOGROUP ori=FORMONLY.r_orientation, DEFAULT="L", TABINDEX=3, ITEMS=(("L",%"Landscape"),("P",%"Portrait")), ORIENTATION=HORIZONTAL,NOT NULL;
+
+	GROUP gp2 : opdest, TEXT=%"Output Destinations";
+  RADIOGROUP aa3=FORMONLY.r_output, DEFAULT="SVG", TABINDEX=1, ORIENTATION=HORIZONTAL;
+	LABEL lab : grwsvg, TEXT=%"SVG Viewer:";
+	EDIT val = FORMONLY.r_grwsvgserver, SCROLL;
+	LABEL lab2 : l_filename, TEXT=%"Filename:";
+	EDIT fname = FORMONLY.r_outputFileName, SCROLL;
+	LABEL lab3 : l_prnname, TEXT=%"Printer:",HIDDEN;
+	COMBOBOX pname = FORMONLY.r_printer, HIDDEN, NOT NULL, INITIALIZER=glGRW_prnCombo;
+
+	GROUP gp3 : gacts, TEXT=%"Actions";
+  RADIOGROUP act=FORMONLY.r_action, DEFAULT="preview", TABINDEX=2, ITEMS=(("preview",%"Preview"),("save",%"Save On Disk")), ORIENTATION=HORIZONTAL,NOT NULL;
+
+	CHECKBOX conf = FORMONLY.r_confirmation, VALUECHECKED=1, VALUEUNCHECKED=0, TEXT=%"Confirm Message on Completion", NOT NULL;
+	BUTTON accept : accept,STYLE="big bold";
+	BUTTON cancel : cancel,STYLE="big bold";
+
+	CHECKBOX do = FORMONLY.r_outDataOnly, VALUECHECKED=1, VALUEUNCHECKED=0, TEXT=%"Output ONLY XML data, not report", NOT NULL;
+
+	GROUP gp4 : gp4, TEXT=%"Layout Preview";
+	IMAGE img = FORMONLY.preview, WIDTH=300 PIXELS, HEIGHT=300 PIXELS, AUTOSCALE, SIZEPOLICY=FIXED, STYLE="noborder";
+END
