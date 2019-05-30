@@ -78,16 +78,16 @@
       <File filePath="src/g2_debug.inc"/>
       <File filePath="src/g2_logging.4gl"/>
       <File filePath="src/g2_lib.4gl"/>
-      <File filePath="src/g2_about.4gl"/>
-      <File filePath="src/g2_appInfo.4gl"/>
       <File filePath="src/g2_aui.4gl"/>
-      <File filePath="src/g2_calendar.4gl"/>
       <File filePath="src/g2_db.4gl"/>
-      <File filePath="src/g2_encrypt.4gl"/>
-      <File filePath="src/g2_lookup.4gl"/>
-      <File filePath="src/g2_secure.4gl"/>
+      <File filePath="src/g2_appInfo.4gl"/>
+      <File filePath="src/g2_about.4gl"/>
+      <File filePath="src/g2_calendar.4gl"/>
       <File filePath="src/g2_sql.4gl"/>
       <File filePath="src/g2_ui.4gl"/>
+      <File filePath="src/g2_lookup.4gl"/>
+      <File filePath="src/g2_secure.4gl"/>
+      <File filePath="src/g2_encrypt.4gl"/>
     </Library>
   </Group>
 </Project>
