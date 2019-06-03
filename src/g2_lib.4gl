@@ -449,6 +449,26 @@ FUNCTION g2_strToDate(l_str STRING) RETURNS DATE
   RETURN l_date
 END FUNCTION
 --------------------------------------------------------------------------------
+#+ Return the result from the hostname commend on Unix / Linux / Mac.
+#+
+#+ @return uname of the OS
+FUNCTION g2_getHostname() RETURNS STRING
+  DEFINE l_hostname STRING
+  DEFINE c base.channel
+  IF os.Path.pathSeparator() = ";" THEN -- Windows
+    LET l_hostname = fgl_getEnv("COMPUTERNAME")
+  ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
+    LET l_hostname = fgl_getEnv("HOSTNAME")
+  END IF
+	IF l_hostname.getLength() < 2 THEN
+		LET c = base.channel.create()
+		CALL c.openPipe("hostname -f", "r")
+		LET l_hostname = c.readLine()
+		CALL c.close()
+	END IF
+  RETURN l_hostname
+END FUNCTION
+--------------------------------------------------------------------------------
 #+ Return the result from the uname commend on Unix / Linux / Mac.
 #+
 #+ @return uname of the OS

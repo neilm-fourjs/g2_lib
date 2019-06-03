@@ -9,6 +9,7 @@
 #+
 #+ No includes required.
 IMPORT os
+IMPORT FGL g2_lib
 IMPORT FGL g2_aui
 IMPORT FGL g2_appInfo
 --------------------------------------------------------------------------------
@@ -19,15 +20,10 @@ IMPORT FGL g2_appInfo
 FUNCTION g2_about(l_appInfo appInfo INOUT)
   DEFINE f, n, g, w om.DomNode
   DEFINE nl om.nodeList
-  DEFINE gver, servername, info, txt STRING
+  DEFINE gver, info, txt STRING
   DEFINE l_fe_typ, l_fe_ver STRING
   DEFINE y SMALLINT
 
-  IF os.Path.pathSeparator() = ";" THEN -- Windows
-    LET servername = fgl_getEnv("COMPUTERNAME")
-  ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
-    LET servername = fgl_getEnv("HOSTNAME")
-  END IF
   LET gver = "build ", fgl_getVersion()
 
   IF l_appInfo.fe_typ IS NULL THEN
@@ -39,6 +35,9 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 
 	IF l_appInfo.userName IS NULL THEN
 		CALL l_appInfo.setUserName(NULL)
+	END IF
+	IF l_appInfo.hostname IS NULL THEN
+		LET l_appInfo.hostname = g2_lib.g2_getHostname()
 	END IF
 
   OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
@@ -116,7 +115,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
   LET y = y + 1
 
   CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server Name") || ":", "right", "black")
-  CALL g2_aui.g2_addLabel(g, 10, y, servername, NULL, "black")
+  CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.hostname, NULL, "black")
   LET y = y + 1
 
   CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Application User") || ":", "right", "black")

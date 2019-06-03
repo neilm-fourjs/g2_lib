@@ -1,4 +1,6 @@
 # Simple class to handle Application information.
+IMPORT FGL g2_lib
+
 PUBLIC TYPE appInfo RECORD
 	appName,
 	appBuild,
@@ -13,6 +15,7 @@ PUBLIC TYPE appInfo RECORD
 	uni_typ,
 	uni_ver,
 	os,
+	hostname,
 	cli_os,
 	cli_osver,
 	cli_res,
@@ -30,6 +33,7 @@ FUNCTION (this appInfo)
   LET this.progAuth = l_progAuth
   LET this.progVersion = l_progVer
   LET this.splashImage = l_progImg
+	LET this.hostname = g2_lib.g2_getHostname()
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) appInfo(l_appName STRING, l_appBuild STRING) RETURNS()
