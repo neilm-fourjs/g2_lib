@@ -150,7 +150,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
   LET y = y + 1
 
   CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Clint OS User") || ":", "right", "black")
-  CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.cli_un, NULL, "black")
+  CALL g2_aui.g2_addLabel(g, 10, y, NVL(l_appInfo.cli_un,"Unknown"), NULL, "black")
   LET y = y + 1
 
   {IF m_user_agent.getLength() > 1 THEN
