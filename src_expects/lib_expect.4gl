@@ -8,8 +8,16 @@ FUNCTION failed( l_reason STRING )
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION okay( l_reason STRING )
-	DISPLAY SFMT("OAKY: %1", l_reason)
+	DISPLAY SFMT("OKAY: %1", l_reason)
 	LET m_success = m_success + 1
+END FUNCTION
+----------------------------------------------------------------------------------------------------
+FUNCTION test(l_label STRING, l_val1 STRING, l_val2 STRING)
+	IF l_val1 != l_val2 THEN
+		CALL failed(SFMT("test %1 got '%2'",l_label, l_val2))
+	ELSE
+		CALL okay(SFMT("test %1",l_label))
+	END IF
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION results()

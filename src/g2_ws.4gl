@@ -2,13 +2,14 @@ IMPORT com
 IMPORT util
 IMPORT FGL g2_logging
 PUBLIC DEFINE m_server STRING
-DEFINE ws_response RECORD
-	status INTEGER,
-	description STRING,
-	data util.JSONObject,
+PUBLIC TYPE t_response RECORD
 	server STRING,
-	timestamp STRING
+	status INTEGER,
+	timestamp STRING,
+	description STRING,
+	data util.JSONObject
 END RECORD
+PUBLIC DEFINE ws_response t_response
 ----------------------------------------------------------------------------------------------------
 -- Start the service loop
 PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logger INOUT)
