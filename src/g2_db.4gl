@@ -60,6 +60,11 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
   END IF
 
   IF this.driver IS NULL THEN
+		IF this.type IS NOT NULL THEN
+			LET this.driver = "dbm"||this.type
+		END IF
+	END IF
+	IF this.driver IS NULL THEN
     LET this.driver = fgl_getenv("DBDRIVER")
   END IF
   IF this.driver IS NULL OR this.driver = " " THEN

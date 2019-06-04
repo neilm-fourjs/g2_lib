@@ -347,5 +347,5 @@ FUNCTION (this sql) g2_SQLrec2Json()
   FOR x = 1 TO this.fields.getLength()
     CALL this.json_rec.put(this.fields[x].colname, this.fields[x].value.trimRight())
   END FOR
-  DISPLAY this.json_rec.toString()
+--  DISPLAY this.json_rec.toString()
 END FUNCTION
