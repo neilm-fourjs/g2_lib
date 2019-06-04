@@ -37,6 +37,7 @@ MAIN
 
 -- process the row
 	CALL l_sql.g2_SQLrec2Json() -- get selected data into a JSON object
+	DISPLAY "JSON:", l_sql.json_rec.toString()
 	TRY -- turn JSONobject into 4gl record
 		CALL l_sql.json_rec.toFGL( l_stk )
 	CATCH

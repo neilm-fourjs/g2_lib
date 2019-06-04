@@ -5,6 +5,7 @@ PUBLIC DEFINE m_server STRING
 DEFINE ws_response RECORD
 	status INTEGER,
 	description STRING,
+	data util.JSONObject,
 	server STRING,
 	timestamp STRING
 END RECORD
@@ -58,6 +59,14 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 -- Format the string reply from the service function
 PUBLIC FUNCTION service_reply(l_stat INT, l_reply STRING) RETURNS STRING
+	IF l_reply.getCharAt(1) = "{" THEN -- assume it's JSON
+		TRY
+			LET ws_response.data = util.JSONObject.parse(l_reply)
+			LET l_reply = "JSON"
+		CATCH
+			LET ws_response.data = util.JSONObject.parse("{\"Error\": \"invalid JSON!\"}")
+		END TRY
+	END IF
 	LET ws_response.description = l_reply
 	LET ws_response.server = m_server
 	LET ws_response.timestamp = CURRENT
