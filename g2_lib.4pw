@@ -96,6 +96,7 @@
     </Application>
     <Library binaryName="lib_expect" id="-3234353" label="lib_expect">
       <File filePath="src_expects/lib_expect.4gl"/>
+      <File filePath="src_expects/njm_demo310.4db"/>
     </Library>
   </Group>
 </Project>
