@@ -88,6 +88,7 @@
       <File filePath="src/g2_lookup.4gl"/>
       <File filePath="src/g2_secure.4gl"/>
       <File filePath="src/g2_encrypt.4gl"/>
+      <File filePath="src/g2_ws.4gl"/>
     </Library>
   </Group>
   <Group id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
