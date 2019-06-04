@@ -16,10 +16,10 @@ PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logg
 
   CALL com.WebServiceEngine.RegisterRestService(l_module, l_basePath)
 
-  LET l_msg = SFMT("Service '%1' started %2.", l_module, CURRENT)
+  LET l_msg = SFMT("Started with path %1.", l_basePath)
   CALL com.WebServiceEngine.Start()
   WHILE TRUE
-    CALL g2_log.logIt(SFMT("Service: %1", l_msg))
+    CALL g2_log.logIt(SFMT("Service: %1 - %2", l_module, l_msg))
     LET l_ret = com.WebServiceEngine.ProcessServices(-1)
     CASE l_ret
       WHEN 0
@@ -32,7 +32,7 @@ PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logg
       WHEN -3
         LET l_msg = "Client Connection lost."
       WHEN -4
-        LET l_msg = "Server interrupted with Ctrl-C."
+        LET l_msg = "Interrupted with Ctrl-C."
       WHEN -9
         LET l_msg = "Unsupported operation."
       WHEN -10
@@ -48,12 +48,12 @@ PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logg
         EXIT WHILE
     END CASE
     IF int_flag != 0 THEN
-      LET l_msg = "Service interrupted."
+      LET l_msg = "Interrupted."
       LET int_flag = 0
       EXIT WHILE
     END IF
   END WHILE
-  CALL g2_log.logIt(SFMT("Server stopped: %1", l_msg))
+  CALL g2_log.logIt(SFMT("Service: %1 - Ended: %2", l_module, l_msg))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 -- Format the string reply from the service function
