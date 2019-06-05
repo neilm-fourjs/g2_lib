@@ -165,6 +165,11 @@ FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS(
     LET l_message = "Message was NULL!!\n" || base.Application.getStackTrace()
   END IF
 
+	IF m_isWS THEN
+		DISPLAY l_message
+		RETURN
+	END IF
+
   LET l_win = ui.window.getcurrent()
   IF l_win IS NULL THEN -- Needs a current window or dialog doesn't work!!
     OPEN WINDOW dummy AT 1, 1 WITH 1 ROWS, 1 COLUMNS
