@@ -20,6 +20,7 @@ PUBLIC DEFINE g2_err g2_logging.logger
 PUBLIC DEFINE m_mdi CHAR(1)
 PUBLIC DEFINE m_isUniversal BOOLEAN
 PUBLIC DEFINE m_isGDC BOOLEAN
+PUBLIC DEFINE m_isWS BOOLEAN
 
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
 	DEFINE l_ucn STRING
@@ -35,6 +36,10 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
 	IF l_ucn.getLength() < 3 THEN LET l_ucn = "?" END IF
 	IF ui.Interface.getFrontEndName() = "GDC" THEN LET m_isGDC = TRUE END IF
 	IF l_ucn != "GBC" THEN LET m_isUniversal = FALSE END IF
+
+	IF fgl_getEnv("FGL_VMPROXY_PROXY") MATCHES "*gwsproxy*" THEN
+		LET m_isWS = TRUE
+	END IF
 
   CALL g2_loadStyles(l_cfgname)
 	CALL g2_loadToolBar(l_cfgname)
@@ -407,7 +412,7 @@ FUNCTION g2_error()
   END IF
   LET l_err = l_stat || ":" || l_err || l_mod
 --  CALL gl_logIt("Error:"||l_err)
-  IF l_stat != -6300 THEN
+  IF l_stat != -6300 AND NOT m_isWS THEN
     CALL g2_errPopup(l_err)
   END IF
 
