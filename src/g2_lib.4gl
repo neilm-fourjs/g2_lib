@@ -18,28 +18,22 @@ IMPORT FGL g2_logging
 PUBLIC DEFINE g2_log g2_logging.logger
 PUBLIC DEFINE g2_err g2_logging.logger
 PUBLIC DEFINE m_mdi CHAR(1)
-PUBLIC DEFINE m_isUniversal BOOLEAN
-PUBLIC DEFINE m_isGDC BOOLEAN
-PUBLIC DEFINE m_isWS BOOLEAN
+PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
+PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
+PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
-	DEFINE l_ucn STRING
+	DEFINE l_tmp STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_log.init(NULL, NULL, "err", "TRUE")
 
   CALL STARTLOG(g2_err.fullLogPath)
   WHENEVER ANY ERROR CALL g2_error
 
-	LET m_isGDC = FALSE
-	LET m_isUniversal = TRUE
-	LET l_ucn = ui.Interface.getUniversalClientName()
-	IF l_ucn.getLength() < 3 THEN LET l_ucn = "?" END IF
+	LET l_tmp = ui.Interface.getUniversalClientName()
+	IF l_tmp.getLength() < 3 THEN LET l_tmp = "?" END IF
 	IF ui.Interface.getFrontEndName() = "GDC" THEN LET m_isGDC = TRUE END IF
-	IF l_ucn != "GBC" THEN LET m_isUniversal = FALSE END IF
-
-	IF fgl_getEnv("FGL_VMPROXY_PROXY") MATCHES "*gwsproxy*" THEN
-		LET m_isWS = TRUE
-	END IF
+	IF l_tmp != "GBC" THEN LET m_isUniversal = FALSE END IF
 
   CALL g2_loadStyles(l_cfgname)
 	CALL g2_loadToolBar(l_cfgname)
