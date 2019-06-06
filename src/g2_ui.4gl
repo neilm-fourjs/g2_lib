@@ -4,14 +4,14 @@ IMPORT FGL g2_sql
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE t_after_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
 PUBLIC TYPE t_after_fld_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS ()
-PUBLIC TYPE ui RECORD
+PUBLIC TYPE g2_ui RECORD
 	dia ui.Dialog,
 	before_inp_func t_before_inp_func,
 	after_inp_func t_after_inp_func,
 	after_fld_func t_after_fld_func
 END RECORD
 --------------------------------------------------------------------------------
-FUNCTION (this ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
+FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
   DEFINE x SMALLINT
 	DEFINE l_evt, l_fld STRING
 	IF l_acceptAction.getLength() < 1 THEN LET l_acceptAction = "accept" END IF
