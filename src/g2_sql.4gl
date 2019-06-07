@@ -7,7 +7,7 @@ CONSTANT SQL_PREV = -1
 CONSTANT SQL_NEXT = -2
 CONSTANT SQL_LAST = -3
 
-TYPE t_fields RECORD
+PUBLIC TYPE t_fields RECORD
   colName STRING,
   colType STRING,
 	colLength SMALLINT,
@@ -15,7 +15,9 @@ TYPE t_fields RECORD
 	isKey	BOOLEAN,
   value STRING,
 	para_no SMALLINT,
-	formOnly BOOLEAN
+	formOnly BOOLEAN,
+	noEntry BOOLEAN,
+	defValue STRING
 END RECORD
 
 PUBLIC TYPE sql RECORD

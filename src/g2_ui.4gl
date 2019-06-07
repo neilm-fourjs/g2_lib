@@ -1,35 +1,50 @@
 
 IMPORT FGL g2_sql
 
+PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE t_after_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
 PUBLIC TYPE t_after_fld_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE g2_ui RECORD
 	dia ui.Dialog,
+	init_inp_func t_init_inp_func,
 	before_inp_func t_before_inp_func,
 	after_inp_func t_after_inp_func,
-	after_fld_func t_after_fld_func
+	after_fld_func t_after_fld_func,
+	fields DYNAMIC ARRAY OF g2_sql.t_fields
 END RECORD
 --------------------------------------------------------------------------------
 FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
   DEFINE x SMALLINT
 	DEFINE l_evt, l_fld STRING
-	IF l_acceptAction.getLength() < 1 THEN LET l_acceptAction = "accept" END IF
-  CALL ui.Dialog.setDefaultUnbuffered(TRUE)
-  LET this.dia = ui.Dialog.createInputByName(l_sql.fields)
 
-  IF l_new THEN
-  ELSE
-    IF l_sql.current_row = 0 THEN
-      RETURN
-    END IF
-    FOR x = 1 TO l_sql.fields.getLength()
-      CALL this.dia.setFieldValue(l_sql.fields[x].colName, l_sql.fields[x].value)
-      IF x = l_sql.key_field_num THEN
-        CALL this.dia.setFieldActive(l_sql.fields[x].colname, FALSE)
-      END IF
-    END FOR
+	LET this.fields = l_sql.fields
+
+-- Allow initialize like adding formonly fields or setting noEntry fields.
+	IF this.init_inp_func IS NOT NULL THEN
+		CALL this.init_inp_func(l_new, this.dia)
+	END IF
+
+	IF l_acceptAction.getLength() < 1 THEN LET l_acceptAction = "accept" END IF
+
+  CALL ui.Dialog.setDefaultUnbuffered(TRUE)
+
+  LET this.dia = ui.Dialog.createInputByName(this.fields)
+
+  IF NOT l_new THEN
+    IF l_sql.current_row = 0 THEN RETURN END IF
   END IF
+
+	FOR x = 1 TO this.fields.getLength()
+		IF l_new THEN
+			CALL this.dia.setFieldValue(this.fields[x].colName, this.fields[x].defValue)
+		ELSE
+			CALL this.dia.setFieldValue(this.fields[x].colName, this.fields[x].value)
+		END IF
+		IF x = l_sql.key_field_num OR this.fields[x].noEntry THEN
+			CALL this.dia.setFieldActive(this.fields[x].colname, FALSE)
+		END IF
+	END FOR
 
   CALL this.dia.addTrigger("ON ACTION close")
   CALL this.dia.addTrigger("ON ACTION cancel")
@@ -79,14 +94,14 @@ FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction
 
       WHEN "ON ACTION clear"
 				CALL l_sql.g2_SQLrec2Json()
-				FOR x = 1 TO l_sql.fields.getLength()
-					CALL this.dia.setFieldValue(l_sql.fields[x].colName, l_sql.fields[x].value)
+				FOR x = 1 TO this.fields.getLength()
+					CALL this.dia.setFieldValue(this.fields[x].colName, this.fields[x].value)
 				END FOR
 				CALL l_sql.g2_SQLrec2Json()
 
       WHEN "ON ACTION "||l_acceptAction
-				FOR x = 1 TO l_sql.fields.getLength()
-					LET l_sql.fields[x].value = this.dia.getFieldValue(l_sql.fields[x].colName)
+				FOR x = 1 TO this.fields.getLength()
+					LET this.fields[x].value = this.dia.getFieldValue(this.fields[x].colName)
 				END FOR
         CALL this.dia.accept()
 
@@ -96,4 +111,14 @@ FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction
     END CASE
   END WHILE
 
+END FUNCTION
+--------------------------------------------------------------------------------
+FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value STRING)
+	DEFINE x SMALLINT
+	CALL this.fields.appendElement()
+	LET x = this.fields.getLength()
+	LET this.fields[x].colName = l_name
+	LET this.fields[x].colType = l_type
+	LET this.fields[x].value = l_value
+	LET this.fields[x].formOnly = TRUE
 END FUNCTION
