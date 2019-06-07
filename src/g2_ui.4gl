@@ -5,12 +5,14 @@ PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE t_after_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
 PUBLIC TYPE t_after_fld_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS ()
+PUBLIC TYPE t_onChange_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS ()
 PUBLIC TYPE g2_ui RECORD
 	dia ui.Dialog,
 	init_inp_func t_init_inp_func,
 	before_inp_func t_before_inp_func,
 	after_inp_func t_after_inp_func,
 	after_fld_func t_after_fld_func,
+	onChange_func t_onChange_func,
 	fields DYNAMIC ARRAY OF g2_sql.t_fields
 END RECORD
 --------------------------------------------------------------------------------
@@ -57,6 +59,11 @@ FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction
 			LET l_fld = l_evt.subString(13, l_evt.getLength())
 			LET l_evt = "AFTER FIELD"
 		END IF
+		IF l_evt.subString(1,9) = "ON CHANGE" THEN
+			LET l_fld = l_evt.subString(11, l_evt.getLength())
+			LET l_evt = "ON CHANGE"
+			DISPLAY "ON CHANGE:",l_fld
+		END IF
     CASE l_evt
       WHEN "BEFORE INPUT"
         IF this.before_inp_func IS NOT NULL THEN
@@ -88,6 +95,10 @@ FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction
 					CALL this.after_fld_func(l_fld, this.dia.getFieldValue(l_fld), this.dia)
 				END IF
 
+      WHEN "ON CHANGE"
+				IF this.onChange_func IS NOT NULL THEN
+					CALL this.onChange_func(l_fld, this.dia.getFieldValue(l_fld), this.dia)
+				END IF
       WHEN "ON ACTION close"
         LET int_flag = TRUE
         EXIT WHILE
