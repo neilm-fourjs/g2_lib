@@ -113,7 +113,7 @@ FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction
 
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value STRING)
+FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value STRING, l_noEntry BOOLEAN)
 	DEFINE x SMALLINT
 	CALL this.fields.appendElement()
 	LET x = this.fields.getLength()
@@ -121,4 +121,5 @@ FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value 
 	LET this.fields[x].colType = l_type
 	LET this.fields[x].value = l_value
 	LET this.fields[x].formOnly = TRUE
+	LET this.fields[x].noEntry = l_noEntry
 END FUNCTION
