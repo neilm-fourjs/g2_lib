@@ -14,7 +14,8 @@ TYPE t_fields RECORD
   isNumeric BOOLEAN,
 	isKey	BOOLEAN,
   value STRING,
-	para_no SMALLINT
+	para_no SMALLINT,
+	formOnly BOOLEAN
 END RECORD
 
 PUBLIC TYPE sql RECORD
@@ -69,6 +70,7 @@ FUNCTION (this sql) g2_SQLcursor()
   FOR x = 1 TO this.handle.getResultCount()
     LET this.fields[x].colName = this.handle.getResultName(x)
     LET this.fields[x].colType = this.handle.getResultType(x)
+		LET this.fields[x].formOnly = FALSE
 		LET this.fields[x].isKey = FALSE
     IF this.fields[x].colname.trim() = this.key_field.trim() THEN
 			LET this.fields[x].isKey = TRUE
@@ -204,7 +206,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
   END FOR
   LET l_sql = l_sql.append(") = (")
   FOR x = 1 TO this.fields.getLength()
-		IF NOT this.fields[x].isKey THEN
+		IF NOT this.fields[x].isKey AND NOT this.fields[x].formOnly THEN
 			LET this.fields[x].para_no = l_para_no
 			LET l_para_no = l_para_no + 1
 			IF x != this.fields.getLength() THEN
@@ -220,15 +222,17 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 
 -- Update the Parameters.
   FOR x = 1 TO this.fields.getLength()
-		LET l_val = this.fields[x].value
-		LET l_valNumeric = this.fields[x].value.trim()
-		IF this.fields[x].isKey THEN
-			LET l_key = this.fields[x].value.trimRight()
-		ELSE
-			IF this.fields[x].isNumeric THEN
-				CALL l_updsql.setParameter( this.fields[x].para_no, l_valNumeric )
+		IF NOT this.fields[x].formOnly THEN
+			LET l_val = this.fields[x].value
+			LET l_valNumeric = this.fields[x].value.trim()
+			IF this.fields[x].isKey THEN
+				LET l_key = this.fields[x].value.trimRight()
 			ELSE
-				CALL l_updsql.setParameter( this.fields[x].para_no, l_val )
+				IF this.fields[x].isNumeric THEN
+					CALL l_updsql.setParameter( this.fields[x].para_no, l_valNumeric )
+				ELSE
+					CALL l_updsql.setParameter( this.fields[x].para_no, l_val )
+				END IF
 			END IF
 		END IF
   END FOR
@@ -270,10 +274,12 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
   END FOR
   LET l_sql = l_sql.append(") values (")
   FOR x = 1 TO this.fields.getLength()
-		IF x != this.fields.getLength() THEN
-			LET l_sql = l_sql.append("?,")
-		ELSE
-			LET l_sql = l_sql.append("?")
+		IF NOT this.fields[x].formOnly THEN
+			IF x != this.fields.getLength() THEN
+				LET l_sql = l_sql.append("?,")
+			ELSE
+				LET l_sql = l_sql.append("?")
+			END IF
 		END IF
 	END FOR
   LET l_sql = l_sql.append(")")
@@ -282,12 +288,14 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 
 -- Update the Parameters.
   FOR x = 1 TO this.fields.getLength()
-		LET l_val = this.fields[x].value
-		LET l_valNumeric = this.fields[x].value.trim()
-		IF this.fields[x].isNumeric THEN
-			CALL l_inssql.setParameter( x, l_valNumeric )
-		ELSE
-			CALL l_inssql.setParameter( x, l_val )
+		IF NOT this.fields[x].formOnly THEN
+			LET l_val = this.fields[x].value
+			LET l_valNumeric = this.fields[x].value.trim()
+			IF this.fields[x].isNumeric THEN
+				CALL l_inssql.setParameter( x, l_valNumeric )
+			ELSE
+				CALL l_inssql.setParameter( x, l_val )
+			END IF
 		END IF
   END FOR
 -- Excute the SQL
