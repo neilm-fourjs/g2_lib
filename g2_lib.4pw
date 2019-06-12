@@ -86,8 +86,8 @@
       <File filePath="src/g2_sql.4gl"/>
       <File filePath="src/g2_ui.4gl"/>
       <File filePath="src/g2_lookup.4gl"/>
-      <File filePath="src/g2_secure.4gl"/>
       <File filePath="src/g2_encrypt.4gl"/>
+      <File filePath="src/g2_secure.4gl"/>
       <File filePath="src/g2_ws.4gl"/>
     </Library>
   </Group>
