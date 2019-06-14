@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Project defaultApplication="668499250" gstVersion="31403" version="3.3">
+<Project defaultApplication="-615368558" gstVersion="31404" version="3.3">
   <Settings>
     <DynamicProperties version="2">
       <DynamicProperty description="Accent color (Android 5.0 and later)" initialValue="#9575CD" isDefaultInherited="false" isHidden="false" label="Accent color" name="gma-accent-color" readOnly="false" type="COLOR"/>
@@ -92,6 +92,9 @@
     </Library>
   </Group>
   <Group id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
+    <Application binaryName="g2_exp_lookup" dependencies="14000" id="-615368558" label="g2_exp_lookup">
+      <File filePath="src_expects/g2_exp_lookup.4gl"/>
+    </Application>
     <Application binaryName="g2_exp_sql" dependencies="14000,-3234353" id="269619776" label="g2_exp_sql">
       <File filePath="src_expects/g2_exp_sql.4gl"/>
     </Application>
