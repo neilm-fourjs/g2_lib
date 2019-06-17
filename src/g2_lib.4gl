@@ -25,9 +25,12 @@ PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
 	DEFINE l_tmp STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
-	CALL g2_log.init(NULL, NULL, "err", "TRUE")
-
+	CALL g2_err.init(NULL, NULL, "err", "TRUE")
   CALL STARTLOG(g2_err.fullLogPath)
+
+  LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
+  GL_DBGMSG(1, SFMT("g2_lib: debug level %1", gl_dbgLev))
+
   WHENEVER ANY ERROR CALL g2_error
 
 	LET l_tmp = ui.Interface.getUniversalClientName()

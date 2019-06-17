@@ -573,10 +573,10 @@ FUNCTION g2_getColumnType(l_typ STRING) RETURNS(STRING, STRING)
       LET l_len = 10
     WHEN "CHA"
       LET l_typ = "C"
-      LET l_len = g2_getColumnLength(l_typ)
+      LET l_len = g2_getColumnLength(l_typ, 0)
     WHEN "VAR"
       LET l_typ = "C"
-      LET l_len = g2_getColumnLength(l_typ)
+      LET l_len = g2_getColumnLength(l_typ, 0)
   END CASE
 
   RETURN l_typ, l_len
@@ -586,16 +586,32 @@ END FUNCTION
 #+
 #+ @param s_typ Type
 #+ @return Length from type or defaults to 10
-FUNCTION g2_getColumnLength(l_typ STRING) RETURNS SMALLINT
-  DEFINE x, y, l_len SMALLINT
-  LET l_len = 1 -- default
+FUNCTION g2_getColumnLength(l_type STRING, l_max SMALLINT) RETURNS SMALLINT
+  DEFINE x, y, l_size SMALLINT
+  LET l_size = 1 -- default
+  CASE l_type
+    WHEN "SMALLINT"
+      LET l_size = 5
+    WHEN "SERIAL"
+      LET l_size = 10
+    WHEN "INTEGER"
+      LET l_size = 10
+    WHEN "FLOAT"
+      LET l_size = 12
+    WHEN "DATE"
+      LET l_size = 10
+  END CASE
 --TODO: Handle decimal, numeric ie values with , in.
-  LET x = l_typ.getIndexOf("(", 4)
-  LET y = l_typ.getIndexOf(")", x + 1)
-  IF x > 0 AND y > 0 THEN
-    LET l_len = l_typ.subString(x + 1, y - 1)
+  LET x = l_type.getIndexOf("(", 1)
+  IF x > 1 THEN
+    LET y = l_type.getIndexOf(",", 1)
+    IF y = 0 THEN
+      LET y = l_type.getIndexOf(")", 1)
+    END IF
+    LET l_size = l_type.subString(x + 1, y - 1)
   END IF
-  RETURN l_len
+	IF l_max > 0 AND l_size > l_max THEN LET l_size = l_max END IF
+  RETURN l_size
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Check a record for valid update/insert

@@ -9,9 +9,9 @@
 --------------------------------------------------------------------------------
 IMPORT FGL g2_lib
 IMPORT FGL g2_aui
+IMPORT FGL g2_db
 &include "g2_debug.inc"
-
-CONSTANT MAXCOLWIDTH = 30
+CONSTANT MAXCOLWIDTH = 40
 --------------------------------------------------------------------------------
 #+ @code LET key = g2_lookup.g2_lookup( tabnam, cols, colts, wher, ordby )
 #+
@@ -23,9 +23,8 @@ CONSTANT MAXCOLWIDTH = 30
 #+ @param wher	The WHERE clause, 1=1 means all, or use result of construct
 #+ @param ordby The ORDER BY clause
 #+ @returns string with the key for selected row or NULL if cancelled or no data.
-FUNCTION g2_lookup(
-    tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING)
-    RETURNS STRING --{{{
+FUNCTION g2_lookup(tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING)
+    RETURNS STRING
   DEFINE l_frm, l_grid, l_tabl, l_tabc, l_edit, l_curr om.DomNode
   DEFINE l_hbx, l_sp, l_titl om.DomNode
   DEFINE l_tot_recs, x, i INTEGER
@@ -42,7 +41,6 @@ FUNCTION g2_lookup(
   DEFINE l_event STRING
 
 -- See "genero_lib.inc" for Macro definitions.
-
   GL_DBGMSG(2, "g2_lookup: table(s)=" || tabnam)
   GL_DBGMSG(2, "g2_lookup: cols		=" || cols)
   GL_DBGMSG(2, "g2_lookup: l_titles	=" || colts)
@@ -69,13 +67,13 @@ FUNCTION g2_lookup(
   END IF
   GL_DBGMSG(2, "g2_lookup: Counted:" || l_tot_recs)
 
--- Prepare/Declare main cursor
+-- Build the SQL
   LET l_sel_stmt = "SELECT " || cols CLIPPED || " FROM " || tabnam CLIPPED, " WHERE " || wher
   IF ordby IS NOT NULL THEN
     LET l_sel_stmt = l_sel_stmt CLIPPED, " ORDER BY " || ordby
   END IF
 
--- Version 3.00 feature.
+-- Prepare/Declare main cursor
   LET l_sql_handle = base.SqlHandle.create()
   TRY
     CALL l_sql_handle.prepare(l_sel_stmt)
@@ -89,7 +87,7 @@ FUNCTION g2_lookup(
     LET l_fields[x].name = l_sql_handle.getResultName(x)
     LET l_col_titles[x] = l_fields[x].name -- default column l_titles
     LET l_fields[x].type = l_sql_handle.getResultType(x)
-    GL_DBGMSG(2, "g2_lookup:" || i || " Name:" || l_fields[x].name || " Type:" || l_fields[x].type)
+    GL_DBGMSG(2, "g2_lookup:" || x || " Name:" || l_fields[x].name || " Type:" || l_fields[x].type)
   END FOR
   GL_DBGMSG(2, "g2_lookup: Cursor Okay.")
 
@@ -97,8 +95,7 @@ FUNCTION g2_lookup(
   GL_DBGMSG(2, "g2_lookup: Opening Window.")
   OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
   CALL fgl_setTitle("Listing from " || tabnam)
-  LET l_frm =
-      g2_aui.g2_genForm("gl_" || tabnam.trim()) -- ensures form name is specific for this lookup
+  LET l_frm = g2_aui.g2_genForm("gl_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
   LET l_grid = l_frm.createChild('Grid')
 -- Create a centered window l_title.
@@ -133,7 +130,7 @@ FUNCTION g2_lookup(
     CALL l_tabc.setAttribute("colName", l_fields[x].name)
     LET l_edit = l_tabc.createChild('Edit')
     CALL l_tabc.setAttribute("text", l_col_titles[x])
-    CALL l_edit.setAttribute("width", gl_lookup_getSize(l_fields[x].type))
+    CALL l_edit.setAttribute("width", g2_db.g2_getColumnLength(l_fields[x].type, MAXCOLWIDTH))
     IF l_col_titles[x].getCharAt(1) = "_" THEN -- if l_title starts with _ then it's a hidden column
       CALL l_tabc.setAttribute("hidden", "1")
     END IF
@@ -235,42 +232,4 @@ FUNCTION g2_lookup(
     RETURN l_ret_key.trim()
   END IF
 
-END FUNCTION --}}}
---------------------------------------------------------------------------------
-#+ Get the size for the table column from the type passed
-#+
-#+ @param l_type String type of field
-#+ @returns smallint size of field
-FUNCTION gl_lookup_getSize(l_type STRING) RETURNS SMALLINT
-  DEFINE l_size SMALLINT
-  DEFINE x, y SMALLINT
-
-  CASE l_type
-    WHEN "SMALLINT"
-      LET l_size = 5
-    WHEN "SERIAL"
-      LET l_size = 10
-    WHEN "INTEGER"
-      LET l_size = 10
-    WHEN "FLOAT"
-      LET l_size = 12
-    WHEN "DATE"
-      LET l_size = 10
-    OTHERWISE
-      LET l_size = 5
-  END CASE
-
-  LET x = l_type.getIndexOf("(", 1)
-  IF x > 1 THEN
-    LET y = l_type.getIndexOf(",", 1)
-    IF y = 0 THEN
-      LET y = l_type.getIndexOf(")", 1)
-    END IF
-    LET l_size = l_type.subString(x + 1, y - 1)
-  END IF
-  IF l_size > MAXCOLWIDTH THEN
-    LET l_size = MAXCOLWIDTH
-  END IF -- shrink big fields to MAXCOLWIDTH
-  RETURN l_size
-END FUNCTION --}}}
---------------------------------------------------------------------------------
+END FUNCTION
