@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-#+ Genero Library 1 - Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
+#+ Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
 #+ Genero 3.20 >
 #+
