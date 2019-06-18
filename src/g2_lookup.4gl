@@ -23,7 +23,8 @@ CONSTANT MAXCOLWIDTH = 40
 #+ @param wher	The WHERE clause, 1=1 means all, or use result of construct
 #+ @param ordby The ORDER BY clause
 #+ @returns string with the key for selected row or NULL if cancelled or no data.
-FUNCTION g2_lookup(tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING)
+FUNCTION g2_lookup(
+    tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING)
     RETURNS STRING
   DEFINE l_frm, l_grid, l_tabl, l_tabc, l_edit, l_curr om.DomNode
   DEFINE l_hbx, l_sp, l_titl om.DomNode
@@ -95,7 +96,8 @@ FUNCTION g2_lookup(tabnam STRING, cols STRING, colts STRING, wher STRING, ordby 
   GL_DBGMSG(2, "g2_lookup: Opening Window.")
   OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
   CALL fgl_setTitle("Listing from " || tabnam)
-  LET l_frm = g2_aui.g2_genForm("gl_" || tabnam.trim()) -- ensures form name is specific for this lookup
+  LET l_frm =
+      g2_aui.g2_genForm("gl_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
   LET l_grid = l_frm.createChild('Grid')
 -- Create a centered window l_title.

@@ -37,51 +37,53 @@ IMPORT FGL g2_db
 &include "g2_debug.inc"
 
 PUBLIC TYPE lookup RECORD
-		tableName STRING, 			-- Table name
-		columnList STRING, 			-- List of Columns, comma separated
-		columnTitles STRING, 		-- Headings ( defaults to column names ), comma separated
-		whereClause STRING, 		-- where clause ( defaults to 1=1 )
-		orderBy STRING,					-- Order by ( optional )
-		maxColWidth SMALLINT,		-- Largest column width ( default is coded as 40 )
-		allowUpdate BOOLEAN,		-- Allow update of a row ( WIP )
-		allowInsert BOOLEAN,		-- Allow insert of a row ( WIP )
-		allowDelete BOOLEAN,		-- Allow Delete of a row ( WIP )
-		sql_count STRING,				-- SQL for select count of rows
-		sql_getData STRING,			-- Main select for fetching the data
-		totalRecords INTEGER,		-- Total row count from select count
-		sqlQueryHandle base.SqlHandle,	-- The SQL Handle for the main select SQL
-		fields DYNAMIC ARRAY OF RECORD	-- The array of fields selected
-			name STRING,
-			type STRING
-		END RECORD,
-		columnTitlesArr DYNAMIC ARRAY OF STRING,	-- Column headiing array based on 'columnTitles'
-		formName STRING,				-- Form name in AUI tree, used by client stored settings
-		windowTitle STRING,			-- Window title, defaults to "Listing from 'tablename'"
-		theDialog ui.Dialog,		-- The dialog object
-		selectedKey STRING			-- the selected first column
-	END RECORD
+  tableName STRING, -- Table name
+  columnList STRING, -- List of Columns, comma separated
+  columnTitles STRING, -- Headings ( defaults to column names ), comma separated
+  whereClause STRING, -- where clause ( defaults to 1=1 )
+  orderBy STRING, -- Order by ( optional )
+  maxColWidth SMALLINT, -- Largest column width ( default is coded as 40 )
+  allowUpdate BOOLEAN, -- Allow update of a row ( WIP )
+  allowInsert BOOLEAN, -- Allow insert of a row ( WIP )
+  allowDelete BOOLEAN, -- Allow Delete of a row ( WIP )
+  sql_count STRING, -- SQL for select count of rows
+  sql_getData STRING, -- Main select for fetching the data
+  totalRecords INTEGER, -- Total row count from select count
+  sqlQueryHandle base.SqlHandle, -- The SQL Handle for the main select SQL
+  fields DYNAMIC ARRAY OF RECORD -- The array of fields selected
+    name STRING,
+    type STRING
+  END RECORD,
+  columnTitlesArr DYNAMIC ARRAY OF STRING, -- Column headiing array based on 'columnTitles'
+  formName STRING, -- Form name in AUI tree, used by client stored settings
+  windowTitle STRING, -- Window title, defaults to "Listing from 'tablename'"
+  theDialog ui.Dialog, -- The dialog object
+  selectedKey STRING -- the selected first column
+END RECORD
 
 PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
-	DEFINE l_key STRING
-	DEFINE x SMALLINT
+  DEFINE l_key STRING
+  DEFINE x SMALLINT
   DEFINE l_frm, l_grid, l_tabl, l_tabc, l_edit, l_curr om.DomNode
   DEFINE l_hbx, l_sp, l_titl om.DomNode
   DEFINE l_event STRING
 
-	IF NOT this.checkLookupParams() THEN RETURN NULL END IF
+  IF NOT this.checkLookupParams() THEN
+    RETURN NULL
+  END IF
 
-  GL_DBGMSG(2, SFMT("g2_lookup2: table = ",this.tableName))
-  GL_DBGMSG(2, SFMT("g2_lookup2: column	= ",this.columnList))
-  GL_DBGMSG(2, SFMT("g2_lookup2: titles	= ",this.columnTitles))
-  GL_DBGMSG(2, SFMT("g2_lookup2: where = ",this.whereClause))
-  GL_DBGMSG(2, SFMT("g2_lookup2: orderby = ",this.orderBy))
-  GL_DBGMSG(2, SFMT("g2_lookup2: maxColWidth = ",this.maxColWidth))
+  GL_DBGMSG(2, SFMT("g2_lookup2: table = ", this.tableName))
+  GL_DBGMSG(2, SFMT("g2_lookup2: column	= ", this.columnList))
+  GL_DBGMSG(2, SFMT("g2_lookup2: titles	= ", this.columnTitles))
+  GL_DBGMSG(2, SFMT("g2_lookup2: where = ", this.whereClause))
+  GL_DBGMSG(2, SFMT("g2_lookup2: orderby = ", this.orderBy))
+  GL_DBGMSG(2, SFMT("g2_lookup2: maxColWidth = ", this.maxColWidth))
   GL_DBGMSG(2, "g2_lookup2: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
-	IF this.sql_count IS NULL THEN
+  IF this.sql_count IS NULL THEN
     LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || this.whereClause
-	END IF
+  END IF
   TRY
     PREPARE listcntpre FROM this.sql_count
   CATCH
@@ -99,12 +101,13 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   GL_DBGMSG(2, "g2_lookup2: Counted:" || this.totalRecords)
 
 -- build the main sql if it's not already defined
-	IF this.sql_getData IS NULL THEN
-		LET this.sql_getData = "SELECT " || this.columnList || " FROM " || this.tableName, " WHERE " || this.whereClause
-		IF this.orderBy IS NOT NULL THEN
-			LET this.sql_getData = this.sql_getData CLIPPED, " ORDER BY " || this.orderBy
-		END IF
-	END IF
+  IF this.sql_getData IS NULL THEN
+    LET this.sql_getData =
+        "SELECT " || this.columnList || " FROM " || this.tableName, " WHERE " || this.whereClause
+    IF this.orderBy IS NOT NULL THEN
+      LET this.sql_getData = this.sql_getData CLIPPED, " ORDER BY " || this.orderBy
+    END IF
+  END IF
 
 -- Perpare the main cursor
   LET this.sqlQueryHandle = base.SqlHandle.create()
@@ -152,9 +155,12 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
     LET l_tabc = l_tabl.createChild('TableColumn')
     CALL l_tabc.setAttribute("colName", this.fields[x].name)
     LET l_edit = l_tabc.createChild('Edit')
-		IF this.columnTitlesArr[x] IS NULL THEN LET this.columnTitlesArr[x] = this.fields[x].name END IF
+    IF this.columnTitlesArr[x] IS NULL THEN
+      LET this.columnTitlesArr[x] = this.fields[x].name
+    END IF
     CALL l_tabc.setAttribute("text", this.columnTitlesArr[x])
-    CALL l_edit.setAttribute("width", g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth))
+    CALL l_edit.setAttribute(
+        "width", g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth))
     IF this.columnTitlesArr[x].getCharAt(1) = "_" THEN -- if l_title starts with _ then it's a hidden column
       CALL l_tabc.setAttribute("hidden", "1")
     END IF
@@ -172,42 +178,51 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   LET l_sp = l_hbx.createChild('SpacerItem')
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("name", "firstrow")
-  CALL l_titl.setAttribute("image", "gobegin")
+  CALL l_titl.setAttribute("text", "")
+  CALL l_titl.setAttribute("image", "fa-step-backward")
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("name", "prevpage")
-  CALL l_titl.setAttribute("image", "gorev")
+  CALL l_titl.setAttribute("text", "")
+  CALL l_titl.setAttribute("image", "fa-backward")
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("text", "Okay")
   CALL l_titl.setAttribute("name", "accept")
-  CALL l_titl.setAttribute("width", "8")
-	IF this.allowInsert THEN
-		LET l_titl = l_hbx.createChild('Button')
-		CALL l_titl.setAttribute("text", "New Record")
-		CALL l_titl.setAttribute("name", "append")
-		CALL l_titl.setAttribute("width", "8")
-	END IF
-	IF this.allowInsert THEN
-		LET l_titl = l_hbx.createChild('Button')
-		CALL l_titl.setAttribute("text", "Update")
-		CALL l_titl.setAttribute("name", "update")
-		CALL l_titl.setAttribute("width", "8")
-	END IF
-	IF this.allowDelete THEN
-		LET l_titl = l_hbx.createChild('Button')
-		CALL l_titl.setAttribute("text", "Delete")
-		CALL l_titl.setAttribute("name", "delete")
-		CALL l_titl.setAttribute("width", "8")
-	END IF
+  CALL l_titl.setAttribute("image", "fa-check")
+  CALL l_titl.setAttribute("width", "6")
+  IF this.allowInsert THEN
+    LET l_titl = l_hbx.createChild('Button')
+    CALL l_titl.setAttribute("text", "Insert")
+    CALL l_titl.setAttribute("name", "append")
+    CALL l_titl.setAttribute("image", "fa-file")
+    CALL l_titl.setAttribute("width", "6")
+  END IF
+  IF this.allowInsert THEN
+    LET l_titl = l_hbx.createChild('Button')
+    CALL l_titl.setAttribute("text", "Update")
+    CALL l_titl.setAttribute("name", "update")
+    CALL l_titl.setAttribute("image", "fa-pencil")
+    CALL l_titl.setAttribute("width", "6")
+  END IF
+  IF this.allowDelete THEN
+    LET l_titl = l_hbx.createChild('Button')
+    CALL l_titl.setAttribute("text", "Delete")
+    CALL l_titl.setAttribute("name", "delete")
+    CALL l_titl.setAttribute("image", "fa-trash")
+    CALL l_titl.setAttribute("width", "6")
+  END IF
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("name", "cancel")
   CALL l_titl.setAttribute("text", "Cancel")
-  CALL l_titl.setAttribute("width", "8")
+  CALL l_titl.setAttribute("image", "fa-close")
+  CALL l_titl.setAttribute("width", "6")
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("name", "nextpage")
-  CALL l_titl.setAttribute("image", "goforw")
+  CALL l_titl.setAttribute("text", "")
+  CALL l_titl.setAttribute("image", "fa-forward")
   LET l_titl = l_hbx.createChild('Button')
   CALL l_titl.setAttribute("name", "lastrow")
-  CALL l_titl.setAttribute("image", "goend")
+  CALL l_titl.setAttribute("text", "")
+  CALL l_titl.setAttribute("image", "fa-step-forward")
   LET l_sp = l_hbx.createChild('SpacerItem')
   LET l_titl = l_hbx.createChild('Label')
   CALL l_titl.setAttribute("text", this.totalRecords USING "###,###,##&" || " Rows")
@@ -219,10 +234,16 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   CALL this.theDialog.addTrigger("ON ACTION close")
   CALL this.theDialog.addTrigger("ON ACTION accept")
   CALL this.theDialog.addTrigger("ON ACTION cancel")
-	IF this.allowInsert THEN CALL this.theDialog.addTrigger("ON APPEND") END IF
-	IF this.allowUpdate THEN CALL this.theDialog.addTrigger("ON UPDATE") END IF
-	IF this.allowDelete THEN CALL this.theDialog.addTrigger("ON DELETE") END IF
-	CALL this.refrestData()
+  IF this.allowInsert THEN
+    CALL this.theDialog.addTrigger("ON APPEND")
+  END IF
+  IF this.allowUpdate THEN
+    CALL this.theDialog.addTrigger("ON UPDATE")
+  END IF
+  IF this.allowDelete THEN
+    CALL this.theDialog.addTrigger("ON DELETE")
+  END IF
+  CALL this.refrestData()
 
   CALL this.theDialog.setCurrentRow("tablistv", 1) -- TODO: should be done by the runtime
 -- Loop for events.
@@ -242,13 +263,17 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
       WHEN "ON ACTION accept"
         EXIT WHILE
       WHEN "ON UPDATE"
-				LET int_flag = this.update(this.theDialog.getFieldValue(this.fields[1].name))
-				IF NOT int_flag THEN CALL this.refrestData() END IF
+        LET int_flag = this.update(this.theDialog.getFieldValue(this.fields[1].name))
+        IF NOT int_flag THEN
+          CALL this.refrestData()
+        END IF
       WHEN "ON APPEND"
-				LET int_flag = this.update(NULL)
-				IF NOT int_flag THEN CALL this.refrestData() END IF
+        LET int_flag = this.update(NULL)
+        IF NOT int_flag THEN
+          CALL this.refrestData()
+        END IF
       WHEN "ON DELETE"
-				LET int_flag = this.delete(this.theDialog.getFieldValue(this.fields[1].name))
+        LET int_flag = this.delete(this.theDialog.getFieldValue(this.fields[1].name))
       WHEN "ON SORT"
         --MESSAGE "Use 'reset sort order' to reset to default."
         EXIT WHILE
@@ -262,35 +287,38 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
         GL_DBGMSG(2, "g2_lookup2: Unhandled Event:" || l_event)
     END CASE
   END WHILE
-  LET this.selectedKey = this.theDialog.getFieldValue(this.fields[1].name) -- get the selected row first field.
-  LET this.theDialog = NULL -- Terminate the dialog 
+  LET this.selectedKey =
+      this.theDialog.getFieldValue(this.fields[1].name) -- get the selected row first field.
+  LET this.theDialog = NULL -- Terminate the dialog
   CALL this.sqlQueryHandle.close()
   CLOSE WINDOW listv
   IF int_flag THEN
     GL_DBGMSG(2, "g2_lookup2: Window Closed, Cancelled.")
     RETURN NULL
   ELSE
-    GL_DBGMSG(2, SFMT("g2_lookup2: Window Closed, returning row:%1 %2", arr_curr(),this.selectedKey.trim() ))
+    GL_DBGMSG(2, SFMT("g2_lookup2: Window Closed, returning row:%1 %2", arr_curr(), this.selectedKey.trim()))
     RETURN this.selectedKey.trim()
   END IF
 
-	RETURN l_key
+  RETURN l_key
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this lookup) refrestData()
-	DEFINE x, i INTEGER
+  DEFINE x, i INTEGER
 -- Fetch the data
   CALL this.sqlQueryHandle.fetchFirst()
   LET x = 0
   WHILE SQLCA.sqlcode = 0
     LET x = x + 1
-    CALL this.theDialog.setCurrentRow("tablistv", x) -- must set the current row before setting values
+    CALL this.theDialog.setCurrentRow(
+        "tablistv", x) -- must set the current row before setting values
     FOR i = 1 TO this.sqlQueryHandle.getResultCount()
-      CALL this.theDialog.setFieldValue( this.sqlQueryHandle.getResultName(i),  this.sqlQueryHandle.getResultValue(i))
+      CALL this.theDialog.setFieldValue(
+          this.sqlQueryHandle.getResultName(i), this.sqlQueryHandle.getResultValue(i))
     END FOR
     CALL this.sqlQueryHandle.fetch()
   END WHILE
-	GL_DBGMSG(0, SFMT("Fetched %1 Rows.",x))
+  GL_DBGMSG(0, SFMT("Fetched %1 Rows.", x))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 #+ Initialize helper function:
@@ -302,82 +330,101 @@ END FUNCTION
 #+					can be _ to have a hidden column - ie 1st col if it's a key
 #+ @param wher	The WHERE clause, 1=1 means all, or use result of construct
 #+ @param ordby The ORDER BY clause
-FUNCTION (this lookup) init( tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING) RETURNS ()
-	LET this.sql_count = NULL
-	LET this.sql_getData = NULL
-	LET this.tableName = tabnam
-	LET this.columnList = cols
-	LET this.columnTitles = colts
-	LET this.whereClause = wher
-	LET this.orderBy = ordby
+FUNCTION (this lookup) init( tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING) RETURNS()
+  LET this.sql_count = NULL
+  LET this.sql_getData = NULL
+  LET this.tableName = tabnam
+  LET this.columnList = cols
+  LET this.columnTitles = colts
+  LET this.whereClause = wher
+  LET this.orderBy = ordby
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
-FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
-	DEFINE l_err STRING
+PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
+  DEFINE l_err STRING
   DEFINE l_tok base.StringTokenizer
 
-	IF this.maxColWidth = 0 THEN LET this.maxColWidth = 40 END IF
-	IF this.tableName IS NULL THEN
-		IF this.sql_getData IS NULL THEN LET l_err = l_err.append("tableName ") END IF
-		LET this.allowDelete = FALSE -- can't do this no table name!
-		LET this.allowInsert = FALSE -- can't do this no table name!
-		LET this.allowUpdate = FALSE -- can't do this no table name!
-	END IF
-	IF this.columnlist IS NULL AND this.sql_getData IS NULL THEN LET l_err = l_err.append("columnList ") END IF
-	IF this.columnTitles IS NULL AND this.columnlist != "*" THEN LET this.columnTitles = this.columnlist END IF
-	IF this.whereClause IS NULL THEN LET this.whereClause = "1=1" END IF
-	IF this.formName IS NULL THEN LET this.formName = "gl_"||this.tableName END IF
-	IF this.windowTitle IS NULL THEN LET this.windowTitle = SFMT(%"Listing from %1",this.tableName) END IF
+  IF this.maxColWidth = 0 THEN
+    LET this.maxColWidth = 40
+  END IF
+  IF this.tableName IS NULL THEN
+    IF this.sql_getData IS NULL THEN
+      LET l_err = l_err.append("tableName ")
+    END IF
+    LET this.allowDelete = FALSE -- can't do this no table name!
+    LET this.allowInsert = FALSE -- can't do this no table name!
+    LET this.allowUpdate = FALSE -- can't do this no table name!
+  END IF
+  IF this.columnlist IS NULL AND this.sql_getData IS NULL THEN
+    LET l_err = l_err.append("columnList ")
+  END IF
+  IF this.columnTitles IS NULL AND this.columnlist != "*" THEN
+    LET this.columnTitles = this.columnlist
+  END IF
+  IF this.whereClause IS NULL THEN
+    LET this.whereClause = "1=1"
+  END IF
+  IF this.formName IS NULL THEN
+    LET this.formName = "gl_" || this.tableName
+  END IF
+  IF this.windowTitle IS NULL THEN
+    LET this.windowTitle = SFMT(% "Listing from %1", this.tableName)
+  END IF
 
-	LET l_tok = base.StringTokenizer.create(this.columnTitles, ",")
-	CALL this.columnTitlesArr.clear() -- clear the defaults if l_title supplied.
-	WHILE l_tok.hasMoreTokens()
-		LET this.columnTitlesArr[this.columnTitlesArr.getLength() + 1] = l_tok.nextToken()
-	END WHILE
+  LET l_tok = base.StringTokenizer.create(this.columnTitles, ",")
+  CALL this.columnTitlesArr.clear() -- clear the defaults if l_title supplied.
+  WHILE l_tok.hasMoreTokens()
+    LET this.columnTitlesArr[this.columnTitlesArr.getLength() + 1] = l_tok.nextToken()
+  END WHILE
 
-	IF l_err IS NOT NULL THEN
-		CALL g2_lib.g2_winMessage("Error",SFMT(%"Lookup called by initiated correctly!\nThe following are not set:%1", l_err),"exclamation")
-		RETURN FALSE
-	END IF
-	RETURN TRUE
+  IF l_err IS NOT NULL THEN
+    CALL g2_lib.g2_winMessage(
+        "Error",
+        SFMT(% "Lookup called by initiated correctly!\nThe following are not set:%1", l_err),
+        "exclamation")
+    RETURN FALSE
+  END IF
+  RETURN TRUE
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
-FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
-	DEFINE l_confirm CHAR(1)
-	DEFINE l_sql STRING
-	LET l_confirm =
-		g2_lib.g2_winQuestion("Delete",SFMT("Delete this record?\nKey'%1'",l_key),"Yes","Yes|No","question")
-	IF l_confirm = "Y" THEN
-		LET l_sql = SFMT("DELETE FROM %1 WHERE %2 = '%3'",this.tableName, this.fields[1].name, l_key)
-		GL_DBGMSG(2, SFMT("g2_lookup2: l_sql=%1",l_sql))
-		TRY
-			EXECUTE IMMEDIATE l_sql
-			RETURN FALSE
-		CATCH
-			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2",STATUS,SQLERRMESSAGE) )
-			CALL g2_lib.g2_winMessage("Error",SFMT("Failed to delete!\n%1 %2",STATUS,SQLERRMESSAGE),"exclamation")
-		END TRY
-	END IF
-	RETURN TRUE
+PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
+  DEFINE l_confirm CHAR(1)
+  DEFINE l_sql STRING
+  LET l_confirm =
+      g2_lib.g2_winQuestion(
+          "Delete", SFMT("Delete this record?\nKey'%1'", l_key), "Yes", "Yes|No", "question")
+  IF l_confirm = "Y" THEN
+    LET l_sql = SFMT("DELETE FROM %1 WHERE %2 = '%3'", this.tableName, this.fields[1].name, l_key)
+    GL_DBGMSG(2, SFMT("g2_lookup2: l_sql=%1", l_sql))
+    TRY
+      EXECUTE IMMEDIATE l_sql
+      RETURN FALSE
+    CATCH
+      GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+      CALL g2_lib.g2_winMessage(
+          "Error", SFMT("Failed to delete!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+    END TRY
+  END IF
+  RETURN TRUE
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
-FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
-	DEFINE l_dia ui.Dialog
-	DEFINE l_event STRING
-	DEFINE l_accept BOOLEAN = FALSE
-	DEFINE x SMALLINT
-	DEFINE l_sql STRING
+PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
+  DEFINE l_dia ui.Dialog
+  DEFINE l_event STRING
+  DEFINE l_accept BOOLEAN = FALSE
+  DEFINE x SMALLINT
+  DEFINE l_sql STRING
 
-	CALL ui.Dialog.setDefaultUnbuffered( TRUE ) 
+  CALL ui.Dialog.setDefaultUnbuffered(TRUE)
   LET l_dia = ui.Dialog.createInputByName(this.fields)
-	FOR x = 1 TO this.fields.getLength()
-		IF l_key IS NOT NULL THEN
-			IF x = 1THEN
-				CALL l_dia.setFieldActive( this.fields[x].name, FALSE )
-			END IF
-			CALL l_dia.setFieldValue( this.fields[x].name, this.theDialog.getFieldValue(this.fields[x].name) )
-		END IF
-	END FOR
+  FOR x = 1 TO this.fields.getLength()
+    IF l_key IS NOT NULL THEN
+      IF x = 1 THEN
+        CALL l_dia.setFieldActive(this.fields[x].name, FALSE)
+      END IF
+      CALL l_dia.setFieldValue( this.fields[x].name, this.theDialog.getFieldValue(this.fields[x].name))
+    END IF
+  END FOR
   CALL l_dia.addTrigger("ON ACTION close")
   CALL l_dia.addTrigger("ON ACTION accept")
   CALL l_dia.addTrigger("ON ACTION cancel")
@@ -389,52 +436,58 @@ FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
         EXIT WHILE
       WHEN "ON ACTION cancel"
         EXIT WHILE
-      WHEN "ON ACTION accept" 
-				LET l_accept = TRUE
+      WHEN "ON ACTION accept"
+        LET l_accept = TRUE
         EXIT WHILE
       OTHERWISE
         GL_DBGMSG(2, "g2_lookup2: Unhandled Event:" || l_event)
     END CASE
-	END WHILE
-	IF NOT l_accept THEN RETURN TRUE END IF
+  END WHILE
+  IF NOT l_accept THEN
+    RETURN TRUE
+  END IF
 
-	IF l_key IS NULL THEN
-		LET l_sql = SFMT("INSERT INTO %1 ( ", this.tableName )
-	ELSE
-		LET l_sql = SFMT("UPDATE %1 SET (", this.tableName )
-	END IF
+  IF l_key IS NULL THEN
+    LET l_sql = SFMT("INSERT INTO %1 ( ", this.tableName)
+  ELSE
+    LET l_sql = SFMT("UPDATE %1 SET (", this.tableName)
+  END IF
 
-	FOR x = 1 TO this.fields.getLength()
-		LET l_sql = l_sql.append( this.fields[x].name.trimRight() )
-		IF x < this.fields.getLength() THEN
-			LET l_sql = l_sql.append(",")
-		END IF
-	END FOR
-	IF l_key IS NOT NULL THEN
-		LET l_sql = l_sql.append(") = ( ")
-	ELSE
-		LET l_sql = l_sql.append(") VALUES ( ")
-	END IF	
-	FOR x = 1 TO this.fields.getLength()
-		LET l_sql = l_sql.append( "'"||l_dia.getFieldValue(this.fields[x].name.trimRight())||"'" )
-		IF x < this.fields.getLength() THEN
-			LET l_sql = l_sql.append(",")
-		END IF
-	END FOR
-	LET l_sql = l_sql.append(")")
+  FOR x = 1 TO this.fields.getLength()
+    LET l_sql = l_sql.append(this.fields[x].name.trimRight())
+    IF x < this.fields.getLength() THEN
+      LET l_sql = l_sql.append(",")
+    END IF
+  END FOR
+  IF l_key IS NOT NULL THEN
+    LET l_sql = l_sql.append(") = ( ")
+  ELSE
+    LET l_sql = l_sql.append(") VALUES ( ")
+  END IF
+  FOR x = 1 TO this.fields.getLength()
+    LET l_sql = l_sql.append("'" || l_dia.getFieldValue(this.fields[x].name.trimRight()) || "'")
+    IF x < this.fields.getLength() THEN
+      LET l_sql = l_sql.append(",")
+    END IF
+  END FOR
+  LET l_sql = l_sql.append(")")
 
-	IF l_key IS NOT NULL THEN
-		LET l_sql = l_sql.append( SFMT(" WHERE %1 = '%2'", this.fields[1].name.trimRight(), l_dia.getFieldValue(this.fields[1].name.trimRight())))
-	END IF
+  IF l_key IS NOT NULL THEN
+    LET l_sql =
+        l_sql.append(
+            SFMT(" WHERE %1 = '%2'",
+                this.fields[1].name.trimRight(),
+                l_dia.getFieldValue(this.fields[1].name.trimRight())))
+  END IF
 
-	GL_DBGMSG(2, SFMT("g2_lookup2: l_sql=%1",l_sql))
-	TRY
-		EXECUTE IMMEDIATE l_sql
-		RETURN FALSE
-	CATCH
-		GL_DBGMSG(0, SFMT("SQL Failed:%1 %2",STATUS,SQLERRMESSAGE) )
-		CALL g2_lib.g2_winMessage("Error",SFMT("Failed!\n%1 %2",STATUS,SQLERRMESSAGE),"exclamation")
-	END TRY
+  GL_DBGMSG(2, SFMT("g2_lookup2: l_sql=%1", l_sql))
+  TRY
+    EXECUTE IMMEDIATE l_sql
+    RETURN FALSE
+  CATCH
+    GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+    CALL g2_lib.g2_winMessage("Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+  END TRY
 
-	RETURN TRUE
+  RETURN TRUE
 END FUNCTION
