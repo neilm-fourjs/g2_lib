@@ -55,6 +55,9 @@ FUNCTION countries2()
 	DEFINE l_lookup g2_lookup2.lookup
 	DEFINE l_cntry STRING
 	CALL l_lookup.init( "countries", "*", "Code,Country", "1=1", "country_name")
+	LET l_lookup.allowInsert = TRUE
+	LET l_lookup.allowUpdate = TRUE
+	LET l_lookup.allowDelete = TRUE
 	LET l_cntry =  l_lookup.g2_lookup2()
 	DISPLAY "Country:", l_cntry
 END FUNCTION

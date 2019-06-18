@@ -42,9 +42,9 @@ FUNCTION g2_lookup(tabnam STRING, cols STRING, colts STRING, wher STRING, ordby 
 
 -- See "genero_lib.inc" for Macro definitions.
   GL_DBGMSG(2, "g2_lookup: table(s)=" || tabnam)
-  GL_DBGMSG(2, "g2_lookup: cols		=" || cols)
-  GL_DBGMSG(2, "g2_lookup: l_titles	=" || colts)
-  GL_DBGMSG(2, "g2_lookup: where	 =" || wher)
+  GL_DBGMSG(2, "g2_lookup: cols    =" || cols)
+  GL_DBGMSG(2, "g2_lookup: titles  =" || colts)
+  GL_DBGMSG(2, "g2_lookup: where   =" || wher)
   GL_DBGMSG(2, "g2_lookup: orderby =" || ordby)
   GL_DBGMSG(2, "g2_lookup: Declaring Count Cursor...")
 

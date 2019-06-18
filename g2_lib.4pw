@@ -92,7 +92,10 @@
       <File filePath="src/g2_ws.4gl"/>
     </Library>
   </Group>
-  <Group environment="value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
+  <Group environment="value:FGLPROFILE=../etc/profile,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
+    <Library binaryName="etc" id="-894407244" label="etc">
+      <File filePath="etc/profile"/>
+    </Library>
     <Application binaryName="g2_exp_lookup" dependencies="14000" id="-615368558" label="g2_exp_lookup">
       <File filePath="src_expects/g2_exp_lookup.4gl"/>
     </Application>
