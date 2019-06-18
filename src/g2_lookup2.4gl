@@ -81,24 +81,11 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   GL_DBGMSG(2, "g2_lookup2: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
-  IF this.sql_count IS NULL THEN
-    LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || this.whereClause
-  END IF
-  TRY
-    PREPARE listcntpre FROM this.sql_count
-  CATCH
-    CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_count, SQLERRMESSAGE))
-    RETURN NULL --, NULL
-  END TRY
-  DECLARE listcntcur CURSOR FOR listcntpre
-  OPEN listcntcur
-  FETCH listcntcur INTO this.totalRecords
-  CLOSE listcntcur
+	LET this.totalRecords = this.countRows(this.whereClause)
   IF this.totalRecords < 1 THEN
     CALL g2_lib.g2_errPopup(% "No Records Found")
     RETURN NULL
   END IF
-  GL_DBGMSG(2, "g2_lookup2: Counted:" || this.totalRecords)
 
 -- build the main sql if it's not already defined
   IF this.sql_getData IS NULL THEN
@@ -340,6 +327,26 @@ FUNCTION (this lookup) init( tabnam STRING, cols STRING, colts STRING, wher STRI
   LET this.orderBy = ordby
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
+FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
+	DEFINE i INT
+  IF this.sql_count IS NULL THEN
+    LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || l_where
+  END IF
+  TRY
+    PREPARE listcntpre FROM this.sql_count
+  CATCH
+    CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_count, SQLERRMESSAGE))
+    RETURN 0
+  END TRY
+  DECLARE listcntcur CURSOR FOR listcntpre
+  OPEN listcntcur
+  FETCH listcntcur INTO i
+  CLOSE listcntcur
+
+  GL_DBGMSG(2, "g2_lookup2: Counted:" || i)
+	RETURN i
+END FUNCTION
+----------------------------------------------------------------------------------------------------
 PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
   DEFINE l_err STRING
   DEFINE l_tok base.StringTokenizer
@@ -432,6 +439,11 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   WHILE TRUE
     LET l_event = l_dia.nextEvent()
     CASE l_event
+      WHEN "AFTER FIELD "||this.fields[1].name
+				IF this.countRows( this.fields[1].name||" = '"||l_dia.getFieldValue(this.fields[1].name.trimRight())||"'" ) > 0 THEN
+					CALL g2_lib.g2_winMessage("Error", %"Key already used!", "exclamation")
+					CALL l_dia.nextField(this.fields[1].name)
+        END IF
       WHEN "ON ACTION close"
         EXIT WHILE
       WHEN "ON ACTION cancel"
