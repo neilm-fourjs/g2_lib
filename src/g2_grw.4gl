@@ -13,22 +13,36 @@ PUBLIC TYPE greRpt RECORD
 		preview BOOLEAN,
 		pageWidth SMALLINT,
 		rptTitle STRING,
-		handle om.SaxDocumentHandler
+		handle om.SaxDocumentHandler,
+		greDistributed BOOLEAN,
+		greServer STRING,
+		greServerPort INTEGER,
+		started DATETIME HOUR TO FRACTION(5),
+		finished DATETIME HOUR TO FRACTION(5)
 	END RECORD
 
-FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRING) RETURNS BOOLEAN
+FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRING, l_start BOOLEAN) RETURNS BOOLEAN
+	LET this.rptName = l_rptName
 	LET this.preview = l_preview
 	LET this.device = l_device
-	RETURN this.start(l_rptName)
+	LET this.greDistributed = FALSE
+	LET this.greServer = fgl_getEnv("GRESERVER")
+	LET this.greServerPort = fgl_getEnv("GRESRVPORT")
+	IF this.greServerPort IS NULL THEN LET this.greServerPort = 6490 END IF
+	IF this.greServer.getLength() > 1 THEN LET this.greDistributed = TRUE END IF
+	IF l_start THEN
+		RETURN this.start()
+	ELSE
+		RETURN FALSE
+	END IF
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
-FUNCTION ( this greRpt ) start(l_rptName STRING) RETURNS BOOLEAN
-	LET this.rptName = l_rptName
+FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
   IF this.preview IS NULL THEN LET this.preview = FALSE END IF
 	IF this.reportsDir IS NULL THEN LET this.reportsDir = fgl_getEnv("REPORTDIR") END IF
 	IF this.reportsDir IS NULL THEN LET this.reportsDir = "../etc" END IF
   IF this.rptName IS NOT NULL THEN
-		IF this.rptTitle IS NULL THEN LET this.rptTitle = l_rptName END IF
+		IF this.rptTitle IS NULL THEN LET this.rptTitle = this.rptName END IF
     LET this.rptName = os.path.join(this.reportsDir, this.rptName.append(".4rp") )
   END IF
 	IF NOT os.path.exists(this.rptName) THEN
@@ -63,12 +77,19 @@ FUNCTION ( this greRpt ) start(l_rptName STRING) RETURNS BOOLEAN
       CALL libgreprops.fgl_report_setOutputFileName(this.fileName)
     END IF
   END IF
+
+  IF this.greDistributed THEN
+		DISPLAY SFMT("Using distributed mode: %1 %2",this.greServer,this.greServerPort)
+    CALL fgl_report_configureDistributedProcessing(this.greServer,this.greServerPort)
+  END IF
+
   -- Set the SAX handler
   IF this.device = "XML" THEN -- Just produce XML output
     LET this.handle = libgre.fgl_report_createProcessLevelDataFile(this.fileName)
   ELSE -- Produce a report using GRE
     LET this.handle = libgre.fgl_report_commitCurrentSettings()
   END IF
+	LET this.started = CURRENT
   MESSAGE SFMT("Printing Report %1, please wait ...", NVL(this.rptName,"ASCII") )
   CALL ui.Interface.refresh()
 
@@ -127,6 +148,7 @@ FUNCTION ( this greRpt ) progress(l_row INTEGER, l_max INTEGER, l_mod SMALLINT) 
 END FUNCTION
 -------------------------------------------------------------------------------
 FUNCTION ( this greRpt ) finish() RETURNS ()
+	LET this.finished = CURRENT
 	MESSAGE SFMT("Report %1 Finished.",  NVL(this.rptName,"ASCII"))
   CALL ui.Interface.refresh()
 END FUNCTION
