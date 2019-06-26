@@ -17,6 +17,7 @@ PUBLIC TYPE greRpt RECORD
 		greDistributed BOOLEAN,
 		greServer STRING,
 		greServerPort INTEGER,
+		greOutputDir STRING,
 		started DATETIME HOUR TO FRACTION(5),
 		finished DATETIME HOUR TO FRACTION(5)
 	END RECORD
@@ -28,6 +29,7 @@ FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRI
 	LET this.greDistributed = FALSE
 	LET this.greServer = fgl_getEnv("GRESERVER")
 	LET this.greServerPort = fgl_getEnv("GRESRVPORT")
+	LET this.greOutputDir = fgl_getEnv("GREOUTPUTDIR")
 	IF this.greServerPort IS NULL THEN LET this.greServerPort = 6490 END IF
 	IF this.greServer.getLength() > 1 THEN LET this.greDistributed = TRUE END IF
 	IF l_start THEN
@@ -38,6 +40,8 @@ FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRI
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
+	DISPLAY SFMT("GREOUTPUTDIR: %1 GRESERVER: %2 GRESRVPORT: %3", this.greOutputDir, this.greServer,this.greServerPort)
+
   IF this.preview IS NULL THEN LET this.preview = FALSE END IF
 	IF this.reportsDir IS NULL THEN LET this.reportsDir = fgl_getEnv("REPORTDIR") END IF
 	IF this.reportsDir IS NULL THEN LET this.reportsDir = "../etc" END IF
@@ -53,7 +57,7 @@ FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
     CALL g2_lib.g2_winMessage("Error", "Report initialize failed!", "exclamation")
     RETURN FALSE
   END IF
-
+	DISPLAY SFMT("Rpt: %1 Preview: %2 Device: %3 RptDir: %4 Width: %5", this.rptName, IIF(this.preview,"True","FALSE"), this.device, this.reportsDir, this.pageWidth)
   IF this.pageWidth > 80 THEN
     CALL libgreprops.fgl_report_configurePageSize("a4length", "a4width") -- Landscape
   ELSE
@@ -81,6 +85,8 @@ FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
   IF this.greDistributed THEN
 		DISPLAY SFMT("Using distributed mode: %1 %2",this.greServer,this.greServerPort)
     CALL fgl_report_configureDistributedProcessing(this.greServer,this.greServerPort)
+	ELSE
+		DISPLAY "Not using distributed mode."
   END IF
 
   -- Set the SAX handler
