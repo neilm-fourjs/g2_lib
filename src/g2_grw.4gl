@@ -26,7 +26,7 @@ FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRI
 	LET this.rptName = l_rptName
 	LET this.preview = l_preview
 
-	IF l_device IS NULL THEN
+	IF l_device IS NULL OR l_device = "ASK" THEN
 		IF NOT this.getOutput() THEN RETURN FALSE END IF
 	ELSE
 		LET this.device = l_device
