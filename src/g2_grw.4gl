@@ -25,7 +25,13 @@ PUBLIC TYPE greRpt RECORD
 FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRING, l_start BOOLEAN) RETURNS BOOLEAN
 	LET this.rptName = l_rptName
 	LET this.preview = l_preview
-	LET this.device = l_device
+
+	IF l_device IS NULL THEN
+		IF NOT this.getOutput() THEN RETURN FALSE END IF
+	ELSE
+		LET this.device = l_device
+	END IF
+
 	LET this.greDistributed = FALSE
 	LET this.greServer = fgl_getEnv("GRESERVER")
 	LET this.greServerPort = fgl_getEnv("GRESRVPORT")
@@ -85,6 +91,7 @@ FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
   IF this.greDistributed THEN
 		DISPLAY SFMT("Using distributed mode: %1 %2",this.greServer,this.greServerPort)
     CALL fgl_report_configureDistributedProcessing(this.greServer,this.greServerPort)
+		CALL fgl_report_configureDistributedEnvironment(NULL,NULL,NULL,NULL)
 	ELSE
 		DISPLAY "Not using distributed mode."
   END IF
@@ -154,6 +161,9 @@ FUNCTION ( this greRpt ) progress(l_row INTEGER, l_max INTEGER, l_mod SMALLINT) 
 END FUNCTION
 -------------------------------------------------------------------------------
 FUNCTION ( this greRpt ) finish() RETURNS ()
+	IF this.device = "Browser" AND this.preview THEN      
+		CALL ui.Interface.frontCall( "standard", "launchurl", [fgl_report_getBrowserURL()], [] )    
+	END IF
 	LET this.finished = CURRENT
 	MESSAGE SFMT("Report %1 Finished.",  NVL(this.rptName,"ASCII"))
   CALL ui.Interface.refresh()
@@ -164,19 +174,23 @@ FUNCTION ( this greRpt ) getOutput() RETURNS BOOLEAN
 	LET int_flag = FALSE
   MENU "Report Destination"
       ATTRIBUTES(STYLE = "dialog", COMMENT = "Output report to ...", IMAGE = "question")
-    COMMAND "File"
+    COMMAND "File XML"
       LET l_dest = "F"
       LET this.device = "XML"
     COMMAND "File PDF"
       LET l_dest = "F"
       LET this.device = "PDF"
+    COMMAND "File XLSX"
+      LET l_dest = "F"
+      LET this.device = "XLSX"
     COMMAND "Screen"
       LET l_dest = "S"
-      LET this.device = "SVG"
+			IF ui.Interface.getFrontEndName() = "GDC" THEN
+    	  LET this.device = "SVG"
+			ELSE
+				LET this.device = "Browser"
+			END IF
       LET this.preview = TRUE
-    COMMAND "Printer"
-      LET l_dest = "P"
-      LET this.device = "Printer"
     COMMAND "PDF"
       LET l_dest = "D"
       LET this.device = "PDF"
@@ -185,17 +199,13 @@ FUNCTION ( this greRpt ) getOutput() RETURNS BOOLEAN
       LET l_dest = "D"
       LET this.device = "XLS"
       LET this.preview = TRUE
-    COMMAND "HTML"
-      LET l_dest = "D"
-      LET this.device = "HTML"
-      LET this.preview = TRUE
     COMMAND "XLSX"
-      LET l_dest = "F"
+      LET l_dest = "D"
       LET this.device = "XLSX"
       LET this.preview = TRUE
-    COMMAND "XML"
-      LET l_dest = "F"
-      LET this.device = "XML"
+    COMMAND "Printer"
+      LET l_dest = "P"
+      LET this.device = "Printer"
   END MENU
   IF int_flag THEN
     CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
