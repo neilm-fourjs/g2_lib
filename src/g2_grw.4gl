@@ -19,14 +19,16 @@ PUBLIC TYPE greRpt RECORD
 		greServerPort INTEGER,
 		greOutputDir STRING,
 		started DATETIME HOUR TO FRACTION(5),
-		finished DATETIME HOUR TO FRACTION(5)
+		finished DATETIME HOUR TO FRACTION(5),
+		status INTEGER,
+		error STRING
 	END RECORD
 
 FUNCTION ( this greRpt ) init(l_rptName STRING, l_preview BOOLEAN, l_device STRING, l_start BOOLEAN) RETURNS BOOLEAN
 	LET this.rptName = l_rptName
 	LET this.preview = l_preview
 
-	IF l_device IS NULL OR l_device = "ASK" THEN
+	IF l_device IS NULL THEN
 		IF NOT this.getOutput() THEN RETURN FALSE END IF
 	ELSE
 		LET this.device = l_device
@@ -63,6 +65,10 @@ FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
     CALL g2_lib.g2_winMessage("Error", "Report initialize failed!", "exclamation")
     RETURN FALSE
   END IF
+	IF NOT this.allOkay("load") THEN
+		ERROR SFMT("%1:%2", this.status, this.error )
+		RETURN FALSE
+	END IF
 	DISPLAY SFMT("Rpt: %1 Preview: %2 Device: %3 RptDir: %4 Width: %5", this.rptName, IIF(this.preview,"True","FALSE"), this.device, this.reportsDir, this.pageWidth)
   IF this.pageWidth > 80 THEN
     CALL libgreprops.fgl_report_configurePageSize("a4length", "a4width") -- Landscape
@@ -102,10 +108,28 @@ FUNCTION ( this greRpt ) start() RETURNS BOOLEAN
   ELSE -- Produce a report using GRE
     LET this.handle = libgre.fgl_report_commitCurrentSettings()
   END IF
+	IF NOT this.allOkay("commit") THEN
+		ERROR SFMT("%1:%2", this.status, this.error )
+		RETURN FALSE
+	END IF
 	LET this.started = CURRENT
+
   MESSAGE SFMT("Printing Report %1, please wait ...", NVL(this.rptName,"ASCII") )
   CALL ui.Interface.refresh()
-
+	RETURN TRUE
+END FUNCTION
+-------------------------------------------------------------------------------
+FUNCTION ( this greRpt ) allOkay(l_where STRING) RETURNS BOOLEAN
+	DEFINE x SMALLINT
+	LET this.status = fgl_report_getErrorStatus()
+	IF this.status != 0 THEN
+		LET this.error = l_where,":",fgl_report_getErrorString()
+		LET x = this.error.getIndexOf("	",1)
+		IF x > 0 THEN
+			LET this.error = this.error.subString(1,x-1)
+		END IF
+		RETURN FALSE
+	END IF
 	RETURN TRUE
 END FUNCTION
 -------------------------------------------------------------------------------
@@ -161,6 +185,10 @@ FUNCTION ( this greRpt ) progress(l_row INTEGER, l_max INTEGER, l_mod SMALLINT) 
 END FUNCTION
 -------------------------------------------------------------------------------
 FUNCTION ( this greRpt ) finish() RETURNS ()
+	IF NOT this.allOkay("finish") THEN
+		ERROR SFMT("%1:%2", this.status, this.error )
+		RETURN
+	END IF
 	IF this.device = "Browser" AND this.preview THEN      
 		CALL ui.Interface.frontCall( "standard", "launchurl", [fgl_report_getBrowserURL()], [] )    
 	END IF
