@@ -49,16 +49,24 @@ PUBLIC TYPE lookup RECORD
   sql_count STRING, -- SQL for select count of rows
   sql_getData STRING, -- Main select for fetching the data
   totalRecords INTEGER, -- Total row count from select count
+	totalFields SMALLINT, -- Number of fields
   sqlQueryHandle base.SqlHandle, -- The SQL Handle for the main select SQL
+  dsp_fields DYNAMIC ARRAY OF RECORD -- The array of fields selected
+    name STRING,
+    type STRING,
+		width INTEGER
+  END RECORD,
   fields DYNAMIC ARRAY OF RECORD -- The array of fields selected
     name STRING,
     type STRING
   END RECORD,
+	inputVBox om.DomNode,
   columnTitlesArr DYNAMIC ARRAY OF STRING, -- Column headiing array based on 'columnTitles'
   formName STRING, -- Form name in AUI tree, used by client stored settings
   windowTitle STRING, -- Window title, defaults to "Listing from 'tablename'"
   theDialog ui.Dialog, -- The dialog object
-  selectedKey STRING -- the selected first column
+  selectedKey STRING, -- the selected first column
+	currentRow INTEGER -- current row in the display array
 END RECORD
 
 PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
@@ -109,8 +117,12 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   FOR x = 1 TO this.sqlQueryHandle.getResultCount()
     LET this.fields[x].name = this.sqlQueryHandle.getResultName(x)
     LET this.fields[x].type = this.sqlQueryHandle.getResultType(x)
+    LET this.dsp_fields[x].name = "dsp_"||this.fields[x].name
+    LET this.dsp_fields[x].type = this.fields[x].type
+		LET this.dsp_fields[x].width = g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth)
     GL_DBGMSG(2, "g2_lookup2:" || x || " Name:" || this.fields[x].name || " Type:" || this.fields[x].type)
   END FOR
+	LET this.totalFields = this.fields.getLength()
   GL_DBGMSG(2, "g2_lookup2: Cursor Okay.")
 
 -- Open the window and define a table.
@@ -118,11 +130,16 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
   CALL fgl_setTitle(this.windowTitle)
   LET l_frm = g2_aui.g2_genForm(this.formName) -- ensures form name is specific for this lookup
+	CALL l_frm.setAttribute("width",100)
 
   LET l_grid = l_frm.createChild('Grid')
+	CALL l_grid.setAttribute("width",100)
+	CALL l_grid.setAttribute("gridWidth",100)
 -- Create a centered window l_title.
   LET l_hbx = l_grid.createChild('HBox')
   CALL l_hbx.setAttribute("posY", "0")
+	CALL l_hbx.setAttribute("width",100)
+	CALL l_hbx.setAttribute("gridWidth",100)
   LET l_sp = l_hbx.createChild('SpacerItem')
   LET l_titl = l_hbx.createChild('Label')
   CALL l_titl.setAttribute("text", this.windowTitle)
@@ -132,31 +149,62 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
   GL_DBGMSG(2, "g2_lookup2: Generating Table...")
 -- Create the table
   LET l_tabl = l_grid.createChild('Table')
+	CALL l_tabl.setAttribute("width",100)
+	CALL l_tabl.setAttribute("gridWidth",100)
   CALL l_tabl.setAttribute("tabName", "tablistv")
   CALL l_tabl.setAttribute("height", "20")
   CALL l_tabl.setAttribute("pageSize", "20")
   CALL l_tabl.setAttribute("posY", "1")
 
 -- Create Columns & Headings for the table.
-  FOR x = 1 TO this.fields.getLength()
+  FOR x = 1 TO this.totalFields
     LET l_tabc = l_tabl.createChild('TableColumn')
-    CALL l_tabc.setAttribute("colName", this.fields[x].name)
+    CALL l_tabc.setAttribute("colName", this.dsp_fields[x].name)
     LET l_edit = l_tabc.createChild('Edit')
     IF this.columnTitlesArr[x] IS NULL THEN
-      LET this.columnTitlesArr[x] = this.fields[x].name
+      LET this.columnTitlesArr[x] = this.dsp_fields[x].name
     END IF
     CALL l_tabc.setAttribute("text", this.columnTitlesArr[x])
     CALL l_edit.setAttribute(
-        "width", g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth))
+        "width", this.dsp_fields[x].width )
     IF this.columnTitlesArr[x].getCharAt(1) = "_" THEN -- if l_title starts with _ then it's a hidden column
       CALL l_tabc.setAttribute("hidden", "1")
     END IF
   END FOR
 
+  GL_DBGMSG(2, "g2_lookup2: Adding Update/Insert area ...")
+-- Create Lables & Fields for the update/insert area.
+	LET this.inputVBox = l_grid.createChild('VBox')
+	CALL this.inputVBox.setAttribute("posY", 2)
+	CALL this.inputVBox.setAttribute("hidden", TRUE)
+  LET l_hbx = this.inputVBox.createChild('Grid')
+	CALL l_hbx.setAttribute("width",100)
+	CALL l_hbx.setAttribute("gridWidth",100)
+	CALL l_hbx.setAttribute("height",this.fields.getLength())
+	CALL l_hbx.setAttribute("gridHeight",this.fields.getLength())
+  FOR x = 1 TO this.totalFields
+		LET l_curr = l_hbx.createChild('Label')
+		CALL l_curr.setAttribute("text", this.columnTitlesArr[x])
+		CALL l_curr.setAttribute("gridWidth",20)
+		CALL l_curr.setAttribute("width",20)
+		CALL l_curr.setAttribute("posY", x)
+		CALL l_curr.setAttribute("posX", 1)
+		LET l_curr = l_hbx.createChild('FormField')
+		CALL l_curr.setAttribute("name", this.fields[x].name)
+		CALL l_curr.setAttribute("colName", this.fields[x].name)
+		LET l_titl = l_curr.createChild('Edit')
+		CALL l_titl.setAttribute("gridWidth",this.dsp_fields[x].width)
+		CALL l_titl.setAttribute("width",this.dsp_fields[x].width)
+		CALL l_titl.setAttribute("posY", x)
+		CALL l_titl.setAttribute("posX", 20)
+	END FOR
+
   GL_DBGMSG(2, "g2_lookup2: Adding buttons...")
 -- Create centered buttons.
   LET l_hbx = l_grid.createChild('HBox')
-  CALL l_hbx.setAttribute("posY", "3")
+	CALL l_hbx.setAttribute("width",100)
+	CALL l_hbx.setAttribute("gridWidth",100)
+	CALL l_hbx.setAttribute("posY", 50+x)
   LET l_curr = l_hbx.createChild('Label')
   CALL l_curr.setAttribute("text", "Row:")
   LET l_curr = l_hbx.createChild('Label')
@@ -250,17 +298,14 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
       WHEN "ON ACTION accept"
         EXIT WHILE
       WHEN "ON UPDATE"
-        LET int_flag = this.update(this.theDialog.getFieldValue(this.fields[1].name))
-        IF NOT int_flag THEN
-          CALL this.refrestData()
-        END IF
+        LET int_flag = this.update(this.theDialog.getFieldValue(this.dsp_fields[1].name))
+
       WHEN "ON APPEND"
         LET int_flag = this.update(NULL)
-        IF NOT int_flag THEN
-          CALL this.refrestData()
-        END IF
+
       WHEN "ON DELETE"
-        LET int_flag = this.delete(this.theDialog.getFieldValue(this.fields[1].name))
+        LET int_flag = this.delete(this.theDialog.getFieldValue(this.dsp_fields[1].name))
+
       WHEN "ON SORT"
         --MESSAGE "Use 'reset sort order' to reset to default."
         EXIT WHILE
@@ -268,6 +313,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
         EXIT WHILE
       WHEN "BEFORE ROW"
         LET x = this.theDialog.arrayToVisualIndex("tablistv", arr_curr())
+				LET this.currentRow = arr_curr()
         CALL l_curr.setAttribute(
             "text", SFMT("%1 (%2)", x USING "<<<,##&", arr_curr() USING "<<<,##&"))
       OTHERWISE
@@ -275,7 +321,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
     END CASE
   END WHILE
   LET this.selectedKey =
-      this.theDialog.getFieldValue(this.fields[1].name) -- get the selected row first field.
+      this.theDialog.getFieldValue(this.dsp_fields[1].name) -- get the selected row first field.
   LET this.theDialog = NULL -- Terminate the dialog
   CALL this.sqlQueryHandle.close()
   CLOSE WINDOW listv
@@ -297,11 +343,11 @@ FUNCTION (this lookup) refrestData()
   LET x = 0
   WHILE SQLCA.sqlcode = 0
     LET x = x + 1
-    CALL this.theDialog.setCurrentRow(
-        "tablistv", x) -- must set the current row before setting values
+ -- must set the current row before setting values
+    CALL this.theDialog.setCurrentRow("tablistv", x)
     FOR i = 1 TO this.sqlQueryHandle.getResultCount()
       CALL this.theDialog.setFieldValue(
-          this.sqlQueryHandle.getResultName(i), this.sqlQueryHandle.getResultValue(i))
+          this.dsp_fields[i].name, this.sqlQueryHandle.getResultValue(i))
     END FOR
     CALL this.sqlQueryHandle.fetch()
   END WHILE
@@ -329,9 +375,7 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
 	DEFINE i INT
-  IF this.sql_count IS NULL THEN
-    LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || l_where
-  END IF
+  LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || l_where
   TRY
     PREPARE listcntpre FROM this.sql_count
   CATCH
@@ -417,19 +461,23 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   DEFINE l_dia ui.Dialog
-  DEFINE l_event STRING
+  DEFINE l_event, l_newKey STRING
   DEFINE l_accept BOOLEAN = FALSE
   DEFINE x SMALLINT
   DEFINE l_sql STRING
-
+	CALL this.inputVBox.setAttribute("hidden", FALSE)
   CALL ui.Dialog.setDefaultUnbuffered(TRUE)
   LET l_dia = ui.Dialog.createInputByName(this.fields)
-  FOR x = 1 TO this.fields.getLength()
+  FOR x = 1 TO this.totalFields
     IF l_key IS NOT NULL THEN
       IF x = 1 THEN
         CALL l_dia.setFieldActive(this.fields[x].name, FALSE)
+				DISPLAY SFMT("Add field '%1' to input - disabled", this.fields[x].name)
+			ELSE
+        CALL l_dia.setFieldActive(this.fields[x].name, TRUE)
+				DISPLAY SFMT("Add field '%1' to input - enabled", this.fields[x].name)
       END IF
-      CALL l_dia.setFieldValue( this.fields[x].name, this.theDialog.getFieldValue(this.fields[x].name))
+      CALL l_dia.setFieldValue( this.fields[x].name, this.theDialog.getFieldValue(this.dsp_fields[x].name))
     END IF
   END FOR
   CALL l_dia.addTrigger("ON ACTION close")
@@ -438,12 +486,16 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 -- Loop for events.
   WHILE TRUE
     LET l_event = l_dia.nextEvent()
+		DISPLAY "Event:",l_event
     CASE l_event
       WHEN "AFTER FIELD "||this.fields[1].name
-				IF this.countRows( this.fields[1].name||" = '"||l_dia.getFieldValue(this.fields[1].name.trimRight())||"'" ) > 0 THEN
-					CALL g2_lib.g2_winMessage("Error", %"Key already used!", "exclamation")
-					CALL l_dia.nextField(this.fields[1].name)
-        END IF
+				IF l_key IS NULL THEN
+					LET l_newKey = l_dia.getFieldValue(this.fields[1].name.trimRight())
+					IF this.countRows( SFMT("%1 = '%2'",this.fields[1].name,l_newKey) ) > 0 THEN
+						CALL g2_lib.g2_winMessage("Error", SFMT(%"Key '%1' already used!",l_newKey), "exclamation")
+						CALL l_dia.nextField(this.fields[1].name)
+					END IF
+				END IF
       WHEN "ON ACTION close"
         EXIT WHILE
       WHEN "ON ACTION cancel"
@@ -455,6 +507,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
         GL_DBGMSG(2, "g2_lookup2: Unhandled Event:" || l_event)
     END CASE
   END WHILE
+	CALL this.inputVBox.setAttribute("hidden", TRUE)
   IF NOT l_accept THEN
     RETURN TRUE
   END IF
@@ -465,7 +518,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
     LET l_sql = SFMT("UPDATE %1 SET (", this.tableName)
   END IF
 
-  FOR x = 1 TO this.fields.getLength()
+  FOR x = 1 TO this.totalFields
     LET l_sql = l_sql.append(this.fields[x].name.trimRight())
     IF x < this.fields.getLength() THEN
       LET l_sql = l_sql.append(",")
@@ -476,8 +529,8 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   ELSE
     LET l_sql = l_sql.append(") VALUES ( ")
   END IF
-  FOR x = 1 TO this.fields.getLength()
-    LET l_sql = l_sql.append("'" || l_dia.getFieldValue(this.fields[x].name.trimRight()) || "'")
+  FOR x = 1 TO this.totalFields
+    LET l_sql = l_sql.append(SFMT("'%1'",l_dia.getFieldValue(this.fields[x].name.trimRight()) ))
     IF x < this.fields.getLength() THEN
       LET l_sql = l_sql.append(",")
     END IF
@@ -495,11 +548,26 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   GL_DBGMSG(2, SFMT("g2_lookup2: l_sql=%1", l_sql))
   TRY
     EXECUTE IMMEDIATE l_sql
-    RETURN FALSE
   CATCH
-    GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
-    CALL g2_lib.g2_winMessage("Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+		--DISPLAY "SQLCode:",SQLCA.sqlcode, " SQLERRD2:",SQLCA.sqlerrd[2], " sqlawarn:",SQLCA.sqlawarn
+		IF SQLCA.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+			CALL g2_lib.g2_winMessage("Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+			RETURN TRUE -- int_flag
+		END IF
   END TRY
 
-  RETURN TRUE
+  IF l_key IS NOT NULL THEN
+		CALL this.theDialog.setCurrentRow("tablistv", this.currentRow)
+	ELSE
+		LET this.totalRecords = this.totalRecords + 1
+		CALL this.theDialog.setCurrentRow("tablistv", this.totalRecords)
+	END IF
+	FOR x = 1 TO this.totalFields
+		DISPLAY SFMT("Updating Row %1 field %2 to %3", this.currentRow, this.dsp_fields[x].name, l_dia.getFieldValue(this.fields[x].name.trimRight() ) )
+		CALL this.theDialog.setFieldValue(
+				this.dsp_fields[x].name, l_dia.getFieldValue(this.fields[x].name.trimRight() ) )
+	END FOR
+
+  RETURN FALSE -- int_flag
 END FUNCTION

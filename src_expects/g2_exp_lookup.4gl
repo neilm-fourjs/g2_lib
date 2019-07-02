@@ -3,6 +3,7 @@ IMPORT FGL g2_lib
 IMPORT FGL g2_db
 IMPORT FGL g2_lookup
 IMPORT FGL g2_lookup2
+IMPORT FGL lib_expect
 
 MAIN
 	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
@@ -10,6 +11,9 @@ MAIN
 	CALL g2_lib.g2_init("S",NULL)
 
   CALL l_db.g2_connect("njm_demo310")
+	
+	OPEN FORM f FROM "form"
+	DISPLAY FORM f
 
 	MENU
 		COMMAND "Lookup 1 - Colours" CALL colours1()
@@ -27,14 +31,14 @@ FUNCTION colours1()
 	DEFINE l_colr STRING
 	LET l_colr = 
 	  g2_lookup.g2_lookup( "colours", "colour_key,colour_name,colour_hex", "Key,Name,HEX", "1=1", "colour_name")
-	DISPLAY "Colour:", l_colr
+	CALL lib_expect.showResult( "Colour:"||NVL(l_colr,NULL))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION countries1()
 	DEFINE l_cntry STRING
 	LET l_cntry = 
 	  g2_lookup.g2_lookup( "countries", "country_Code,country_name", "Code,Country", "1=1", "country_name")
-	DISPLAY "Country:", l_cntry
+	CALL lib_expect.showResult( "Country:"||NVL(l_cntry,NULL))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION colours2()
@@ -48,7 +52,7 @@ FUNCTION colours2()
 	LET l_lookup.allowUpdate = TRUE
 	LET l_lookup.allowDelete = TRUE
 	LET l_colr = l_lookup.g2_lookup2()
-	DISPLAY "Colour:", l_colr
+	CALL lib_expect.showResult( "Colour:"||NVL(l_colr,NULL))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION countries2()
@@ -59,7 +63,7 @@ FUNCTION countries2()
 	LET l_lookup.allowUpdate = TRUE
 	LET l_lookup.allowDelete = TRUE
 	LET l_cntry =  l_lookup.g2_lookup2()
-	DISPLAY "Country:", l_cntry
+	CALL lib_expect.showResult( "Country:"||NVL(l_cntry,NULL))
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION customers2()
@@ -70,5 +74,5 @@ FUNCTION customers2()
 	LET l_lookup.sql_getData = "SELECT customer.customer_code, customer.customer_name, addresses.line1 FROM customer, addresses WHERE customer.del_addr = addresses.rec_key ORDER BY customer_name"
 	LET l_lookup.windowTitle = "Customers"
 	LET l_cust = l_lookup.g2_lookup2()
-	DISPLAY "Customer:", l_cust, " Selected from ",l_lookup.totalRecords
+	CALL lib_expect.showResult( "Customer:"||NVL(l_cust,NULL)||" Selected from "||l_lookup.totalRecords)
 END FUNCTION

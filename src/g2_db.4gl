@@ -30,7 +30,9 @@ PUBLIC TYPE dbInfo RECORD
 	dir STRING,
 	dbspace STRING,
 	connection STRING,
-	create_db BOOLEAN
+	create_db BOOLEAN,
+	serial_emu STRING,
+	serial_errd BOOLEAN
 END RECORD
 
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
@@ -81,12 +83,14 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
   IF l_msg IS NULL OR l_msg = " " THEN
     LET l_msg = fgl_getResource("dbi.default.driver")
   END IF
+
+	LET this.serial_emu = fgl_getResource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
+	LET this.serial_errd = fgl_getResource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
+
   IF l_msg IS NOT NULL AND l_msg != " " THEN
     LET this.driver = l_msg
-    GL_DBGMSG(0, SFMT("Database Driver: %1 from fglprofile:%2", this.driver, fgl_getEnv("FGLPROFILE")))
-  ELSE
-    GL_DBGMSG(0, "Database Driver:"||this.driver)
-  END IF
+	END IF
+  GL_DBGMSG(0, SFMT("Database Driver: %1 fglprofile:%2 Serial Emu:%3 Errd: %4", this.driver, fgl_getEnv("FGLPROFILE"),this.serial_emu, this.serial_errd))
 
   LET this.type = this.driver.subString(4, 6)
   LET this.connection = this.name

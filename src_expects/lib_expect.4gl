@@ -20,6 +20,11 @@ FUNCTION test(l_label STRING, l_val1 STRING, l_val2 STRING)
 	END IF
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
+FUNCTION showResult( l_result STRING ) RETURNS ()
+	DISPLAY l_result
+	ERROR l_result
+END FUNCTION
+----------------------------------------------------------------------------------------------------
 FUNCTION results()
 	DISPLAY "Failed:  ", m_fails
 	DISPLAY "Success: ", m_success
