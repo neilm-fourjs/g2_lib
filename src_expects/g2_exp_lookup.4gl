@@ -45,6 +45,7 @@ FUNCTION colours2()
 	DEFINE l_lookup g2_lookup2.lookup
 	DEFINE l_colr STRING
 	LET l_lookup.tableName = "colours"
+	LET l_lookup.isKeySerial = TRUE
 	LET l_lookup.columnList =  "*"
 	LET l_lookup.columnTitles = "Key,Name,HEX"
 	LET l_lookup.orderBy = "colour_name"

@@ -43,6 +43,7 @@ PUBLIC TYPE lookup RECORD
   whereClause STRING, -- where clause ( defaults to 1=1 )
   orderBy STRING, -- Order by ( optional )
   maxColWidth SMALLINT, -- Largest column width ( default is coded as 40 )
+	isKeySerial BOOLEAN, -- Is the key a serial column?
   allowUpdate BOOLEAN, -- Allow update of a row ( WIP )
   allowInsert BOOLEAN, -- Allow insert of a row ( WIP )
   allowDelete BOOLEAN, -- Allow Delete of a row ( WIP )
@@ -463,20 +464,22 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   DEFINE l_dia ui.Dialog
   DEFINE l_event, l_newKey STRING
   DEFINE l_accept BOOLEAN = FALSE
-  DEFINE x SMALLINT
+  DEFINE x, l_firstField SMALLINT
   DEFINE l_sql STRING
 	CALL this.inputVBox.setAttribute("hidden", FALSE)
   CALL ui.Dialog.setDefaultUnbuffered(TRUE)
   LET l_dia = ui.Dialog.createInputByName(this.fields)
+	LET l_firstField = 1
+	IF this.isKeySerial THEN LET l_firstField = 2 END IF
   FOR x = 1 TO this.totalFields
+		IF x = 1 AND ( this.isKeySerial OR l_key IS NOT NULL ) THEN
+			CALL l_dia.setFieldActive(this.fields[x].name, FALSE)
+			DISPLAY SFMT("Add field '%1' to input - disabled", this.fields[x].name)
+		ELSE
+			CALL l_dia.setFieldActive(this.fields[x].name, TRUE)
+			DISPLAY SFMT("Add field '%1' to input - enabled", this.fields[x].name)
+		END IF
     IF l_key IS NOT NULL THEN
-      IF x = 1 THEN
-        CALL l_dia.setFieldActive(this.fields[x].name, FALSE)
-				DISPLAY SFMT("Add field '%1' to input - disabled", this.fields[x].name)
-			ELSE
-        CALL l_dia.setFieldActive(this.fields[x].name, TRUE)
-				DISPLAY SFMT("Add field '%1' to input - enabled", this.fields[x].name)
-      END IF
       CALL l_dia.setFieldValue( this.fields[x].name, this.theDialog.getFieldValue(this.dsp_fields[x].name))
     END IF
   END FOR
@@ -489,7 +492,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 		DISPLAY "Event:",l_event
     CASE l_event
       WHEN "AFTER FIELD "||this.fields[1].name
-				IF l_key IS NULL THEN
+				IF l_key IS NULL AND NOT this.isKeySerial THEN
 					LET l_newKey = l_dia.getFieldValue(this.fields[1].name.trimRight())
 					IF this.countRows( SFMT("%1 = '%2'",this.fields[1].name,l_newKey) ) > 0 THEN
 						CALL g2_lib.g2_winMessage("Error", SFMT(%"Key '%1' already used!",l_newKey), "exclamation")
@@ -518,18 +521,18 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
     LET l_sql = SFMT("UPDATE %1 SET (", this.tableName)
   END IF
 
-  FOR x = 1 TO this.totalFields
+  FOR x = l_firstField TO this.totalFields
     LET l_sql = l_sql.append(this.fields[x].name.trimRight())
     IF x < this.fields.getLength() THEN
       LET l_sql = l_sql.append(",")
     END IF
   END FOR
-  IF l_key IS NOT NULL THEN
+  IF l_key IS NOT NULL THEN -- update
     LET l_sql = l_sql.append(") = ( ")
-  ELSE
+  ELSE -- insert
     LET l_sql = l_sql.append(") VALUES ( ")
   END IF
-  FOR x = 1 TO this.totalFields
+  FOR x = l_firstField TO this.totalFields
     LET l_sql = l_sql.append(SFMT("'%1'",l_dia.getFieldValue(this.fields[x].name.trimRight()) ))
     IF x < this.fields.getLength() THEN
       LET l_sql = l_sql.append(",")
@@ -537,7 +540,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
   END FOR
   LET l_sql = l_sql.append(")")
 
-  IF l_key IS NOT NULL THEN
+  IF l_key IS NOT NULL THEN -- update
     LET l_sql =
         l_sql.append(
             SFMT(" WHERE %1 = '%2'",
@@ -557,11 +560,12 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 		END IF
   END TRY
 
-  IF l_key IS NOT NULL THEN
+  IF l_key IS NOT NULL THEN -- update
 		CALL this.theDialog.setCurrentRow("tablistv", this.currentRow)
 	ELSE
 		LET this.totalRecords = this.totalRecords + 1
 		CALL this.theDialog.setCurrentRow("tablistv", this.totalRecords)
+		CALL l_dia.setFieldValue( this.fields[1].name, SQLCA.sqlerrd[2] )
 	END IF
 	FOR x = 1 TO this.totalFields
 		DISPLAY SFMT("Updating Row %1 field %2 to %3", this.currentRow, this.dsp_fields[x].name, l_dia.getFieldValue(this.fields[x].name.trimRight() ) )
