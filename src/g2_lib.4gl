@@ -551,8 +551,6 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
   CALL n.setAttribute("image", l_splashImage)
   CALL n.setAttribute("posY", "0")
   CALL n.setAttribute("posX", "0")
-  CALL n.setAttribute("gridWidth", "40")
-  CALL n.setAttribute("gridHeight", "8")
   CALL n.setAttribute("height", l_h||"px")
   CALL n.setAttribute("width", l_w||"px")
   CALL n.setAttribute("stretch", "both")
