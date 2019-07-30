@@ -526,8 +526,10 @@ END FUNCTION
 #+
 #+ @param l_dur > 0 for sleep then close, 0=just open window, -1=close window
 #+ @param l_splashImage Image file name
+#+ @param l_w Image Width
+#+ @param l_h Image Height
 #+ @return Nothing.
-FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING) --{{{
+FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALLINT) --{{{
   DEFINE f, g, n om.DomNode
 
   IF l_dur = -1 THEN
@@ -546,15 +548,13 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING) --{{{
   LET n = g.createChild("Image")
   CALL n.setAttribute("name", "logo")
   CALL n.setAttribute("style", "noborder")
-  CALL n.setAttribute("width", "36")
-  CALL n.setAttribute("height", "8")
   CALL n.setAttribute("image", l_splashImage)
   CALL n.setAttribute("posY", "0")
   CALL n.setAttribute("posX", "0")
   CALL n.setAttribute("gridWidth", "40")
   CALL n.setAttribute("gridHeight", "8")
-  CALL n.setAttribute("height", "200px")
-  CALL n.setAttribute("width", "570px")
+  CALL n.setAttribute("height", l_h||"px")
+  CALL n.setAttribute("width", l_w||"px")
   CALL n.setAttribute("stretch", "both")
   CALL n.setAttribute("autoScale", "1")
   CALL ui.interface.refresh()
