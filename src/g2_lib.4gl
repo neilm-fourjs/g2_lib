@@ -532,10 +532,11 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING) --{{{
 
   IF l_dur = -1 THEN
     CLOSE WINDOW splash
+  	GL_DBGMSG(3, "Close splash.")
     RETURN
   END IF
 
-  GL_DBGMSG(4, "Doing splash.")
+  GL_DBGMSG(3, "Open splash.")
   OPEN WINDOW splash
       AT 1, 1
       WITH 1 ROWS, 1 COLUMNS
@@ -561,6 +562,6 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING) --{{{
   IF l_dur > 0 THEN
     SLEEP l_dur
     CLOSE WINDOW splash
+  	GL_DBGMSG(3, "Close splash.")
   END IF
-  GL_DBGMSG(4, "Done splash.")
 END FUNCTION --}}}

@@ -28,8 +28,13 @@ FUNCTION g2_dbgMsg(l_fil STRING, l_lno INT, l_lev STRING, l_msg STRING)
         LET x = 22
       END IF
       LET l_lin[1, x] = l_fil.trim()
-      DISPLAY l_lin, ":", l_lev USING "<<&", ": ", l_msg.trim()
-      CALL ERRORLOG(l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
+			IF gl_dbgLev > 2 THEN
+    	  DISPLAY CURRENT," ",l_lin, ":", l_lev USING "<<&", ": ", l_msg.trim()
+   	   CALL ERRORLOG( CURRENT||" "||l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
+			ELSE
+    	  DISPLAY l_lin, ":", l_lev USING "<<&", ": ", l_msg.trim()
+   	   CALL ERRORLOG(l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
+			END IF
     END IF
   END IF
 
