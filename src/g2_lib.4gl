@@ -563,3 +563,14 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
   	GL_DBGMSG(3, "Close splash.")
   END IF
 END FUNCTION --}}}
+--------------------------------------------------------------------------------
+#+ Sleep that handle SIGINT
+#+ @param l_timeout Number of seconds to sleep
+FUNCTION g2_sleep(l_timeout SMALLINT) RETURNS ()
+  DEFINE l_to DATETIME YEAR TO FRACTION(3)
+  IF l_timeout <= 0 OR l_timeout IS NULL THEN RETURN END IF
+  LET l_to = CURRENT + (l_timeout UNITS SECOND)
+  WHILE CURRENT < l_to
+    SLEEP 1
+  END WHILE
+END FUNCTION
