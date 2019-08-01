@@ -564,7 +564,7 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
   END IF
 END FUNCTION --}}}
 --------------------------------------------------------------------------------
-#+ Sleep that handle SIGINT
+#+ Sleep that handles SIGINT
 #+ @param l_timeout Number of seconds to sleep
 FUNCTION g2_sleep(l_timeout SMALLINT) RETURNS ()
   DEFINE l_to DATETIME YEAR TO FRACTION(3)
