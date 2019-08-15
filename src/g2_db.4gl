@@ -1,6 +1,6 @@
 # Library functions for Database Connection / Actions.
 IMPORT os
-
+IMPORT util
 IMPORT FGL g2_lib
 &include "g2_debug.inc"
 
@@ -37,7 +37,8 @@ END RECORD
 
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
   DEFINE l_msg STRING
-  DEFINE l_lockMode, l_fglprofile BOOLEAN
+  DEFINE l_lockMode, l_fglprofile, l_failed BOOLEAN
+	DEFINE l_CustomName, l_dbUser, l_dbPass STRING
 
   LET l_fglprofile = FALSE
 
@@ -91,8 +92,10 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
     LET this.driver = l_msg
 	END IF
   GL_DBGMSG(0, SFMT("Database Driver: %1 fglprofile:%2 Serial Emu:%3 Errd: %4", this.driver, fgl_getEnv("FGLPROFILE"),this.serial_emu, this.serial_errd))
-
   LET this.type = this.driver.subString(4, 6)
+	IF this.type != "sqt" THEN -- allow a custom dbname & user
+		CALL getCustomDBUser() RETURNING l_CustomName, l_dbUser, l_dbPass
+	END IF
   LET this.connection = this.name
   LET l_lockMode = TRUE
   IF NOT l_fglprofile THEN -- no fglprofile setting to do it the long way.
@@ -134,24 +137,47 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
         LET this.connection = "db+driver='" || this.driver || "',source='" || this.source || "'"
     END CASE
   END IF
-
-  TRY
-    DISPLAY CURRENT, ":Connecting to " || this.connection || " Using:", this.driver, " Source:", this.source, " ..."
-    DATABASE this.connection
-    DISPLAY CURRENT, ":Connected to " || this.connection || " Using:", this.driver, " Source:", this.source
-  CATCH
-    LET l_msg =
-        "Connection to database failed\nDB:",
-        this.name,
-        "\nSource:",
-        this.source,
-        "\nDriver:",
-        this.driver,
-        "\n",
-        "Status:",
-        SQLCA.SQLCODE,
-        "\n",
-        SQLERRMESSAGE
+	LET l_failed = FALSE
+	IF l_customName IS NULL THEN
+		TRY
+			GL_DBGMSG(0,SFMT(":Connecting to %1 Using: %2 Source: %3 ...",this.connection ,this.driver,this.source))
+			DATABASE this.connection
+			GL_DBGMSG(0,":Connected.")
+		CATCH
+			LET l_failed = TRUE
+			LET l_msg =
+					"Connection to database failed\nDB:",
+					this.name,
+					"\nSource:",
+					this.source,
+					"\nDriver:",
+					this.driver,
+					"\n",
+					"Status:",
+					SQLCA.SQLCODE,
+					"\n",
+					SQLERRMESSAGE
+		END TRY
+	ELSE
+		TRY
+			GL_DBGMSG(0,SFMT(":Connecting to %1 User: %2...",l_customName, l_dbUser))
+			CONNECT TO l_customName USER l_dbUser USING l_dbPass
+			GL_DBGMSG(0,":Connected.")
+			LET this.name = l_customName
+		CATCH
+			LET l_failed = TRUE
+			LET l_msg =
+					"Connect to failed\nDB:",
+					l_customName,
+					"\nUser:",
+					l_dbUser,
+					"Status:",
+					SQLCA.SQLCODE,
+					"\n",
+					SQLERRMESSAGE
+		END TRY
+	END IF
+	IF l_failed THEN
     DISPLAY l_msg
     IF this.create_db AND SQLCA.SQLCODE = -329 AND this.type = "ifx" THEN
       CALL this.g2_ifx_createdb()
@@ -172,7 +198,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
       CALL g2_lib.g2_errPopup(SFMT(% "Fatal Error %1", l_msg))
 			CALL g2_lib.g2_exitProgram(1, l_msg)
     END IF
-  END TRY
+  END IF
 
   IF l_lockMode THEN
     SET LOCK MODE TO WAIT 3
@@ -656,5 +682,39 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
     END IF
   END IF
   RETURN TRUE
+END FUNCTION
+--------------------------------------------------------------------------------
+-- Get custom dbname and user from a json file outside of the deployment
+-- eg:
+-- {
+--   "dbname": "njm_demo310",
+--   "username": "neilm",
+--   "password": "12neilm"
+-- }
+
+FUNCTION getCustomDBUser() RETURNS (STRING,STRING,STRING)
+	DEFINE l_path, l_file STRING
+	DEFINE l_jsonText TEXT
+	DEFINE db RECORD
+		dbname STRING,
+		username STRING,
+		password STRING
+	END RECORD
+	LET l_path = os.path.join("..","..")
+	LET l_file = os.path.join(l_path,"custom_db.json")
+	IF NOT os.path.exists(l_file) THEN 
+		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
+		RETURN NULL,NULL,NULL
+	END IF
+	TRY
+		LOCATE l_jsonText IN FILE l_file
+		CALL util.JSON.parse(l_jsonText, db)
+	CATCH
+		GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, STATUS, ERR_GET(STATUS)))
+		DISPLAY l_jsonText
+		RETURN NULL,NULL,NULL
+	END TRY
+	GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
+	RETURN db.dbname, db.username, db.password
 END FUNCTION
 --------------------------------------------------------------------------------
