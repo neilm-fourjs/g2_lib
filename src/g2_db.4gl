@@ -140,9 +140,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
 	LET l_failed = FALSE
 	IF l_customName IS NULL THEN
 		TRY
-			GL_DBGMSG(0,SFMT(":Connecting to %1 Using: %2 Source: %3 ...",this.connection ,this.driver,this.source))
+			GL_DBGMSG(0,SFMT("Connecting to %1 Using: %2 Source: %3 ...",this.connection ,this.driver,this.source))
 			DATABASE this.connection
-			GL_DBGMSG(0,":Connected.")
+			GL_DBGMSG(0,"Connected.")
 		CATCH
 			LET l_failed = TRUE
 			LET l_msg =
@@ -160,9 +160,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS ()
 		END TRY
 	ELSE
 		TRY
-			GL_DBGMSG(0,SFMT(":Connecting to %1 User: %2...",l_customName, l_dbUser))
+			GL_DBGMSG(0,SFMT("Connecting to %1 User: %2 ...",l_customName, l_dbUser))
 			CONNECT TO l_customName USER l_dbUser USING l_dbPass
-			GL_DBGMSG(0,":Connected.")
+			GL_DBGMSG(0,"Connected.")
 			LET this.name = l_customName
 		CATCH
 			LET l_failed = TRUE

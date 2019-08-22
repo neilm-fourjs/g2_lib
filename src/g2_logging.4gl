@@ -59,12 +59,12 @@ FUNCTION (this logger) logIt(l_mess STRING) --{{{
 
   LET l_module = getCallingModuleName()
   IF l_module MATCHES "cloud_gl_lib.gl_dbgMsg:*" THEN
-    LET l_mess = CURRENT || "|" || NVL(l_mess, "NULL")
+    LET l_mess = CURRENT || " " || NVL(l_mess, "NULL")
   ELSE
-    LET l_mess = CURRENT || "|" || NVL(l_module, "NULL") || "|" || l_mess
+    LET l_mess = CURRENT || " " || NVL(l_module, "NULL") || "|" || l_mess
   END IF
 
-  DISPLAY "Log:", l_mess
+  DISPLAY l_mess
   CALL c.writeLine(l_mess)
   CALL c.close()
 END FUNCTION

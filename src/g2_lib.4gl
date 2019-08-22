@@ -23,20 +23,24 @@ PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
 PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
-	DEFINE l_tmp STRING
+	DEFINE l_gbc, l_fe STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
   CALL STARTLOG(g2_err.fullLogPath)
 
   LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
-  GL_DBGMSG(1, SFMT("g2_lib: debug level %1", gl_dbgLev))
+  GL_DBGMSG(1, SFMT("g2_lib: debug level = %1", gl_dbgLev))
 
   WHENEVER ANY ERROR CALL g2_error
 
-	LET l_tmp = ui.Interface.getUniversalClientName()
-	IF l_tmp.getLength() < 3 THEN LET l_tmp = "?" END IF
-	IF ui.Interface.getFrontEndName() = "GDC" THEN LET m_isGDC = TRUE END IF
-	IF l_tmp != "GBC" THEN LET m_isUniversal = FALSE END IF
+-- Try and figure out what the client is capable of GDC(Native/UR) / GBC 
+	LET l_gbc = ui.Interface.getUniversalClientName()
+	LET l_fe = ui.Interface.getFrontEndName()
+  GL_DBGMSG(1, SFMT("g2_lib: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
+	IF l_gbc.getLength() < 3 THEN LET l_gbc = "?" END IF
+	IF l_fe = "GBC" THEN LET l_gbc = "GBC" END IF
+	IF l_fe = "GDC" THEN LET m_isGDC = TRUE END IF
+	IF l_gbc != "GBC" THEN LET m_isUniversal = FALSE END IF
 
   CALL g2_loadStyles(l_cfgname)
 	CALL g2_loadToolBar(l_cfgname)

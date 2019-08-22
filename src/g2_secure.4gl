@@ -24,6 +24,7 @@ IMPORT util
 
 IMPORT FGL g2_lib
 IMPORT FGL g2_encrypt
+&include "g2_debug.inc"
 
 -- Private variables:
 DEFINE m_doc xml.domDocument
@@ -468,9 +469,9 @@ FUNCTION g2_getSession(l_id STRING, l_age INTEGER) RETURNS STRING
   END IF
   CALL m_enc.init(C_CERTFILE, C_PRIVATEKEY)
 	TRY
-		DISPLAY "localStorage - getItem..."
+		GL_DBGMSG(1, "localStorage - getItem...")
 		CALL ui.Interface.frontCall("localStorage", "getItem", l_id, l_val)
-		DISPLAY "localStorage - getItem done"
+		GL_DBGMSG(1, "localStorage - getItem done")
 	CATCH
 		CALL g2_lib.g2_errPopup("localStorage - getItem Failed!")
 		RETURN NULL
