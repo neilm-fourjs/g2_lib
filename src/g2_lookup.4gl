@@ -116,6 +116,7 @@ FUNCTION g2_lookup(
 	CALL l_tabl.setAttribute("height", "20")
 	CALL l_tabl.setAttribute("pageSize", "20")
 	CALL l_tabl.setAttribute("posY", "1")
+	CALL l_tabl.setAttribute("doubleClick", "accept")
 
 -- Setup column l_titles if supplied.
 	IF colts IS NOT NULL THEN

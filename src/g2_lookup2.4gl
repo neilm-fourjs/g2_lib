@@ -156,6 +156,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 	CALL l_tabl.setAttribute("height", "20")
 	CALL l_tabl.setAttribute("pageSize", "20")
 	CALL l_tabl.setAttribute("posY", "1")
+	CALL l_tabl.setAttribute("doubleClick", "accept")
 
 -- Create Columns & Headings for the table.
 	FOR x = 1 TO this.totalFields
