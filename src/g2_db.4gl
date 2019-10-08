@@ -43,26 +43,26 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	LET l_fglprofile = FALSE
 
 -- setup stuff from environment or defaults
-	IF l_dbName IS NULL OR l_dbName = " " THEN
-		LET l_dbName = fgl_getenv("DBNAME")
-	END IF
-	IF l_dbName IS NULL OR l_dbName = " " THEN
-		LET l_dbName = DEF_DBNAME
-	END IF
-	LET this.name = l_dbName
+  IF l_dbName IS NULL OR l_dbName = " " THEN
+    LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
+  END IF
+  IF l_dbName IS NULL OR l_dbName = " " THEN
+    LET l_dbName = DEF_DBNAME
+  END IF
+  LET this.name = l_dbName
 
-	IF this.dir IS NULL OR this.dir = " " THEN
-		LET this.dir = DEF_DBDIR
-	END IF
+  IF this.dir IS NULL OR this.dir = " " THEN
+    LET this.dir = DEF_DBDIR
+  END IF
 
-	IF this.dbspace IS NULL THEN
-		LET this.dbspace = fgl_getenv("DBSPACE")
-	END IF
-	IF this.dbspace IS NULL OR this.dbspace = " " THEN
-		LET this.dbspace = DEF_DBSPACE
-	END IF
+  IF this.dbspace IS NULL THEN
+    LET this.dbspace = fgl_getenv("DBSPACE")
+  END IF
+  IF  this.dbspace IS NULL OR this.dbspace = " " THEN
+    LET this.dbspace = DEF_DBSPACE
+  END IF
 
-	IF this.driver IS NULL THEN
+  IF this.driver IS NULL THEN
 		IF this.type IS NOT NULL THEN
 			LET this.driver = "dbm" || this.type
 		END IF
