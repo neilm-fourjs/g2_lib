@@ -720,8 +720,14 @@ FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
 		username STRING,
 		password STRING
 	END RECORD
-	LET l_path = os.path.join("..", "..")
-	LET l_file = os.path.join(l_path, "custom_db.json")
+
+	LET l_file = fgl_getEnv("CUSTOM_DB")
+	IF l_file.getLength() < 1 THEN 
+		LET l_path = os.path.join("..", "..")
+		LET l_file = "custom_db.json" 
+		LET l_file = os.path.join(l_path, l_file)
+	END IF
+
 	IF NOT os.path.exists(l_file) THEN
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
 		RETURN NULL, NULL, NULL
