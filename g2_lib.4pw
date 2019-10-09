@@ -64,7 +64,7 @@
   </Settings>
   <LanguageList version="1.0"/>
   <PlatformList version="1.0"/>
-  <Group id="75644415" label="g2_lib" language="Genero" targetDirectory="$(ProjectDir)/../njm_app/bin">
+  <Group id="75644415" label="g2_lib" language="Genero" targetDirectory="$(ProjectDir)/../njm_app_bin">
     <Library binaryName="g2_gdcUpdate" dependencies="14000" id="-524380304" label="g2_gdcUpdate">
       <File filePath="src/g2_gdcUpdateCommon.4gl"/>
       <File filePath="src/g2_gdcUpdate.4gl"/>
