@@ -173,7 +173,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					l_customName,
 					"\nUser:",
 					l_dbUser,
-					"Status:",
+					"\nStatus:",
 					SQLCA.SQLCODE,
 					"\n",
 					SQLERRMESSAGE
