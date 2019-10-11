@@ -8,7 +8,7 @@ TARGETS=$(BIN)/g2_lib.42x
 
 all: $(TARGETS)
 
-$(BIN)/g2_lib.42x:
+$(BIN)/g2_lib.42x: src/*.4gl
 	gsmake g2_lib.4pw
 
 test:
