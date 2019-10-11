@@ -21,7 +21,7 @@ PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
 PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
 PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 
-FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING)
+FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	DEFINE l_gbc, l_fe STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
@@ -62,7 +62,7 @@ END FUNCTION
 #+ M = MDI Container
 #+ S = Not MDI
 #+ @param l_mdi_sdi S/C/M = default is 'S'
-FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1))
+FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1)) RETURNS ()
 	DEFINE l_container, l_desc STRING
 	IF l_mdi_sdi IS NULL OR l_mdi_sdi = " " THEN
 		LET l_mdi_sdi = "S"
@@ -95,53 +95,50 @@ END FUNCTION
 #+ Load the style file depending on the client
 FUNCTION g2_loadStyles(l_stName STRING) RETURNS()
 	DEFINE l_fe, l_name STRING
-	IF l_stName IS NULL THEN
-		LET l_stName = "default"
-	END IF
+	DEFINE l_ok BOOLEAN = TRUE
+	IF l_stName IS NULL THEN LET l_stName = "default" END IF
 	LET l_fe = "GBC"
-	IF m_isGDC THEN
-		LET l_fe = "GDC"
-	END IF
-	IF m_isUniversal THEN
-		LET l_fe = "GBC"
-	END IF
+	IF m_isGDC AND NOT m_isUniversal THEN LET l_fe = "GDC" END IF
 	LET l_name = l_stName || "_" || l_fe
 	TRY
 		CALL ui.interface.loadStyles(l_name)
 	CATCH
 		LET l_name = l_stName
+		LET l_ok = FALSE
 	END TRY
-	TRY
-		CALL ui.interface.loadStyles(l_name)
-	CATCH
-		LET l_name = "FAILED!"
-	END TRY
+	IF NOT l_ok THEN
+		TRY
+			CALL ui.interface.loadStyles(l_name)
+		CATCH
+			LET l_name = "FAILED!"
+		END TRY
+	END IF
 	GL_DBGMSG(0, SFMT("g2_loadStyles: file=%1 ", l_name))
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Load the Action Defaults file depending on the client
 FUNCTION g2_loadActions(l_adName STRING) RETURNS()
-	IF l_adName IS NULL THEN
+	DEFINE l_ok BOOLEAN = TRUE
+	IF l_adName IS NULL THEN LET l_adName = "default" END IF
+	TRY
+		CALL ui.Interface.loadActionDefaults(l_adName)
+	CATCH
 		LET l_adName = "default"
+		LET l_ok = FALSE
+	END TRY
+	IF NOT l_ok THEN
+		TRY
+			CALL ui.Interface.loadActionDefaults(l_adName)
+		CATCH
+			LET l_adName = "FAILED!"
+		END TRY
 	END IF
-	TRY
-		CALL ui.Interface.loadActionDefaults(l_adName)
-	CATCH
-		LET l_adName = "default"
-	END TRY
-	TRY
-		CALL ui.Interface.loadActionDefaults(l_adName)
-	CATCH
-		LET l_adName = "FAILED!"
-	END TRY
 	GL_DBGMSG(0, SFMT("g2_loadActions: file=%1 ", l_adName))
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Load the ToolBar file depending on the client
 FUNCTION g2_loadToolBar(l_tbName STRING) RETURNS()
-	IF l_tbName IS NULL THEN
-		LET l_tbName = "default"
-	END IF
+	IF l_tbName IS NULL THEN LET l_tbName = "default" END IF
 	TRY
 		CALL ui.Interface.loadToolBar(l_tbName)
 	CATCH
@@ -197,8 +194,8 @@ FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS(
 	LET l_win = ui.window.getcurrent()
 	IF l_win IS NULL THEN -- Needs a current window or dialog doesn't work!!
 		OPEN WINDOW dummy AT 1, 1 WITH 1 ROWS, 1 COLUMNS
-		CALL ui.Window.getCurrent(
-				).setText(" ") -- clear default window title to avoid 'dummy' showing in gbc.
+		-- clear default window title to avoid 'dummy' showing in gbc.
+		CALL ui.Window.getCurrent().setText(" ")
 	END IF
 	IF l_icon = "exclamation" THEN
 		ERROR ""
@@ -301,24 +298,24 @@ END FUNCTION
 #+ Simple message with ui refresh
 #+
 #+ @return Nothing
-FUNCTION g2_message(l_msg STRING) --{{{
+FUNCTION g2_message(l_msg STRING) RETURNS ()
 	MESSAGE NVL(l_msg, "NULL")
 	CALL ui.Interface.refresh()
-END FUNCTION --}}}
+END FUNCTION
 --------------------------------------------------------------------------------
 #+ Simple error message
 #+
 #+ @return Nothing.
-FUNCTION g2_errPopup(l_msg STRING)
+FUNCTION g2_errPopup(l_msg STRING) RETURNS ()
 	CALL g2_winMessage(% "Error!", l_msg, "exclamation")
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Simple error message
 #+
 #+ @return Nothing
-FUNCTION g2_warnPopup(l_msg STRING) --{{{
+FUNCTION g2_warnPopup(l_msg STRING) RETURNS ()
 	CALL g2_winMessage(% "Warning!", l_msg, "exclamation")
-END FUNCTION --}}}
+END FUNCTION
 --------------------------------------------------------------------------------
 #+ Display an error message in a window, console & logfile.
 #+
@@ -326,15 +323,13 @@ END FUNCTION --}}}
 #+ @param l_lno __LINE__ - Line Number
 #+ @param l_err Error Message.
 #+ @return Nothing.
-FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING)
-
+FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING) RETURNS ()
 	CALL g2_errPopup(l_err)
 	ERROR "* ", l_err.trim(), " *"
 	IF l_fil IS NOT NULL THEN
 		DISPLAY l_fil.trim(), ":", l_lno, ": ", l_err.trim()
 		CALL ERRORLOG(l_fil.trim() || ":" || l_lno || ": " || l_err)
 	END IF
-
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Cleanly exit program, setting exit status.
@@ -342,19 +337,19 @@ END FUNCTION
 #+ @param stat Exit status 0 or -1 normally.
 #+ @param reason For Exit, clean, crash, closed, terminated etc
 #+ @return none
-FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING)
+FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS ()
 	GL_DBGMSG(0, SFMT("g2_exitProgram: stat=%1 reason:%2", l_stat, l_reason))
 	EXIT PROGRAM l_stat
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ On Application Close
-FUNCTION g2_appClose()
+FUNCTION g2_appClose() RETURNS ()
 	GL_DBGMSG(1, "g2_appClose")
 	CALL g2_exitProgram(0, "Closed")
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ On Application Terminalate ( kill -15 )
-FUNCTION g2_appTerm()
+FUNCTION g2_appTerm() RETURNS ()
 	GL_DBGMSG(1, "g2_appTerm")
 	TRY
 		ROLLBACK WORK
@@ -416,7 +411,7 @@ END FUNCTION
 #+ Default error handler
 #+
 #+ @return Nothing
-FUNCTION g2_error()
+FUNCTION g2_error() RETURNS ()
 	DEFINE l_err, l_mod STRING
 	DEFINE l_stat INTEGER
 	DEFINE x, y SMALLINT
@@ -530,6 +525,7 @@ FUNCTION g2_getLinuxVer() RETURNS STRING
 	DEFINE x SMALLINT
 
 -- possible files containing version info
+	LET l_file[l_file.getLength() + 1] = "/etc/redhat-release"
 	LET l_file[l_file.getLength() + 1] = "/etc/issue.net"
 	LET l_file[l_file.getLength() + 1] = "/etc/issue"
 	LET l_file[l_file.getLength() + 1] = "/etc/debian_version"
@@ -560,7 +556,7 @@ END FUNCTION
 #+ @param l_w Image Width
 #+ @param l_h Image Height
 #+ @return Nothing.
-FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALLINT) --{{{
+FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALLINT) RETURNS ()
 	DEFINE f, g, n om.DomNode
 
 	IF l_dur = -1 THEN
@@ -593,7 +589,7 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
 		CLOSE WINDOW splash
 		GL_DBGMSG(3, "Close splash.")
 	END IF
-END FUNCTION --}}}
+END FUNCTION
 --------------------------------------------------------------------------------
 #+ Sleep that handles SIGINT
 #+ @param l_timeout Number of seconds to sleep
