@@ -92,7 +92,7 @@
       <File filePath="src/g2_ws.4gl"/>
     </Library>
   </Group>
-  <Group environment="value:FGLPROFILE=../etc/profile,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
+  <Group environment="value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero" targetDirectory="$(ProjectDir)/bin_expects">
     <Library binaryName="etc" id="-894407244" label="etc">
       <File filePath="etc/profile"/>
     </Library>
