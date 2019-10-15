@@ -603,3 +603,15 @@ FUNCTION g2_sleep(l_timeout SMALLINT) RETURNS()
 		SLEEP 1
 	END WHILE
 END FUNCTION
+--------------------------------------------------------------------------------
+#+ Returns the image from the 1st path found in FGLIMAGEPATH
+FUNCTION g2_getImagePath() RETURNS STRING
+	DEFINE l_imgPath STRING
+	DEFINE x SMALLINT
+	LET l_imgPath = fgl_getEnv("FGLIMAGEPATH")
+	LET x = l_imgPath.getIndexOf(os.path.pathSeparator(),1)
+	IF x > 0 THEN
+		LET l_imgPath = l_imgPath.subString(1,x-1)
+	END IF
+	RETURN l_imgPath
+END FUNCTION
