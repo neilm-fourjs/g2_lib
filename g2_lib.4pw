@@ -87,6 +87,7 @@
       <File filePath="src/g2_ui.4gl"/>
       <File filePath="src/g2_lookup.4gl"/>
       <File filePath="src/g2_encrypt.4gl"/>
+      <File filePath="src/g2_getFileName.4gl"/>
       <File filePath="src/g2_lookup2.4gl"/>
       <File filePath="src/g2_secure.4gl"/>
       <File filePath="src/g2_simpleLookup.4gl"/>

@@ -4,9 +4,6 @@ IMPORT util
 IMPORT FGL g2_lib
 &include "g2_debug.inc"
 
-# See schema.inc - value should be the same!
-CONSTANT DEF_DBNAME = "njm_demo_db"
-
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
 CONSTANT DEF_DBSPACE = "dbs1"
@@ -45,9 +42,6 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 -- setup stuff from environment or defaults
   IF l_dbName IS NULL OR l_dbName = " " THEN
     LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
-  END IF
-  IF l_dbName IS NULL OR l_dbName = " " THEN
-    LET l_dbName = DEF_DBNAME
   END IF
   LET this.name = l_dbName
 
@@ -93,9 +87,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	IF l_msg IS NOT NULL AND l_msg != " " THEN
 		LET this.driver = l_msg
 	END IF
-	GL_DBGMSG(0, SFMT("Database Driver: %1 fglprofile:%2 Serial Emu:%3 Errd: %4", this.driver, fgl_getEnv("FGLPROFILE"), this.serial_emu, this.serial_errd))
+	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 fglprofile:%3 Serial Emu:%4 Errd: %5", this.name, this.driver, fgl_getEnv("FGLPROFILE"), this.serial_emu, this.serial_errd))
 	LET this.type = this.driver.subString(4, 6)
-	IF this.type != "sqt" THEN -- allow a custom dbname & user
+	IF this.type != "sqt" AND l_dbName IS NULL THEN -- allow a custom dbname & user
 		CALL getCustomDBUser() RETURNING l_CustomName, l_dbUser, l_dbPass
 	END IF
 	LET this.connection = this.name
@@ -713,7 +707,9 @@ END FUNCTION
 -- }
 
 FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
-	DEFINE l_path, l_file STRING
+	DEFINE l_path STRING = ".."
+	DEFINE l_fileName STRING = "custom_db.json"
+	DEFINE l_file STRING
 	DEFINE l_jsonText TEXT
 	DEFINE db RECORD
 		dbname STRING,
@@ -723,9 +719,11 @@ FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
 
 	LET l_file = fgl_getEnv("CUSTOM_DB")
 	IF l_file.getLength() < 1 THEN 
-		LET l_path = os.path.join("..", "..")
-		LET l_file = "custom_db.json" 
-		LET l_file = os.path.join(l_path, l_file)
+		LET l_file = os.path.join(l_path, l_fileName)
+		IF NOT os.path.exists(l_file) THEN
+			LET l_path = os.path.join("..", "..")
+			LET l_file = os.path.join(l_path, l_fileName)
+		END IF
 	END IF
 
 	IF NOT os.path.exists(l_file) THEN
