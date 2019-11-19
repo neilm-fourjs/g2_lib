@@ -2,25 +2,25 @@
 IMPORT FGL g2_lib
 
 PUBLIC TYPE appInfo RECORD
-	appName,
-					appBuild,
-					progname,
-					progDesc,
-					progVersion,
-					progAuth,
-					splashImage,
-					userName,
-					fe_typ,
-					fe_ver,
-					uni_typ,
-					uni_ver,
-					os,
-					hostname,
-					cli_os,
-					cli_osver,
-					cli_res,
-					cli_dir,
-					cli_un
+		appName,
+		appBuild,
+		progname,
+		progDesc,
+		progVersion,
+		progAuth,
+		splashImage,
+		userName,
+		fe_typ,
+		fe_ver,
+		uni_typ,
+		uni_ver,
+		os,
+		hostname,
+		cli_os,
+		cli_osver,
+		cli_res,
+		cli_dir,
+		cli_un
 			STRING
 END RECORD
 

@@ -5,7 +5,7 @@ IMPORT FGL g2_lib
 &include "g2_debug.inc"
 
 # See schema.inc - value should be the same!
-CONSTANT DEF_DBNAME = "njm_demo310"
+CONSTANT DEF_DBNAME = "njm_demo_db"
 
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"

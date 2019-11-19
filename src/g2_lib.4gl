@@ -109,8 +109,16 @@ FUNCTION g2_loadStyles(l_stName STRING) RETURNS()
 	IF NOT l_ok THEN
 		TRY
 			CALL ui.interface.loadStyles(l_name)
+			LET l_ok = TRUE
 		CATCH
-			LET l_name = "FAILED!"
+			LET l_name = l_name.append(" FAILED using 'default'")
+		END TRY
+	END IF
+	IF NOT l_ok THEN
+		TRY
+			CALL ui.interface.loadStyles("default")
+		CATCH
+			LET l_name = l_name.append(" & default FAILED!")
 		END TRY
 	END IF
 	GL_DBGMSG(0, SFMT("g2_loadStyles: file=%1 ", l_name))
@@ -130,7 +138,7 @@ FUNCTION g2_loadActions(l_adName STRING) RETURNS()
 		TRY
 			CALL ui.Interface.loadActionDefaults(l_adName)
 		CATCH
-			LET l_adName = "FAILED!"
+			LET l_adName = l_adName.append(" FAILED!")
 		END TRY
 	END IF
 	GL_DBGMSG(0, SFMT("g2_loadActions: file=%1 ", l_adName))
@@ -142,7 +150,7 @@ FUNCTION g2_loadToolBar(l_tbName STRING) RETURNS()
 	TRY
 		CALL ui.Interface.loadToolBar(l_tbName)
 	CATCH
-		LET l_tbName = "FAILED!"
+		LET l_tbName = l_tbName.append(" FAILED!")
 	END TRY
 	GL_DBGMSG(0, SFMT("g2_loadToolBar: file=%1 ", l_tbName))
 END FUNCTION
@@ -165,7 +173,7 @@ FUNCTION g2_loadTopMenu(l_tmName STRING) RETURNS()
 			CALL ui.Interface.loadTopMenu(l_tmName)
 		END IF
 	CATCH
-		LET l_tmName = "FAILED!"
+		LET l_tmName = l_tmName.append(" FAILED!")
 	END TRY
 	GL_DBGMSG(0, SFMT("g2_loadTopMenu: file=%1 ", l_tmName))
 END FUNCTION

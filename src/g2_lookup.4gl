@@ -97,7 +97,7 @@ FUNCTION g2_lookup(
 	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
 	CALL fgl_setTitle("Listing from " || tabnam)
 	LET l_frm =
-			g2_aui.g2_genForm("gl_" || tabnam.trim()) -- ensures form name is specific for this lookup
+			g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
 	LET l_grid = l_frm.createChild('Grid')
 -- Create a centered window l_title.
