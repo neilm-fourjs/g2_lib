@@ -94,10 +94,12 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 			this.device,
 			this.reportsDir,
 			this.pageWidth)
-	IF this.pageWidth > 80 THEN
-		CALL libgreprops.fgl_report_configurePageSize("a4length", "a4width") -- Landscape
-	ELSE
-		CALL libgreprops.fgl_report_configurePageSize("a4width", "a4length") -- Portrait
+	IF this.pageWidth IS NOT NULL AND this.pageWidth > 0 THEN
+		IF this.pageWidth > 80 THEN
+			CALL libgreprops.fgl_report_configurePageSize("a4length", "a4width") -- Landscape
+		ELSE
+			CALL libgreprops.fgl_report_configurePageSize("a4width", "a4length") -- Portrait
+		END IF
 	END IF
 
 	IF this.device = "PDF" AND this.rptName IS NULL THEN

@@ -20,8 +20,9 @@ PUBLIC TYPE appInfo RECORD
 		cli_osver,
 		cli_res,
 		cli_dir,
-		cli_un
-			STRING
+		cli_un STRING,
+		scr_h INTEGER,
+		scr_w INTEGER
 END RECORD
 
 FUNCTION (this appInfo)
@@ -42,6 +43,7 @@ FUNCTION (this appInfo) appInfo(l_appName STRING, l_appBuild STRING) RETURNS()
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) getClientInfo() RETURNS()
+	DEFINE x SMALLINT
 	LET this.fe_typ = UPSHIFT(ui.interface.getFrontEndName())
 	LET this.fe_ver = ui.interface.getFrontEndVersion()
 	LET this.uni_typ = ui.interface.getUniversalClientName()
@@ -50,6 +52,11 @@ FUNCTION (this appInfo) getClientInfo() RETURNS()
 	CALL ui.interface.frontcall("standard", "feinfo", ["osversion"], [this.cli_osver])
 	CALL ui.interface.frontCall("standard", "feinfo", ["screenresolution"], [this.cli_res])
 	CALL ui.interface.frontCall("standard", "feinfo", ["fepath"], [this.cli_dir])
+	LET x = this.cli_res.getIndexOf("x",1)
+	IF x > 1 THEN
+		LET this.scr_w = this.cli_res.subString(1,x-1)
+		LET this.scr_h = this.cli_res.subString(x+1, this.cli_res.getLength())
+	END IF
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) setUserName(l_user STRING) RETURNS()
