@@ -33,6 +33,7 @@ FUNCTION (this greRpt)
 
 	IF l_device IS NULL OR l_device = "ASK" THEN
 		IF NOT this.getOutput() THEN
+			DISPLAY "g2_grw: getOutput returned false"
 			RETURN FALSE
 		END IF
 	ELSE
@@ -52,12 +53,13 @@ FUNCTION (this greRpt)
 	IF l_start THEN
 		RETURN this.start()
 	ELSE
-		RETURN FALSE
+		DISPLAY "g2_grw: l_start NOT true!"
+		RETURN TRUE
 	END IF
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this greRpt) start() RETURNS BOOLEAN
-	DISPLAY SFMT("GREOUTPUTDIR: %1 GRESERVER: %2 GRESRVPORT: %3",
+	DISPLAY SFMT("g2_grw: GREOUTPUTDIR: %1 GRESERVER: %2 GRESRVPORT: %3",
 			this.greOutputDir, this.greServer, this.greServerPort)
 
 	IF this.preview IS NULL THEN
@@ -88,7 +90,7 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		ERROR SFMT("%1:%2", this.status, this.error)
 		RETURN FALSE
 	END IF
-	DISPLAY SFMT("Rpt: %1 Preview: %2 Device: %3 RptDir: %4 Width: %5",
+	DISPLAY SFMT("g2_grw: Rpt: %1 Preview: %2 Device: %3 RptDir: %4 Width: %5",
 			this.rptName,
 			IIF(this.preview, "True", "FALSE"),
 			this.device,
@@ -116,16 +118,17 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		CALL libgreprops.fgl_report_setPrinterName(this.fileName)
 	ELSE
 		IF this.fileName IS NOT NULL THEN
+			DISPLAY SFMT("g2_grw: fgl_report_setOutputFileName = %1",this.fileName)
 			CALL libgreprops.fgl_report_setOutputFileName(this.fileName)
 		END IF
 	END IF
 
 	IF this.greDistributed THEN
-		DISPLAY SFMT("Using distributed mode: %1 %2", this.greServer, this.greServerPort)
+		DISPLAY SFMT("g2_grw: Using distributed mode: %1 %2", this.greServer, this.greServerPort)
 		CALL fgl_report_configureDistributedProcessing(this.greServer, this.greServerPort)
 		CALL fgl_report_configureDistributedEnvironment(NULL, NULL, NULL, NULL)
 	ELSE
-		DISPLAY "Not using distributed mode."
+		DISPLAY "g2_grw: Not using distributed mode."
 	END IF
 
 	-- Set the SAX handler
@@ -225,18 +228,22 @@ END FUNCTION
 -------------------------------------------------------------------------------
 FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 	DEFINE l_dest CHAR(1)
+	DEFINE l_fileName STRING
 	LET int_flag = FALSE
 	MENU "Report Destination"
 			ATTRIBUTES(STYLE = "dialog", COMMENT = "Output report to ...", IMAGE = "question")
 		COMMAND "File XML"
 			LET l_dest = "F"
 			LET this.device = "XML"
+			LET this.preview = FALSE
 		COMMAND "File PDF"
 			LET l_dest = "F"
 			LET this.device = "PDF"
+			LET this.preview = FALSE
 		COMMAND "File XLSX"
 			LET l_dest = "F"
 			LET this.device = "XLSX"
+			LET this.preview = FALSE
 		COMMAND "Screen"
 			LET l_dest = "S"
 			IF ui.Interface.getFrontEndName() = "GDC" THEN
@@ -245,18 +252,22 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 				LET this.device = "Browser"
 			END IF
 			LET this.preview = TRUE
+			LET this.fileName = ""
 		COMMAND "PDF"
 			LET l_dest = "D"
 			LET this.device = "PDF"
 			LET this.preview = TRUE
+			LET this.fileName = ""
 		COMMAND "XLS"
 			LET l_dest = "D"
 			LET this.device = "XLS"
 			LET this.preview = TRUE
+			LET this.fileName = ""
 		COMMAND "XLSX"
 			LET l_dest = "D"
 			LET this.device = "XLSX"
 			LET this.preview = TRUE
+			LET this.fileName = ""
 		COMMAND "Printer"
 			LET l_dest = "P"
 			LET this.device = "Printer"
@@ -266,9 +277,14 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		RETURN FALSE
 	END IF
 	IF l_dest = "F" THEN
-		PROMPT "Enter filename:" FOR this.fileName
 		IF this.fileName IS NULL THEN
-			LET this.fileName = base.Application.getProgramName()
+			PROMPT "Enter filename:" FOR l_fileName
+			IF l_fileName IS NULL THEN
+				LET this.fileName = base.Application.getProgramName()
+			END IF
+		ELSE
+			PROMPT SFMT("Enter filename ( %1 ):",this.fileName) FOR l_fileName
+			IF l_fileName IS NOT NULL THEN LET this.fileName = l_fileName END IF
 		END IF
 		IF this.fileName.getIndexOf(".", 1) < 1 THEN
 			LET this.fileName = this.fileName.append("." || this.device.toLowerCase())
@@ -278,5 +294,6 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
 		RETURN FALSE
 	END IF
+	DISPLAY SFMT("g2_grw: Filename: %1", this.fileName)
 	RETURN TRUE
 END FUNCTION
