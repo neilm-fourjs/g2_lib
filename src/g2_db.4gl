@@ -477,7 +477,7 @@ FUNCTION g2_genInsert(tab STRING, rec_n om.domNode, fixQuote BOOLEAN) RETURNS ST
 	DEFINE l_stmt, val STRING
 	DEFINE x, len SMALLINT
 	DEFINE typ, comma CHAR(1)
-
+--TODO: Check for duplicate
 	LET l_stmt = "INSERT INTO " || tab || " VALUES("
 	LET nl = rec_n.selectByTagName("Field")
 	LET comma = " "

@@ -387,8 +387,8 @@ FUNCTION g2_chkClientVer(l_cli STRING, l_ver STRING, l_feature STRING) RETURNS B
 		-- client matched by version is too old
 		CALL g2_winMessage(
 				"Error",
-				SFMT("Your Client version doesn't support feature '%1'!\nNeed min version of %2",
-						l_feature, l_ver),
+				SFMT("Your Client '%1' version doesn't support feature '%2'!\nNeed min version of %3", 
+						l_cli, l_feature, l_ver),
 				"exclamation")
 		RETURN FALSE
 	END IF
