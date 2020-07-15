@@ -12,6 +12,7 @@
 IMPORT os
 IMPORT util
 IMPORT FGL g2_logging
+IMPORT FGL g2_appInfo
 &include "g2_debug.inc"
 
 PUBLIC DEFINE g2_log g2_logging.logger
@@ -20,7 +21,7 @@ PUBLIC DEFINE m_mdi CHAR(1)
 PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
 PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
 PUBLIC DEFINE m_isWS BOOLEAN = FALSE
-
+PUBLIC DEFINE m_appInfo appInfo
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	DEFINE l_gbc, l_fe STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
@@ -51,7 +52,9 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	IF l_gbc != "GBC" THEN
 		LET m_isUniversal = FALSE
 	END IF
-
+	IF m_appInfo.progDesc IS NOT NULL THEN
+		CALL ui.Interface.setText(m_appInfo.progDesc)
+	END IF
 	CALL g2_loadStyles(l_cfgname)
 	CALL g2_loadToolBar(l_cfgname)
 	CALL g2_loadActions(l_cfgname)
@@ -147,12 +150,26 @@ END FUNCTION
 --------------------------------------------------------------------------------
 #+ Load the ToolBar file depending on the client
 FUNCTION g2_loadToolBar(l_tbName STRING) RETURNS()
+	DEFINE l_f ui.Form
 	IF l_tbName IS NULL THEN LET l_tbName = "default" END IF
 	TRY
-		CALL ui.Interface.loadToolBar(l_tbName)
+		LET l_f = ui.Window.getCurrent().getForm()
 	CATCH
-		LET l_tbName = l_tbName.append(" FAILED!")
+		DISPLAY "Failed to get form!"
 	END TRY
+	IF l_f IS NOT NULL THEN
+		TRY
+			CALL l_f.loadToolBar(l_tbName)
+		CATCH
+			LET l_tbName = l_tbName.append(" FAILED!")
+		END TRY
+	ELSE
+		TRY
+			CALL ui.Interface.loadToolBar(l_tbName)
+		CATCH
+			LET l_tbName = l_tbName.append(" FAILED!")
+		END TRY
+	END IF
 	GL_DBGMSG(0, SFMT("g2_loadToolBar: file=%1 ", l_tbName))
 END FUNCTION
 --------------------------------------------------------------------------------
