@@ -1,33 +1,29 @@
 
-.SUFFIXES: .4gl .42m .per .42f .42r .str .42s .java .class
-
-.4gl.42m:
-	$(FGLCOMP) -c -o $(BIN) $^
-
-.per.42f:
-	$(FGLFORM) -M $^ && mv $(lib_dir)/src/*.42f $(BIN)
+#.SUFFIXES: .4gl .42m .per .42f .42r .str .42s .java .class
 
 FGLCOMP = fglcomp -Dgenero$(GENVER) $(PPARG) --resolve-calls 
 FGLLINK = fgl2p $(PPARG)
 FGLFORM = fglform
 
-export FGLSOURCEPATH=$(lib_dir):$(prg1_dir)
-export FGLLDPATH=$(BIN):$(BIN)/$(lib_dir):$(GREDIR)/lib
+VPATH = $(SRC)
 
-lib_srcs = $(addprefix $(lib_dir)/, $(lib_src))
-lib_obj = $(patsubst %.4gl, %.42m, $(lib_src))
-lib_objs = $(addprefix $(BIN)/$(lib_dir)/, $(lib_obj))
-lib_pers = $(addprefix $(lib_dir)/, $(lib_per))
-lib_frm = $(patsubst %.per, %.42f, $(lib_per))
+export FGLSOURCEPATH=$(SRC)
+export FGLLDPATH=$(BIN):$(GREDIR)/lib
+
+lib_srcs = $(notdir $(lib_src))
+lib_obj = $(patsubst %.4gl, %.42m, $(lib_srcs))
+lib_objs = $(addprefix $(BIN)/, $(lib_obj))
+lib_pers = $(notdir $(lib_per))
+lib_frm = $(patsubst %.per, %.42f, $(lib_pers))
 lib_frms = $(addprefix $(BIN)/, $(lib_frm))
 
-all: $(lib_obj) $(lib_frm)
+all: $(lib_objs) $(lib_frms)
 
-$(lib_objs)/%.42m : %.4gl
-#	$(FGLCOMP) -c -o $(BIN) $<
+$(BIN)/%.42m: $(SRC)/%.4gl
+	$(FGLCOMP) -c -o $(BIN) $<
 
-$(lib_frms)/%.42f : %.per
-#	$(FGLFORM) -M $^ && mv $(prg1_dir)/*.42f $(BIN)
+$(BIN)/%.42f: $(SRC)/%.per
+	$(FGLFORM) -M $< && mv $(SRC)/*.42f $(BIN)
 
 clean:
 	find $(BIN) -name \*.42? -delete
@@ -35,7 +31,15 @@ clean:
 	find . -name \*.err -delete
 
 debug: 
-	@echo lib_dir=$(lib_dir)
+	@echo SRC=$(SRC)
+	@echo
 	@echo lib_src=$(lib_src)
+	@echo
+	@echo lib_srcs=$(lib_srcs)
+	@echo
+	@echo lib_obj=$(lib_obj)
+	@echo
+	@echo lib_objs=$(lib_objs)
+	@echo
 	@echo lib_per=$(lib_per)
 

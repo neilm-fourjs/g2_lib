@@ -1,8 +1,8 @@
 
 export GENVER=400
-export BIN=../njm_app_bin
 
-lib_dir = .
+BIN = ../njm_app_bin
+SRC = ./src
 lib_src = $(wildcard src/*.4gl)
 lib_per = $(wildcard src/*.per)
 
