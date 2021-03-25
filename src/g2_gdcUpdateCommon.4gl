@@ -1,7 +1,7 @@
 # Library functions for GDC Auto Update.
 IMPORT os
 
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD
@@ -74,14 +74,14 @@ FUNCTION g2_chkIfUpdate(l_curGDC STRING, l_newGDC STRING) RETURNS BOOLEAN
 	DEFINE l_cur_maj, l_new_maj DECIMAL(4, 2)
 	DEFINE l_cur_min, l_new_min SMALLINT
 
-	CALL g2_getVer(l_curGDC) RETURNING l_cur_maj, l_cur_min
+	CALL g2_core.g2_getVer(l_curGDC) RETURNING l_cur_maj, l_cur_min
 	IF l_cur_maj = 0 THEN
 		CALL g2_setReply(
 				211, % "ERR", SFMT(% "Current GDC Version is not correct format '%1'!", l_curGDC))
 		RETURN FALSE
 	END IF
 
-	CALL g2_getVer(l_newGDC) RETURNING l_new_maj, l_new_min
+	CALL g2_core.g2_getVer(l_newGDC) RETURNING l_new_maj, l_new_min
 	IF l_new_maj = 0 THEN
 		CALL g2_setReply(212, % "ERR", SFMT(% "New GDC Version is not correct format '%1'!", l_newGDC))
 		RETURN FALSE
