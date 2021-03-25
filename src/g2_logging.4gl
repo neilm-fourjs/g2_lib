@@ -12,6 +12,7 @@
 #+ Non GUI functions only
 
 IMPORT os
+IMPORT FGL g2_core
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 
@@ -84,20 +85,20 @@ FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 
 	IF NOT os.path.exists(this.dirName) THEN
 		IF NOT os.path.mkdir(this.dirName) THEN
-			CALL g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
-			CALL g2_exitProgram(200, "log dir issues")
+			CALL g2_core.g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
+			CALL g2_core.g2_exitProgram(200, "log dir issues")
 		ELSE
 			IF os.path.pathSeparator() = ":" THEN -- Linux/Unix/Mac/Android - ie not MSDOS!
 				IF NOT os.path.chrwx(this.dirName, ((7 * 64) + (7 * 8) + 5)) THEN
-					CALL g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
-					CALL g2_exitProgram(201, "log permissions")
+					CALL g2_core.g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
+					CALL g2_core.g2_exitProgram(201, "log permissions")
 				END IF
 			END IF
 		END IF
 	END IF
 	IF NOT os.path.isDirectory(this.dirName) THEN
-		CALL g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
-		CALL g2_exitProgram(202, "logdir not a dir")
+		CALL g2_core.g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
+		CALL g2_core.g2_exitProgram(202, "logdir not a dir")
 	END IF
 
 -- Make sure the logdir ends with a slash.
