@@ -67,25 +67,25 @@
   </Settings>
   <LanguageList version="1.0"/>
   <PlatformList version="1.0"/>
-  <Group id="75644415" label="g2_lib" language="Genero" targetDirectory="$(ProjectDir)/../njm_app_bin">
+  <Group id="75644415" label="g2_lib" language="Genero (no link)" targetDirectory="$(ProjectDir)/../njm_app_bin">
     <Library binaryName="g2_gdcUpdate" dependencies="14000" id="-524380304" label="g2_gdcUpdate">
-      <File filePath="src/g2_gdcUpdateCommon.4gl"/>
-      <File filePath="src/g2_gdcUpdate.4gl"/>
+      <File filePath="g2_gdcUpdateCommon.4gl"/>
+      <File filePath="g2_gdcUpdate.4gl"/>
     </Library>
     <Library binaryName="g2_grw" dependencies="14000" externalDependencies="libgre.42x" id="-2003847556" label="g2_grw">
-      <File filePath="src/g2_grw.4gl"/>
-      <File filePath="src/gl_grwCfg.per"/>
+      <File filePath="g2_grw.4gl"/>
+      <File filePath="gl_grwCfg.per"/>
     </Library>
-    <Library binaryName="g2_lib" dependencies="1986" id="14000" label="g2_lib">
+    <Library binaryName="g2_lib" dependencies="1986" id="14000" label="g2_lib" targetDirectory="$(ProjectDir)/../njm_app_bin">
       <File filePath="g2_debug.4gl"/>
       <File filePath="g2_debug.inc"/>
       <File filePath="g2_logging.4gl"/>
-      <File filePath="g2_core.4gl"/>
       <File filePath="g2_aui.4gl"/>
       <File filePath="g2_db.4gl"/>
       <File filePath="g2_appInfo.4gl"/>
       <File filePath="g2_about.4gl"/>
       <File filePath="g2_calendar.4gl"/>
+      <File filePath="g2_core.4gl"/>
       <File filePath="g2_sql.4gl"/>
       <File filePath="g2_ui.4gl"/>
       <File filePath="g2_lookup.4gl"/>

@@ -1,5 +1,5 @@
 IMPORT util
-IMPORT FGL g2_ws
+IMPORT FGL g2_lib.*
 IMPORT FGL lib_expect
 
 TYPE t_rec  RECORD
