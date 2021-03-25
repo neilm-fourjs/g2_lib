@@ -3,7 +3,7 @@
 IMPORT xml
 IMPORT security
 
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,
@@ -137,6 +137,6 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	LET this.errorMessage = l_msg
-	CALL g2_lib.g2_log.logIt(l_msg)
+	CALL g2_core.g2_log.logIt(l_msg)
 END FUNCTION
 --------------------------------------------------------------------------------

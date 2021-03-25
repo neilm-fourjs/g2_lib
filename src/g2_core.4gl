@@ -28,18 +28,18 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
 	CALL STARTLOG(g2_err.fullLogPath)
 	LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
-	GL_DBGMSG(0, SFMT("g2_lib: Program: %1 pwd: %2", base.application.getProgramName(), os.path.pwd() ))
-	GL_DBGMSG(1, SFMT("g2_lib: debug level = %1", gl_dbgLev))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLDIR=%1", fgl_getEnv("FGLDIR")))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
+	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.application.getProgramName(), os.path.pwd() ))
+	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
+	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getEnv("FGLDIR")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
 
 	WHENEVER ANY ERROR CALL g2_error
 
 -- Try and figure out what the client is capable of GDC(Native/UR) / GBC
 	LET l_gbc = ui.Interface.getUniversalClientName()
 	LET l_fe = ui.Interface.getFrontEndName()
-	GL_DBGMSG(1, SFMT("g2_lib: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
+	GL_DBGMSG(1, SFMT("g2_core: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
 	IF l_gbc.getLength() < 3 THEN
 		LET l_gbc = "?"
 	END IF

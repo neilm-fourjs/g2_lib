@@ -1,5 +1,5 @@
 IMPORT os
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 
 -- From $GREDIR/lib
 IMPORT FGL libgreprops
@@ -78,12 +78,12 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		LET this.rptName = os.path.join(this.reportsDir, this.rptName.append(".4rp"))
 	END IF
 	IF NOT os.path.exists(this.rptName) THEN
-		CALL g2_lib.g2_winMessage(
+		CALL g2_core.g2_winMessage(
 				"Error", SFMT("Report Design '%1' not found!", this.rptName), "exclamation")
 		RETURN FALSE
 	END IF
 	IF NOT libgre.fgl_report_loadCurrentSettings(this.rptName) THEN
-		CALL g2_lib.g2_winMessage("Error", "Report initialize failed!", "exclamation")
+		CALL g2_core.g2_winMessage("Error", "Report initialize failed!", "exclamation")
 		RETURN FALSE
 	END IF
 	IF NOT this.allOkay("load") THEN
@@ -273,7 +273,7 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 			LET this.device = "Printer"
 	END MENU
 	IF int_flag THEN
-		CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
+		CALL g2_core.g2_winMessage("Cancelled", "Report cancelled", "information")
 		RETURN FALSE
 	END IF
 	IF l_dest = "F" THEN
@@ -291,7 +291,7 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		END IF
 	END IF
 	IF int_flag THEN
-		CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
+		CALL g2_core.g2_winMessage("Cancelled", "Report cancelled", "information")
 		RETURN FALSE
 	END IF
 	DISPLAY SFMT("g2_grw: Filename: %1", this.fileName)

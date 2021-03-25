@@ -13,7 +13,7 @@
 
 IMPORT os
 IMPORT util
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN
@@ -32,7 +32,7 @@ FUNCTION g2_getWinNode(l_nam STRING) RETURNS om.DomNode
 		LET l_win = ui.Window.forName(l_nam)
 	END IF
 	IF l_win IS NULL THEN
-		CALL g2_lib.g2_errMsg(__FILE__, __LINE__, SFMT(% "lib.getwinnode.error", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(% "lib.getwinnode.error", l_nam))
 		RETURN l_ret -- l_ret is null here
 	ELSE
 		LET l_ret = l_win.getNode()
@@ -98,14 +98,14 @@ FUNCTION g2_genForm(l_nam STRING) RETURNS om.DomNode
 
 	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN
-		CALL g2_lib.g2_errMsg(
+		CALL g2_core.g2_errMsg(
 				__FILE__, __LINE__, SFMT(% "genForm: failed to get Window '%1'", "CURRENT"))
 		RETURN l_n
 	END IF
 
 	LET l_frm = l_win.createForm(l_nam)
 	IF l_frm IS NULL THEN
-		CALL g2_lib.g2_errMsg(__FILE__, __LINE__, SFMT(% "genForm: createForm('%1') failed !!", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(% "genForm: createForm('%1') failed !!", l_nam))
 		RETURN l_n
 	END IF
 	LET l_n = l_frm.getNode()

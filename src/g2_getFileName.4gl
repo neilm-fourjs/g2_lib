@@ -1,5 +1,5 @@
 IMPORT os
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 IMPORT FGL g2_simpleLookup
 --------------------------------------------------------------------------------------------------------------
 -- Do a simple list of files and return selected name
@@ -25,7 +25,7 @@ FUNCTION g2_getFileName(l_folder STRING, l_ext STRING, l_titl STRING, l_head STR
 		END WHILE
 	END IF
 	IF sl.arr.getLength() = 0 THEN
-		CALL g2_lib.g2_winMessage("Error",SFMT("No '%1' files found in %2",l_ext,l_folder),"exclamation")
+		CALL g2_core.g2_winMessage("Error",SFMT("No '%1' files found in %2",l_ext,l_folder),"exclamation")
 		RETURN NULL
 	END IF
 	LET sl.title = l_titl

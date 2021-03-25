@@ -3,7 +3,7 @@ IMPORT os
 IMPORT com
 IMPORT util
 
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 IMPORT FGL g2_aui
 IMPORT FGL g2_gdcUpdateCommon
 &include "g2_debug.inc"
@@ -36,7 +36,7 @@ FUNCTION g2_gdcUpate() RETURNS()
 	LET l_curGDC = ui.Interface.getFrontEndVersion()
 	LET x = l_curGDC.getIndexOf("-", 1)
 	IF x < 5 THEN
-		CALL g2_lib.g2_winMessage("Error", SFMT(% "Invalid GDC Version error '%1'!", l_curGDC), "exclamation")
+		CALL g2_core.g2_winMessage("Error", SFMT(% "Invalid GDC Version error '%1'!", l_curGDC), "exclamation")
 		RETURN
 	END IF
 	LET l_curGDC = l_curGDC.subString(1, x - 1)
@@ -68,7 +68,7 @@ FUNCTION g2_gdcUpate() RETURNS()
 	END IF
 
 -- We have a new GDC Update ! confirm with user
-	IF g2_lib.g2_winQuestion(
+	IF g2_core.g2_winQuestion(
 							"GDC Update", SFMT(% "%1\nUpdate Now?", g2_gdcUpdateCommon.m_ret.reply), "Yes", "Yes|No",
 							"question")
 					= "No"
@@ -138,7 +138,7 @@ END FUNCTION
 -- Do the web service REST call to check for a new GDC
 PRIVATE FUNCTION abortGDCUpdate(l_msg STRING) RETURNS()
 	CALL g2_aui.g2_notify("")
-	CALL g2_lib.g2_winMessage(% "Error", l_msg, "exclamation")
+	CALL g2_core.g2_winMessage(% "Error", l_msg, "exclamation")
 END FUNCTION
 --------------------------------------------------------------------------------
 -- Do the web service REST call to check for a new GDC

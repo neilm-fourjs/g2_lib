@@ -1,7 +1,7 @@
 # Library functions for Database Connection / Actions.
 IMPORT os
 IMPORT util
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 &include "g2_debug.inc"
 
 # Informix
@@ -112,7 +112,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			WHEN "sqt"
 				IF NOT os.path.EXISTS(this.dir) THEN
 					IF NOT os.path.mkdir(this.dir) THEN
-						CALL g2_lib.g2_winMessage(
+						CALL g2_core.g2_winMessage(
 								"Error",
 								SFMT("Failed to create dbdir '%1' !\n%2", this.dir, ERR_GET(STATUS)),
 								"exclamation")
@@ -123,7 +123,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					LET this.source = this.dir || "/" || this.name || ".db"
 				END IF
 				IF NOT os.path.EXISTS(this.source) THEN
-					CALL g2_lib.g2_winMessage(
+					CALL g2_core.g2_winMessage(
 							"Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
 				ELSE
 					DISPLAY "Database file exists:", this.source
@@ -191,8 +191,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			RUN "echo $LD_LIBRARY_PATH;ldd $FGLDIR/dbdrivers/" || this.driver || ".so"
 		END IF
 		IF l_msg IS NOT NULL THEN
-			CALL g2_lib.g2_errPopup(SFMT(% "Fatal Error %1", l_msg))
-			CALL g2_lib.g2_exitProgram(1, l_msg)
+			CALL g2_core.g2_errPopup(SFMT(% "Fatal Error %1", l_msg))
+			CALL g2_core.g2_exitProgram(1, l_msg)
 		END IF
 	END IF
 
@@ -222,7 +222,7 @@ FUNCTION (this dbInfo) g2_sqt_createdb(l_dir STRING, l_file STRING) RETURNS()
 	LET c = base.Channel.create()
 	IF NOT os.path.exists(l_dir) THEN
 		IF NOT os.path.mkdir(l_dir) THEN
-			CALL g2_lib.g2_exitProgram(STATUS, SFMT("DB Folder Creation Failed for: %1", l_dir))
+			CALL g2_core.g2_exitProgram(STATUS, SFMT("DB Folder Creation Failed for: %1", l_dir))
 		END IF
 	END IF
 	CALL c.openFile(l_file, "w")
@@ -240,7 +240,7 @@ FUNCTION (this dbInfo) g2_mdb_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-			CALL g2_lib.g2_exitProgram(STATUS, "DB Creation Failed!")
+			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid in
@@ -254,7 +254,7 @@ FUNCTION (this dbInfo) g2_ifx_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-			CALL g2_lib.g2_exitProgram(STATUS, "DB Creation Failed!")
+			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid infintate loop!
@@ -382,7 +382,7 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 		PREPARE pre_chk FROM l_stmt
 		EXECUTE pre_chk INTO l_cnt
 	CATCH
-		CALL g2_lib.g2_winMessage("SQL Error", SFMT("%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+		CALL g2_core.g2_winMessage("SQL Error", SFMT("%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
 		LET l_where = NULL
 	END TRY
 	IF l_cnt = 0 THEN
@@ -434,7 +434,7 @@ FUNCTION g2_sqlStatus(l_line INT, l_mod STRING, l_stmt STRING) RETURNS BOOLEAN
 		RETURN TRUE
 	END IF
 	IF l_stmt IS NULL THEN
-		CALL g2_lib.g2_errPopup(
+		CALL g2_core.g2_errPopup(
 				% "Status:"
 						|| l_stat
 						|| "\nSqlState:"
@@ -444,7 +444,7 @@ FUNCTION g2_sqlStatus(l_line INT, l_mod STRING, l_stmt STRING) RETURNS BOOLEAN
 						|| "\n"
 						|| l_mod)
 	ELSE
-		CALL g2_lib.g2_errPopup(
+		CALL g2_core.g2_errPopup(
 				l_stmt
 						|| "\nStatus:"
 						|| l_stat
@@ -671,7 +671,7 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	DISPLAY "Key='", l_key, "'"
 
 	IF l_key IS NULL OR l_key = " " OR l_key.getLength() < 1 THEN
-		CALL g2_lib.g2_warnPopup(% "You entered a NULL Key value!")
+		CALL g2_core.g2_warnPopup(% "You entered a NULL Key value!")
 		RETURN FALSE
 	END IF
 
@@ -686,12 +686,12 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	CLOSE g2_db_checkrec_cur
 	IF NOT l_exists THEN
 		IF l_ex THEN
-			CALL g2_lib.g2_warnPopup(% "Record '" || l_key || "' doesn't Exist!")
+			CALL g2_core.g2_warnPopup(% "Record '" || l_key || "' doesn't Exist!")
 			RETURN FALSE
 		END IF
 	ELSE
 		IF NOT l_ex THEN
-			CALL g2_lib.g2_warnPopup(% "Record '" || l_key || "' already Exists!")
+			CALL g2_core.g2_warnPopup(% "Record '" || l_key || "' already Exists!")
 			RETURN FALSE
 		END IF
 	END IF
