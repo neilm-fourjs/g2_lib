@@ -1,5 +1,20 @@
-# Simple class to handle Application information.
-IMPORT FGL g2_core
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+
+#+ Simple class to handle Application information.
+#+
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
+
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 
 PUBLIC TYPE appInfo RECORD
 		appName,

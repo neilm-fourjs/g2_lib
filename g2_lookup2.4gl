@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 >
+#+ Genero 4.00 >
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -31,9 +31,9 @@
 --	DISPLAY "Selected value:", l_lookup.g2_lookup2()
 --
 
-IMPORT FGL g2_core
-IMPORT FGL g2_aui
-IMPORT FGL g2_db
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 PUBLIC TYPE lookup RECORD

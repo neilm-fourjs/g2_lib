@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero AUI Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -10,10 +10,10 @@
 #+ No includes required.
 #+
 #+ Non GUI functions only
-
+PACKAGE g2_lib
 IMPORT os
 IMPORT util
-IMPORT FGL g2_core
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN

@@ -2,9 +2,10 @@
 export GENVER=400
 
 BIN = ../njm_app_bin
-SRC = ./src
-lib_src = $(wildcard src/*.4gl)
-lib_per = $(wildcard src/*.per)
+SRC = .
+lib = g2_lib
+lib_src = $(wildcard *.4gl)
+lib_per = $(wildcard *.per)
 
 include ./Make_g4.inc
 

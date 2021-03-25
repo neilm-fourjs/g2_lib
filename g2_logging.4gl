@@ -1,18 +1,17 @@
 --------------------------------------------------------------------------------
 #+ Genero Logging Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 #+
-#+ No includes required.
-#+
 #+ Non GUI functions only
+PACKAGE g2_lib
 
 IMPORT os
-IMPORT FGL g2_core
+IMPORT FGL g2_lib.*
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 

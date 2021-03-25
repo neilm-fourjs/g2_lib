@@ -5,24 +5,24 @@ FGLCOMP = fglcomp -Dgenero$(GENVER) $(PPARG) --resolve-calls
 FGLLINK = fgl2p $(PPARG)
 FGLFORM = fglform
 
-VPATH = $(SRC)
+#VPATH = $(SRC)
 
 export FGLSOURCEPATH=$(SRC)
 export FGLLDPATH=$(BIN):$(GREDIR)/lib
 
 lib_srcs = $(notdir $(lib_src))
 lib_obj = $(patsubst %.4gl, %.42m, $(lib_srcs))
-lib_objs = $(addprefix $(BIN)/, $(lib_obj))
+lib_objs = $(addprefix $(BIN)/$(lib)/, $(lib_obj))
 lib_pers = $(notdir $(lib_per))
 lib_frm = $(patsubst %.per, %.42f, $(lib_pers))
 lib_frms = $(addprefix $(BIN)/, $(lib_frm))
 
 all: $(lib_objs) $(lib_frms)
 
-$(BIN)/%.42m: $(SRC)/%.4gl
+$(BIN)/$(lib)/%.42m: %.4gl
 	$(FGLCOMP) -c -o $(BIN) $<
 
-$(BIN)/%.42f: $(SRC)/%.per
+$(BIN)/%.42f: %.per
 	$(FGLFORM) -M $< && mv $(SRC)/*.42f $(BIN)
 
 clean:

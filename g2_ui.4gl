@@ -1,4 +1,15 @@
-IMPORT FGL g2_sql
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 
 PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
