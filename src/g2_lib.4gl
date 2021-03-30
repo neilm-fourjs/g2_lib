@@ -155,7 +155,7 @@ FUNCTION g2_loadToolBar(l_tbName STRING) RETURNS()
 	TRY
 		LET l_f = ui.Window.getCurrent().getForm()
 	CATCH
-		DISPLAY "Failed to get form!"
+		GL_DBGMSG(1, "g2_loadToolBar: Failed to get form object!")
 	END TRY
 	IF l_f IS NOT NULL THEN
 		TRY

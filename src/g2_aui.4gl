@@ -256,6 +256,8 @@ FUNCTION g2_showEnv() RETURNS()
 		nam STRING,
 		val STRING
 	END RECORD
+	DEFINE l_envlistFile, l_line STRING
+	DEFINE c base.Channel
 --TODO: maybe read list of environment variables from a file?
 	LET env[env.getLength() + 1].nam = "FGLDIR"
 	LET env[env.getLength() + 1].nam = "FGLASDIR"
@@ -266,6 +268,9 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGLPROFILE"
 	LET env[env.getLength() + 1].nam = "FGLRUN"
 	LET env[env.getLength() + 1].nam = "GREDIR"
+	LET env[env.getLength() + 1].nam = "GRESERVER"
+	LET env[env.getLength() + 1].nam = "GRESRVPORT"
+	LET env[env.getLength() + 1].nam = "GREOUTPUTDIR"
 
 	LET env[env.getLength() + 1].nam = "FGLDBPATH"
 	LET env[env.getLength() + 1].nam = "FGLSQLDEBUG"
@@ -326,6 +331,25 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_HTTP_USER_AGENT"
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_REMOTE_ADDR"
 
+	LET l_envlistFile = os.path.join("..","etc")
+	LET l_envlistFile = os.path.join(l_envlistFile, "showenv.cfg")
+	IF os.path.exists( l_envlistFile ) THEN
+		LET c = base.Channel.create()
+		TRY
+			CALL c.openFile(l_envlistFile, "r")
+			WHILE NOT c.isEof()
+				LET l_line = c.readLine().trim()
+				LET x = l_line.getIndexOf(" ",x)
+				IF x > 1 THEN LET l_line = l_line.subString(1,x) END IF
+				IF l_line IS NOT NULL AND l_line.getCharAt(1) != "#"  THEN
+					LET env[env.getLength() + 1].nam = l_line
+				END IF
+			END WHILE
+			CALL c.close()
+		CATCH
+		END TRY
+	END IF
+
 	FOR x = 1 TO env.getLength()
 		LET env[x].val = fgl_getenv(env[x].nam)
 		IF env[x].nam.getLength() > txt_w THEN
@@ -357,6 +381,10 @@ FUNCTION g2_showEnv() RETURNS()
 	LET w = tabc.createChild('Edit')
 	CALL w.setAttribute("width", val_w)
 	DISPLAY ARRAY env TO showenv.* ATTRIBUTE(COUNT = env.getLength())
+		ON ACTION dumpenv
+			RUN "env | sort > env.txt"
+			CALL fgl_putFile("env.txt","env.txt")
+	END DISPLAY
 	CLOSE WINDOW showEnv
 END FUNCTION
 --------------------------------------------------------------------------------

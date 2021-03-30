@@ -109,6 +109,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				DISPLAY "INFORMIXSQLHOSTS:", fgl_getEnv("INFORMIXSQLHOSTS")
 			WHEN "mdb"
 				LET l_lockMode = FALSE
+			WHEN "mys"
+				LET l_lockMode = FALSE
 			WHEN "sqt"
 				IF NOT os.path.EXISTS(this.dir) THEN
 					IF NOT os.path.mkdir(this.dir) THEN
