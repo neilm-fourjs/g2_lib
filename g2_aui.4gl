@@ -32,7 +32,7 @@ FUNCTION g2_getWinNode(l_nam STRING) RETURNS om.DomNode
 		LET l_win = ui.Window.forName(l_nam)
 	END IF
 	IF l_win IS NULL THEN
-		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(% "lib.getwinnode.error", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"lib.getwinnode.error", l_nam))
 		RETURN l_ret -- l_ret is null here
 	ELSE
 		LET l_ret = l_win.getNode()
@@ -98,14 +98,13 @@ FUNCTION g2_genForm(l_nam STRING) RETURNS om.DomNode
 
 	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN
-		CALL g2_core.g2_errMsg(
-				__FILE__, __LINE__, SFMT(% "genForm: failed to get Window '%1'", "CURRENT"))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"genForm: failed to get Window '%1'", "CURRENT"))
 		RETURN l_n
 	END IF
 
 	LET l_frm = l_win.createForm(l_nam)
 	IF l_frm IS NULL THEN
-		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(% "genForm: createForm('%1') failed !!", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"genForm: createForm('%1') failed !!", l_nam))
 		RETURN l_n
 	END IF
 	LET l_n = l_frm.getNode()
@@ -143,7 +142,7 @@ END FUNCTION
 #+ Show the Genero & GRE license
 #+
 FUNCTION g2_showLicence() RETURNS()
-	DEFINE licstring STRING
+	DEFINE licString STRING
 	DEFINE winnode, frm, g, frmf, txte om.DomNode
 	DEFINE c base.Channel
 
@@ -172,19 +171,19 @@ FUNCTION g2_showLicence() RETURNS()
 	DISPLAY "Status:", STATUS
 	LET licString = "fglWrt -a info:\n"
 	WHILE NOT c.isEof()
-		LET licstring = licstring.append(c.readLine() || "\n")
+		LET licString = licString.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
 
 	CALL c.openPipe("greWrt -a info 2>&1", "r")
 	LET licString = licString.append("\n\ngreWrt -a info:\n")
 	WHILE NOT c.isEof()
-		LET licstring = licstring.append(c.readLine() || "\n")
+		LET licString = licString.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
 
-	DISPLAY "Lic:", licstring.trim()
-	DISPLAY BY NAME licstring
+	DISPLAY "Lic:", licString.trim()
+	DISPLAY BY NAME licString
 
 	MENU
 		COMMAND "close"
@@ -212,8 +211,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	TRY
 		CALL c.openFile(txt, "r")
 	CATCH
-		CALL g2_winMessage(
-				"ReadMe", SFMT(% "Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
+		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
 		RETURN
 	END TRY
 
@@ -497,15 +495,7 @@ END FUNCTION
 #+ @param s Style.
 #+ @return nothing
 FUNCTION g2_addField(
-		f om.DomNode,
-		x SMALLINT,
-		y SMALLINT,
-		wgt STRING,
-		fld STRING,
-		w SMALLINT,
-		com STRING,
-		j STRING,
-		s STRING)
+		f om.DomNode, x SMALLINT, y SMALLINT, wgt STRING, fld STRING, w SMALLINT, com STRING, j STRING, s STRING)
 		RETURNS()
 	DEFINE n om.domNode
 	DEFINE h SMALLINT
