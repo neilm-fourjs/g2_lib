@@ -1,10 +1,10 @@
 
 IMPORT FGL g2_lib.*
-
 IMPORT FGL lib_expect
 
 MAIN
 	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
+	DEFINE l_appInfo g2_appInfo
 
 	CALL g2_core.g2_init("S",NULL)
 
@@ -19,6 +19,7 @@ MAIN
 		COMMAND "Lookup 2 - Colours" CALL colours2()
 		COMMAND "Lookup 2 - Countries" CALL countries2()
 		COMMAND "Lookup 2 - Customers" CALL customers2()
+		COMMAND "About" CALL g2_about.g2_about(l_appInfo)
 		COMMAND "Quit" EXIT MENU
 		ON ACTION CLOSE EXIT MENU
 	END MENU

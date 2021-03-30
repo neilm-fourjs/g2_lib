@@ -20,16 +20,12 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	DEFINE f, n, g, w om.DomNode
 	DEFINE nl om.NodeList
 	DEFINE gver, info, txt STRING
-	DEFINE l_fe_typ, l_fe_ver STRING
 	DEFINE y SMALLINT
 
-	LET gver = "build ", fgl_getVersion()
+	LET gver = "build ", fgl_getversion()
 
 	IF l_appInfo.fe_typ IS NULL THEN
 		CALL l_appInfo.getClientInfo()
-	END IF
-	IF l_fe_ver IS NULL THEN
-		LET l_fe_ver = "unknown"
 	END IF
 
 	IF l_appInfo.userName IS NULL THEN
@@ -40,9 +36,9 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	END IF
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
-	LET n = g2_getWinNode(NULL)
+	LET n = g2_aui.g2_getWinNode(NULL)
 	CALL n.setAttribute("text", l_appInfo.progDesc)
-	LET f = g2_genForm("about")
+	LET f = g2_aui.g2_genForm("about")
 	LET n = f.createChild("VBox")
 	CALL n.setAttribute("posY", "0")
 	CALL n.setAttribute("posX", "0")
@@ -163,7 +159,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.uni_typ || " " || l_appInfo.uni_ver, NULL, "black")
 	LET y = y + 1
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("FrontEnd Version-FEinfo") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_fe_typ || " " || l_fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.fe_typ || " " || l_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
 	IF l_appInfo.cli_dir.getLength() > 1 THEN

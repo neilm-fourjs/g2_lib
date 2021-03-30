@@ -17,7 +17,10 @@ lib_pers = $(notdir $(lib_per))
 lib_frm = $(patsubst %.per, %.42f, $(lib_pers))
 lib_frms = $(addprefix $(BIN)/, $(lib_frm))
 
-all: $(lib_objs) $(lib_frms)
+all: lib $(lib_objs) $(lib_frms)
+
+lib: $(lib_srcs)
+	fglcomp -o $(BIN) --make $(lib_srcs)
 
 $(BIN)/$(lib)/%.42m: %.4gl
 	$(FGLCOMP) -c -o $(BIN) $<
