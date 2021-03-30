@@ -23,7 +23,7 @@ END RECORD
 PUBLIC DEFINE ws_response t_response
 ----------------------------------------------------------------------------------------------------
 -- Start the service loop
-PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logger INOUT)
+PUBLIC FUNCTION start(l_module STRING, l_basePath STRING, g2_log g2_logging.logger INOUT)
 	DEFINE l_ret SMALLINT
 	DEFINE l_msg STRING
 
@@ -83,5 +83,5 @@ PUBLIC FUNCTION service_reply(l_stat INT, l_reply STRING) RETURNS STRING
 	LET ws_response.server = m_server
 	LET ws_response.timestamp = CURRENT
 	LET ws_response.status = l_stat
-	RETURN util.json.stringify(ws_response)
+	RETURN util.JSON.stringify(ws_response)
 END FUNCTION

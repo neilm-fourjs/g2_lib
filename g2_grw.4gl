@@ -237,6 +237,11 @@ FUNCTION (this greRpt) finish() RETURNS()
 	LET this.finished = CURRENT
 	MESSAGE SFMT("Report %1 Finished.", NVL(this.rptName, "ASCII"))
 	CALL ui.Interface.refresh()
+  IF NOT this.preview THEN
+    DISPLAY SFMT("Trying to open %1", os.Path.join(this.greOutputDir, this.fileName) )
+--TODO: need to detect OS version and change this !!
+    RUN "xdg-open "||os.Path.join(this.greOutputDir, this.fileName)
+	END IF
 END FUNCTION
 -------------------------------------------------------------------------------
 FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
@@ -284,6 +289,7 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		COMMAND "Printer"
 			LET l_dest = "P"
 			LET this.device = "Printer"
+		ON ACTION close LET int_flag = TRUE
 	END MENU
 	IF int_flag THEN
 		CALL g2_core.g2_winMessage("Cancelled", "Report cancelled", "information")

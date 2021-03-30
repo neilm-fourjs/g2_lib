@@ -105,7 +105,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 	DEFINE l_kek xml.CryptoKey
 	DEFINE l_list xml.DomNodeList
 
-	LET l_str = security.Base64.toString(l_str)
+	LET l_str = security.Base64.ToString(l_str)
 	LET l_doc = xml.DomDocument.Create()
 	# Notice that whitespaces are significants in crytography,
 	# therefore it is recommended to remove unnecessary ones
@@ -122,7 +122,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 	END TRY
 	TRY
 		# Load the private RSA key
-		LET l_kek = xml.CryptoKey.create("http://www.w3.org/2001/04/xmlenc#rsa-1_5")
+		LET l_kek = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#rsa-1_5")
 		CALL l_kek.loadPEM(this.privateKey)
 	CATCH
 		CALL this.g2_encryptError(

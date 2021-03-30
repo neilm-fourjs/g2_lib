@@ -44,12 +44,12 @@ END FUNCTION
 --
 FUNCTION month_fullName(dt DATETIME YEAR TO DAY)
 --	DISPLAY "DT:",dt," ",util.DateTime.format(dt,"%B")
-	RETURN util.DateTime.format(dt, "%B")
+	RETURN util.Datetime.format(dt, "%B")
 END FUNCTION
 --------------------------------------------------------------------------------
 --
 FUNCTION month_shortName(dt DATETIME YEAR TO DAY)
-	RETURN util.DateTime.format(dt, "%b")
+	RETURN util.Datetime.format(dt, "%b")
 END FUNCTION
 
 --------------------------------------------------------------------------------
@@ -57,12 +57,12 @@ END FUNCTION
 --------------------------------------------------------------------------------
 --
 FUNCTION day_fullName(dt DATETIME YEAR TO DAY)
-	RETURN util.DateTime.format(dt, "%A")
+	RETURN util.Datetime.format(dt, "%A")
 END FUNCTION
 --------------------------------------------------------------------------------
 --
 FUNCTION day_shortName(dt DATETIME YEAR TO DAY)
-	RETURN util.DateTime.format(dt, "%a")
+	RETURN util.Datetime.format(dt, "%a")
 END FUNCTION
 --------------------------------------------------------------------------------
 --

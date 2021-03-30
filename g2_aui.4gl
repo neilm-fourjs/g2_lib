@@ -11,6 +11,7 @@
 #+
 #+ Non GUI functions only
 PACKAGE g2_lib
+
 IMPORT os
 IMPORT util
 IMPORT FGL g2_lib.*
@@ -46,8 +47,8 @@ END FUNCTION
 #+ @return Node.
 FUNCTION g2_getFormNode(l_nam STRING) RETURNS om.DomNode
 	DEFINE l_frm ui.Form
-	DEFINE nl om.nodeList
-	DEFINE n om.domNode
+	DEFINE nl om.NodeList
+	DEFINE n om.DomNode
 
 	LET l_frm = g2_getForm(NULL)
 	IF l_nam IS NULL THEN
@@ -117,7 +118,7 @@ END FUNCTION
 #+ @param msg   = String: Message text
 #+ @return none
 FUNCTION g2_notify(l_msg STRING) RETURNS()
-	DEFINE frm, g om.domNode
+	DEFINE frm, g om.DomNode
 
 	IF l_msg IS NULL THEN
 		CLOSE WINDOW notify
@@ -135,7 +136,7 @@ FUNCTION g2_notify(l_msg STRING) RETURNS()
 	CALL g.setAttribute("gridWidth", l_msg.getLength() + 1)
 	CALL g2_addLabel(g, 1, 2, l_msg, NULL, "big")
 	GL_DBGMSG(1, "g2_notify" || l_msg)
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -164,7 +165,7 @@ FUNCTION g2_showLicence() RETURNS()
 	CALL txte.setAttribute("gridWidth", 80)
 	CALL txte.setAttribute("gridHeight", 20)
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 	LET c = base.Channel.create()
 	CALL c.openPipe("fglWrt -a info 2>&1", "r")
@@ -203,7 +204,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	DEFINE txt STRING
 	DEFINE c base.Channel
 
-	LET c = base.channel.create()
+	LET c = base.Channel.create()
 	LET txt = fgl_getenv("README")
 	IF txt IS NULL THEN
 		LET txt = "readme.txt"
@@ -216,7 +217,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	END TRY
 
 	LET txt = "ReadMe.txt:\n"
-	WHILE NOT c.isEOF()
+	WHILE NOT c.isEof()
 		LET txt = txt.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
@@ -227,12 +228,12 @@ FUNCTION g2_showReadMe() RETURNS()
 	LET vb = frm.createChild("VBox")
 	LET g = vb.createChild("Grid")
 	LET ff = g.createChild("FormField")
-	CALL ff.setATtribute("colName", "txt")
+	CALL ff.setAttribute("colName", "txt")
 	LET t = ff.createChild("TextEdit")
-	CALL t.setATtribute("scroll", "both")
-	CALL t.setATtribute("stretch", "both")
-	CALL t.setATtribute("gridWidth", "80")
-	CALL t.setATtribute("height", "60")
+	CALL t.setAttribute("scroll", "both")
+	CALL t.setAttribute("stretch", "both")
+	CALL t.setAttribute("gridWidth", "80")
+	CALL t.setAttribute("height", "60")
 
 	DISPLAY BY NAME txt
 	MENU
@@ -254,6 +255,8 @@ FUNCTION g2_showEnv() RETURNS()
 		nam STRING,
 		val STRING
 	END RECORD
+	DEFINE l_envlistFile, l_line STRING
+	DEFINE c base.Channel
 --TODO: maybe read list of environment variables from a file?
 	LET env[env.getLength() + 1].nam = "FGLDIR"
 	LET env[env.getLength() + 1].nam = "FGLASDIR"
@@ -264,6 +267,9 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGLPROFILE"
 	LET env[env.getLength() + 1].nam = "FGLRUN"
 	LET env[env.getLength() + 1].nam = "GREDIR"
+	LET env[env.getLength() + 1].nam = "GRESERVER"
+	LET env[env.getLength() + 1].nam = "GRESRVPORT"
+	LET env[env.getLength() + 1].nam = "GREOUTPUTDIR"
 
 	LET env[env.getLength() + 1].nam = "FGLDBPATH"
 	LET env[env.getLength() + 1].nam = "FGLSQLDEBUG"
@@ -324,6 +330,27 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_HTTP_USER_AGENT"
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_REMOTE_ADDR"
 
+	LET l_envlistFile = os.Path.join("..", "etc")
+	LET l_envlistFile = os.Path.join(l_envlistFile, "showenv.cfg")
+	IF os.Path.exists(l_envlistFile) THEN
+		LET c = base.Channel.create()
+		TRY
+			CALL c.openFile(l_envlistFile, "r")
+			WHILE NOT c.isEof()
+				LET l_line = c.readLine().trim()
+				LET x = l_line.getIndexOf(" ", x)
+				IF x > 1 THEN
+					LET l_line = l_line.subString(1, x)
+				END IF
+				IF l_line IS NOT NULL AND l_line.getCharAt(1) != "#" THEN
+					LET env[env.getLength() + 1].nam = l_line
+				END IF
+			END WHILE
+			CALL c.close()
+		CATCH
+		END TRY
+	END IF
+
 	FOR x = 1 TO env.getLength()
 		LET env[x].val = fgl_getenv(env[x].nam)
 		IF env[x].nam.getLength() > txt_w THEN
@@ -355,6 +382,10 @@ FUNCTION g2_showEnv() RETURNS()
 	LET w = tabc.createChild('Edit')
 	CALL w.setAttribute("width", val_w)
 	DISPLAY ARRAY env TO showenv.* ATTRIBUTE(COUNT = env.getLength())
+		ON ACTION dumpenv
+			RUN "env | sort > env.txt"
+			CALL fgl_putfile("env.txt", "env.txt")
+	END DISPLAY
 	CLOSE WINDOW showEnv
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -413,7 +444,7 @@ FUNCTION g2_progBar(l_meth SMALLINT, l_curval INT, l_txt STRING) RETURNS()
 		CLOSE WINDOW progbar
 	END IF
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -478,7 +509,7 @@ FUNCTION g2_winInfo(l_meth SMALLINT, l_txt STRING, l_icon STRING) RETURNS()
 		CLOSE WINDOW gl_winInfo
 	END IF
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -497,7 +528,7 @@ END FUNCTION
 FUNCTION g2_addField(
 		f om.DomNode, x SMALLINT, y SMALLINT, wgt STRING, fld STRING, w SMALLINT, com STRING, j STRING, s STRING)
 		RETURNS()
-	DEFINE n om.domNode
+	DEFINE n om.DomNode
 	DEFINE h SMALLINT
 
 	LET f = f.createChild("FormField")

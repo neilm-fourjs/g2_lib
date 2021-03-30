@@ -28,8 +28,8 @@ IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 -- Private variables:
-DEFINE m_doc xml.domDocument
-DEFINE m_user_node, m_pass_node xml.domNode
+DEFINE m_doc xml.DomDocument
+DEFINE m_user_node, m_pass_node xml.DomNode
 DEFINE m_file STRING
 DEFINE m_enc encrypt
 
@@ -58,9 +58,9 @@ FUNCTION g2_genPassword() RETURNS STRING
 		END FOR
 	END WHILE
 -- Add a random symbol to the random string.
-	CALL util.math.srand()
-	LET x = util.math.rand(C_DEFPASSLEN - 1) + 1
-	LET y = util.math.rand(C_SYMBOLS.getLength())
+	CALL util.Math.srand()
+	LET x = util.Math.rand(C_DEFPASSLEN - 1) + 1
+	LET y = util.Math.rand(C_SYMBOLS.getLength())
 	DISPLAY "X:", x, " Y:", y
 	LET l_pass[x] = C_SYMBOLS.getCharAt(y)
 --	DISPLAY "Pass:",l_pass
@@ -125,7 +125,7 @@ FUNCTION g2_genPasswordHash(l_pass STRING, l_salt STRING, l_hashtype STRING) RET
 		CASE l_hashtype
 			WHEN "BCRYPT"
 				CALL g2_core.g2_log.logIt("Generating BCrypt HashPassword")
-				LET l_hash = Security.BCrypt.HashPassword(l_pass, l_salt)
+				LET l_hash = security.BCrypt.HashPassword(l_pass, l_salt)
 			WHEN "SHA512"
 				CALL g2_core.g2_log.logIt("Generating " || l_hashtype || " HashPassword")
 				LET l_hash = l_pass || l_salt
@@ -167,7 +167,7 @@ FUNCTION g2_chkPassword(
 		WHEN "BCRYPT"
 			CALL g2_core.g2_log.logIt("checking password using BCRYPT")
 			TRY
-				IF Security.BCrypt.CheckPassword(l_pass, l_passhash) THEN
+				IF security.BCrypt.CheckPassword(l_pass, l_passhash) THEN
 					CALL g2_core.g2_log.logIt("Password checked okay.")
 					RETURN TRUE
 				END IF
@@ -271,7 +271,7 @@ FUNCTION g2_fromBase64(l_str STRING) RETURNS STRING
 		RETURN NULL
 	END IF
 	TRY
-		LET l_str = security.Base64.toString(l_str)
+		LET l_str = security.Base64.ToString(l_str)
 	CATCH
 		CALL g2_core.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
 		LET l_str = NULL
@@ -401,7 +401,7 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 	DEFINE l_old_usr, l_old_pass STRING
 	DEFINE l_root xml.DomNode
 	DEFINE enc xml.Encryption
-	DEFINE symkey xml.CryptoKey
+	DEFINE symKey xml.CryptoKey
 	DEFINE l_myKey CHAR(32)
 	DEFINE l_dte STRING
 
@@ -420,13 +420,13 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 			RETURN FALSE
 		END IF
 		# Create symmetric AES256 key for XML encryption purposes
-		LET symkey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
-		CALL symkey.setKey(l_mykey) # password of 256 bits
+		LET symKey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+		CALL symKey.setKey(l_myKey) # password of 256 bits
 		CALL symKey.setFeature(
 				"KeyName", "MySecretKey") # Name the password in order to identify the key (Not mandatory)
 		# Encrypt the entire document
 		LET enc = xml.Encryption.Create()
-		CALL enc.setKey(symkey) # Set the symmetric key to be used
+		CALL enc.setKey(symKey) # Set the symmetric key to be used
 		CALL enc.encryptElement(l_root) # Encrypt
 		# Save encrypted document back to disk
 		CALL m_doc.save(m_file)
@@ -440,7 +440,7 @@ END FUNCTION
 FUNCTION g2_saveSession(l_id STRING, l_user STRING) RETURNS()
 	DEFINE l_val STRING
 
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN
 	END IF
 	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
@@ -458,7 +458,7 @@ FUNCTION g2_getSession(l_id STRING, l_age INTEGER) RETURNS STRING
 	DEFINE l_val STRING
 	DEFINE l_ts DATETIME YEAR TO MINUTE
 	DEFINE x SMALLINT
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN NULL
 	END IF
 	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
@@ -499,7 +499,7 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION g2_removeSession(l_id STRING)
 
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN
 	END IF
 	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN

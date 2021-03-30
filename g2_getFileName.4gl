@@ -31,9 +31,9 @@ FUNCTION g2_getFileName(l_folder STRING, l_ext STRING, l_titl STRING, l_head STR
 		WHILE TRUE
 			LET l_path = os.Path.dirNext(d)
 			IF l_path IS NULL THEN EXIT WHILE END IF
-			IF os.path.isDirectory(l_path) THEN CONTINUE WHILE END IF
-			IF NOT os.path.extension(l_path) MATCHES l_ext THEN CONTINUE WHILE END IF
-			LET sl.arr[ sl.arr.getLength() + 1 ].desc = os.path.rootName( l_path )
+			IF os.Path.isDirectory(l_path) THEN CONTINUE WHILE END IF
+			IF NOT os.Path.extension(l_path) MATCHES l_ext THEN CONTINUE WHILE END IF
+			LET sl.arr[ sl.arr.getLength() + 1 ].desc = os.Path.rootName( l_path )
 		END WHILE
 	END IF
 	IF sl.arr.getLength() = 0 THEN

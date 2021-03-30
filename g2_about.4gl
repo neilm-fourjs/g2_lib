@@ -18,7 +18,7 @@ IMPORT FGL g2_lib.*
 #+ @return Nothing.
 FUNCTION g2_about(l_appInfo appInfo INOUT)
 	DEFINE f, n, g, w om.DomNode
-	DEFINE nl om.nodeList
+	DEFINE nl om.NodeList
 	DEFINE gver, info, txt STRING
 	DEFINE l_fe_typ, l_fe_ver STRING
 	DEFINE y SMALLINT
@@ -41,7 +41,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
 	LET n = g2_getWinNode(NULL)
-	CALL n.setAttribute("text", l_appInfo.progdesc)
+	CALL n.setAttribute("text", l_appInfo.progDesc)
 	LET f = g2_genForm("about")
 	LET n = f.createChild("VBox")
 	CALL n.setAttribute("posY", "0")
@@ -87,15 +87,15 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Program") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(
-			g, 10, y, l_appInfo.progname || " - " || l_appInfo.progversion, NULL, "black")
+			g, 10, y, l_appInfo.progName || " - " || l_appInfo.progVersion, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Description") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progdesc, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progDesc, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Author") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progauth, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progAuth, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -225,9 +225,9 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		ON ACTION showreadme
 			CALL g2_aui.g2_showReadMe()
 		ON ACTION showlicence
-			CALL g2_aui.g2_showlicence()
+			CALL g2_aui.g2_showLicence()
 		ON ACTION copyabout
-			CALL ui.interface.frontCall("standard", "cbset", info, y)
+			CALL ui.Interface.frontCall("standard", "cbset", info, y)
 	END MENU
 	CLOSE WINDOW about
 

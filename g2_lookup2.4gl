@@ -411,11 +411,11 @@ PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
 		LET this.allowInsert = FALSE -- can't do this no table name!
 		LET this.allowUpdate = FALSE -- can't do this no table name!
 	END IF
-	IF this.columnlist IS NULL AND this.sql_getData IS NULL THEN
+	IF this.columnList IS NULL AND this.sql_getData IS NULL THEN
 		LET l_err = l_err.append("columnList ")
 	END IF
-	IF this.columnTitles IS NULL AND this.columnlist != "*" THEN
-		LET this.columnTitles = this.columnlist
+	IF this.columnTitles IS NULL AND this.columnList != "*" THEN
+		LET this.columnTitles = this.columnList
 	END IF
 	IF this.whereClause IS NULL THEN
 		LET this.whereClause = "1=1"

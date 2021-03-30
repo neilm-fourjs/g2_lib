@@ -60,7 +60,7 @@ FUNCTION (this g2_ui)
 			CALL this.dia.setFieldValue(this.fields[x].colName, this.fields[x].value)
 		END IF
 		IF x = l_sql.key_field_num OR this.fields[x].noEntry THEN
-			CALL this.dia.setFieldActive(this.fields[x].colname, FALSE)
+			CALL this.dia.setFieldActive(this.fields[x].colName, FALSE)
 		END IF
 	END FOR
 

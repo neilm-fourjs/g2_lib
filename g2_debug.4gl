@@ -31,7 +31,7 @@ FUNCTION g2_dbgMsg(l_fil STRING, l_lno INT, l_lev STRING, l_msg STRING)
 		DISPLAY base.Application.getProgramName(), ":", l_msg.trim()
 	ELSE
 		IF gl_dbgLev >= l_lev THEN
-			LET l_fil = os.path.basename(l_fil)
+			LET l_fil = os.Path.baseName(l_fil)
 			LET x = l_fil.getIndexOf(".", 1)
 			LET l_fil = l_fil.subString(1, x - 1)
 			LET l_lin = "...............:", l_lno USING "##,###"

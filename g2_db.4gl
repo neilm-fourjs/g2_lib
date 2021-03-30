@@ -121,6 +121,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				DISPLAY "INFORMIXSQLHOSTS:", fgl_getEnv("INFORMIXSQLHOSTS")
 			WHEN "mdb"
 				LET l_lockMode = FALSE
+			WHEN "mys"
+				LET l_lockMode = FALSE
 			WHEN "sqt"
 				IF NOT os.path.EXISTS(this.dir) THEN
 					IF NOT os.path.mkdir(this.dir) THEN
@@ -483,9 +485,9 @@ END FUNCTION
 #+ @param rec_n TypeInfo Node for record to udpate
 #+ @param fixQuote Mask single quote with another single quote for GeneroDB!
 #+ @return SQL Statement
-FUNCTION g2_genInsert(tab STRING, rec_n om.domNode, fixQuote BOOLEAN) RETURNS STRING
-	DEFINE n om.domNode
-	DEFINE nl om.nodeList
+FUNCTION g2_genInsert(tab STRING, rec_n om.DomNode, fixQuote BOOLEAN) RETURNS STRING
+	DEFINE n om.DomNode
+	DEFINE nl om.NodeList
 	DEFINE l_stmt, val STRING
 	DEFINE x, len SMALLINT
 	DEFINE typ, comma CHAR(1)
@@ -512,7 +514,6 @@ FUNCTION g2_genInsert(tab STRING, rec_n om.domNode, fixQuote BOOLEAN) RETURNS ST
 		LET comma = ","
 	END FOR
 	LET l_stmt = l_stmt.append(")")
-
 	RETURN l_stmt
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -528,9 +529,9 @@ END FUNCTION
 FUNCTION g2_genUpdate(tab, wher, rec_n, rec_o, ser_col, fixQuote)
 	DEFINE tab, wher STRING
 	DEFINE ser_col, fixQuote SMALLINT
-	DEFINE rec_n, rec_o, n, o om.domNode
+	DEFINE rec_n, rec_o, n, o om.DomNode
 	DEFINE l_stmt, val, val_o, d_val, d_val_o STRING
-	DEFINE nl_n, nl_o om.nodeList
+	DEFINE nl_n, nl_o om.NodeList
 	DEFINE x, len SMALLINT
 	DEFINE typ, comma CHAR(1)
 
