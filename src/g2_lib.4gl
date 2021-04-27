@@ -33,7 +33,8 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	GL_DBGMSG(1, SFMT("g2_lib: FGLDIR=%1", fgl_getEnv("FGLDIR")))
 	GL_DBGMSG(1, SFMT("g2_lib: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
 	GL_DBGMSG(1, SFMT("g2_lib: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
-
+	GL_DBGMSG(1, SFMT("g2_lib: FGLPROFILE=%1", fgl_getEnv("FGLPROFILE")))
+	GL_DBGMSG(1, SFMT("g2_lib: flm.license.number=%1", fgl_getResource("flm.license.number")))
 	WHENEVER ANY ERROR CALL g2_error
 
 -- Try and figure out what the client is capable of GDC(Native/UR) / GBC
