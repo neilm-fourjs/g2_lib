@@ -54,9 +54,9 @@ FUNCTION (this greRpt)
 	END IF
 
 	LET this.greDistributed = FALSE
-	LET this.greServer = fgl_getEnv("GRESERVER")
-	LET this.greServerPort = fgl_getEnv("GRESRVPORT")
-	LET this.greOutputDir = fgl_getEnv("GREOUTPUTDIR")
+	LET this.greServer = fgl_getenv("GRESERVER")
+	LET this.greServerPort = fgl_getenv("GRESRVPORT")
+	LET this.greOutputDir = fgl_getenv("GREOUTPUTDIR")
 	IF this.greServerPort IS NULL THEN
 		LET this.greServerPort = 6490
 	END IF
@@ -79,7 +79,7 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		LET this.preview = FALSE
 	END IF
 	IF this.reportsDir IS NULL THEN
-		LET this.reportsDir = fgl_getEnv("REPORTDIR")
+		LET this.reportsDir = fgl_getenv("REPORTDIR")
 	END IF
 	IF this.reportsDir IS NULL THEN
 		LET this.reportsDir = "../etc"
@@ -88,9 +88,9 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		IF this.rptTitle IS NULL THEN
 			LET this.rptTitle = this.rptName
 		END IF
-		LET this.rptName = os.path.join(this.reportsDir, this.rptName.append(".4rp"))
+		LET this.rptName = os.Path.join(this.reportsDir, this.rptName.append(".4rp"))
 	END IF
-	IF NOT os.path.exists(this.rptName) THEN
+	IF NOT os.Path.exists(this.rptName) THEN
 		CALL g2_core.g2_winMessage(
 				"Error", SFMT("Report Design '%1' not found!", this.rptName), "exclamation")
 		RETURN FALSE

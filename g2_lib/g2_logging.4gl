@@ -76,7 +76,7 @@ END FUNCTION
 #+ @param l_dir Directory to log to. If null then use $LOGDIR
 FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 
-	LET this.dirName = NVL(l_dir, fgl_getEnv("LOGDIR"))
+	LET this.dirName = NVL(l_dir, fgl_getenv("LOGDIR"))
 
 	IF this.dirName.getLength() < 1 THEN
 		LET this.dirName = "../logs" -- C_DEFAULT_LOGDIR
@@ -113,13 +113,13 @@ END FUNCTION
 #+ @param l_file File name for the logfile
 FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 	DEFINE l_user STRING
-	IF fgl_getEnv("LOGFILEDATE") = "false" THEN
+	IF fgl_getenv("LOGFILEDATE") = "false" THEN
 		LET this.useDate = FALSE
 	END IF
 	IF l_file IS NULL THEN
-		LET l_user = fgl_getEnv("LOGNAME") -- get OS user
+		LET l_user = fgl_getenv("LOGNAME") -- get OS user
 		IF l_user.getLength() < 2 THEN
-			LET l_user = fgl_getEnv("USERNAME") -- get OS user
+			LET l_user = fgl_getenv("USERNAME") -- get OS user
 		END IF
 		IF l_user.getLength() < 2 THEN
 			LET l_user = "unknown"
@@ -160,8 +160,8 @@ END FUNCTION
 FUNCTION (this logger) setUseDate(l_useDate STRING) RETURNS()
 	LET this.useDate = TRUE
 	IF l_useDate IS NULL THEN
-		IF LENGTH(fgl_getEnv("LOGFILEDATE")) > 1 THEN
-			LET l_useDate = fgl_getEnv("LOGFILEDATE")
+		IF length(fgl_getenv("LOGFILEDATE")) > 1 THEN
+			LET l_useDate = fgl_getenv("LOGFILEDATE")
 		END IF
 	END IF
 	IF l_useDate.toUpperCase() = "FALSE" THEN

@@ -121,15 +121,15 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getEnv("DBNAME"), NULL, NULL)
+	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBNAME"), NULL, NULL)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Type") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, UPSHIFT(fgl_db_driver_type()), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, upshift(fgl_db_driver_type()), NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("DBDATE") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getEnv("DBDATE"), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBDATE"), NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")

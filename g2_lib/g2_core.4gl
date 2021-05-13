@@ -27,13 +27,13 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	DEFINE l_gbc, l_fe STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
-	CALL STARTLOG(g2_err.fullLogPath)
-	LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
+	CALL startlog(g2_err.fullLogPath)
+	LET gl_dbgLev = fgl_getenv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
 	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
 	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
-	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getEnv("FGLDIR")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getenv("FGLDIR")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getenv("FGLIMAGEPATH")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getenv("FGLRESOURCEPATH")))
 
 	WHENEVER ANY ERROR CALL g2_error
 
@@ -74,11 +74,11 @@ FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1)) RETURNS ()
 	END IF
 	LET m_mdi = l_mdi_sdi
 
-	LET l_container = fgl_getEnv("FJS_MDICONT")
+	LET l_container = fgl_getenv("FJS_MDICONT")
 	IF l_container IS NULL OR l_container = " " THEN
 		LET l_container = "container"
 	END IF
-	LET l_desc = fgl_getEnv("FJS_MDITITLE")
+	LET l_desc = fgl_getenv("FJS_MDITITLE")
 	IF l_desc IS NULL OR l_desc = " " THEN
 		LET l_desc = "MDI Container:" || l_container
 	END IF
@@ -355,7 +355,7 @@ FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING) RETURNS ()
 	ERROR "* ", l_err.trim(), " *"
 	IF l_fil IS NOT NULL THEN
 		DISPLAY l_fil.trim(), ":", l_lno, ": ", l_err.trim()
-		CALL ERRORLOG(l_fil.trim() || ":" || l_lno || ": " || l_err)
+		CALL errorlog(l_fil.trim() || ":" || l_lno || ": " || l_err)
 	END IF
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -443,7 +443,7 @@ FUNCTION g2_error() RETURNS ()
 	DEFINE l_stat INTEGER
 	DEFINE x, y SMALLINT
 
-	LET l_stat = STATUS
+	LET l_stat = status
 
 	LET l_mod = base.Application.getStackTrace()
 	LET x = l_mod.getIndexOf("#", 2) + 3
@@ -460,7 +460,7 @@ FUNCTION g2_error() RETURNS ()
 
 	LET l_err = SQLERRMESSAGE || "\n"
 	IF l_err IS NULL THEN
-		LET l_err = ERR_GET(l_stat)
+		LET l_err = err_get(l_stat)
 	END IF
 	IF l_err IS NULL THEN
 		LET l_err = "Unknown!"
@@ -516,9 +516,9 @@ FUNCTION g2_getHostname() RETURNS STRING
 	DEFINE l_hostname STRING
 	DEFINE c base.Channel
 	IF os.Path.pathSeparator() = ";" THEN -- Windows
-		LET l_hostname = fgl_getEnv("COMPUTERNAME")
+		LET l_hostname = fgl_getenv("COMPUTERNAME")
 	ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
-		LET l_hostname = fgl_getEnv("HOSTNAME")
+		LET l_hostname = fgl_getenv("HOSTNAME")
 	END IF
 	IF l_hostname.getLength() < 2 THEN
 		LET c = base.Channel.create()
@@ -635,7 +635,7 @@ END FUNCTION
 FUNCTION g2_getImagePath() RETURNS STRING
 	DEFINE l_imgPath STRING
 	DEFINE x SMALLINT
-	LET l_imgPath = fgl_getEnv("FGLIMAGEPATH")
+	LET l_imgPath = fgl_getenv("FGLIMAGEPATH")
 	LET x = l_imgPath.getIndexOf(os.Path.pathSeparator(),1)
 	IF x > 0 THEN
 		LET l_imgPath = l_imgPath.subString(1,x-1)

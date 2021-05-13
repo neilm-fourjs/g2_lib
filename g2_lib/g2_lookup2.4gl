@@ -129,7 +129,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup2: Opening Window.")
 	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
-	CALL fgl_setTitle(this.windowTitle)
+	CALL fgl_settitle(this.windowTitle)
 	LET l_frm = g2_aui.g2_genForm(this.formName) -- ensures form name is specific for this lookup
 	CALL l_frm.setAttribute("width", 100)
 
@@ -343,7 +343,7 @@ FUNCTION (this lookup) refrestData()
 -- Fetch the data
 	CALL this.sqlQueryHandle.fetchFirst()
 	LET x = 0
-	WHILE SQLCA.sqlcode = 0
+	WHILE sqlca.sqlcode = 0
 		LET x = x + 1
 		-- must set the current row before setting values
 		CALL this.theDialog.setCurrentRow("tablistv", x)
@@ -456,9 +456,9 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 			EXECUTE IMMEDIATE l_sql
 			RETURN FALSE
 		CATCH
-			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed to delete!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+					"Error", SFMT("Failed to delete!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
 		END TRY
 	END IF
 	RETURN TRUE
@@ -560,11 +560,11 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 	TRY
 		EXECUTE IMMEDIATE l_sql
 	CATCH
-		--DISPLAY "SQLCode:",SQLCA.sqlcode, " SQLERRD2:",SQLCA.sqlerrd[2], " sqlawarn:",SQLCA.sqlawarn
-		IF SQLCA.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
-			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+		--DISPLAY "SQLCode:",sqlca.sqlcode, " SQLERRD2:",sqlca.sqlerrd[2], " sqlawarn:",sqlca.sqlawarn
+		IF sqlca.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+					"Error", SFMT("Failed!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
 			RETURN TRUE -- int_flag
 		END IF
 	END TRY
@@ -574,7 +574,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 	ELSE
 		LET this.totalRecords = this.totalRecords + 1
 		CALL this.theDialog.setCurrentRow("tablistv", this.totalRecords)
-		CALL l_dia.setFieldValue(this.fields[1].name, SQLCA.sqlerrd[2])
+		CALL l_dia.setFieldValue(this.fields[1].name, sqlca.sqlerrd[2])
 	END IF
 	FOR x = 1 TO this.totalFields
 		DISPLAY SFMT("Updating Row %1 field %2 to %3",
