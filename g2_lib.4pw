@@ -100,8 +100,8 @@
         <BuildRule additionalDependencies="" commands="$(fglmkmsg) &quot;$(InputPath)&quot; &quot;$(InputDir)/$(InputBaseName).iem&quot;;$(move) &quot;$(InputDir)/$(InputBaseName).iem&quot; &quot;$(TargetDir)/$(InputBaseName).iem&quot;" description="MSG compiler" enabled="true" fileType="application/genero-msg" intermediateFiles="" outputFiles="$(TargetDir)/$(InputBaseName).iem"/>
       </BuildRuleList>
       <LinkRuleList>
-        <LinkRule commands="/bin/env | sort &gt; $(TargetDir)/build.env;fglcomp -o $(TargetDir) --make $(BuildInputFilePaths:.4gl)" dependencies="$(LibDependencies);$(ExternalDependencies)" nodeType="Application" outputFiles=""/>
-        <LinkRule commands="/bin/env &gt; $(TargetDir)/link.env 2&gt; $(TargetDir)/link.err;fglcomp -o $(TargetDir) --verbose --make $(BuildInputFilePaths:.4gl)" dependencies="" nodeType="Library" outputFiles=""/>
+        <LinkRule commands="/bin/env &gt; $(TargetDir)/link.env 2&gt; $(TargetDir)/link.err;fglcomp -o $(TargetDir) --make $(BuildInputFilePaths:.4gl)" dependencies="$(LibDependencies);$(ExternalDependencies)" nodeType="Application" outputFiles=""/>
+        <LinkRule commands="/bin/env &gt; $(TargetDir)/link.env 2&gt; $(TargetDir)/link.err;fglcomp -V;fglcomp -o $(TargetDir) --verbose --make $(BuildInputFilePaths:.4gl)" dependencies="" nodeType="Library" outputFiles=""/>
       </LinkRuleList>
       <ExecutionRule>
         <Run commands="$(gstrun) $(BinaryName) $(CommandLineArgs)"/>
@@ -121,28 +121,28 @@
   <PlatformList version="1.0"/>
   <Group id="75644415" label="g2_lib" language="Genero - NJM No Link" targetDirectory="$(ProjectDir)/../njm_app_bin">
     <Library binaryName="g2_lib" dependencies="1986" id="14000" label="g2_lib" language="Genero - NJM No Link" targetDirectory="$(ProjectDir)/../njm_app_bin">
-      <File filePath="g2_about.4gl"/>
-      <File filePath="g2_appInfo.4gl"/>
-      <File filePath="g2_aui.4gl"/>
-      <File filePath="g2_calendar.4gl"/>
-      <File filePath="g2_core.4gl"/>
-      <File filePath="g2_db.4gl"/>
-      <File filePath="g2_debug.4gl"/>
-      <File filePath="g2_encrypt.4gl"/>
-      <File filePath="g2_getFileName.4gl"/>
-      <File filePath="g2_logging.4gl"/>
-      <File filePath="g2_lookup.4gl"/>
-      <File filePath="g2_lookup2.4gl"/>
-      <File filePath="g2_secure.4gl"/>
-      <File filePath="g2_simpleLookup.4gl"/>
-      <File filePath="g2_sql.4gl"/>
-      <File filePath="g2_ui.4gl"/>
-      <File filePath="g2_ws.4gl"/>
-      <File filePath="g2_debug.inc"/>
-      <File filePath="g2_gdcUpdate.4gl"/>
-      <File filePath="g2_gdcUpdateCommon.4gl"/>
-      <File filePath="g2_grw.4gl"/>
-      <File filePath="gl_grwCfg.per"/>
+      <File filePath="g2_lib/g2_about.4gl"/>
+      <File filePath="g2_lib/g2_appInfo.4gl"/>
+      <File filePath="g2_lib/g2_aui.4gl"/>
+      <File filePath="g2_lib/g2_calendar.4gl"/>
+      <File filePath="g2_lib/g2_core.4gl"/>
+      <File filePath="g2_lib/g2_db.4gl"/>
+      <File filePath="g2_lib/g2_debug.4gl"/>
+      <File filePath="g2_lib/g2_encrypt.4gl"/>
+      <File filePath="g2_lib/g2_getFileName.4gl"/>
+      <File filePath="g2_lib/g2_logging.4gl"/>
+      <File filePath="g2_lib/g2_lookup.4gl"/>
+      <File filePath="g2_lib/g2_lookup2.4gl"/>
+      <File filePath="g2_lib/g2_secure.4gl"/>
+      <File filePath="g2_lib/g2_simpleLookup.4gl"/>
+      <File filePath="g2_lib/g2_sql.4gl"/>
+      <File filePath="g2_lib/g2_ui.4gl"/>
+      <File filePath="g2_lib/g2_ws.4gl"/>
+      <File filePath="g2_lib/g2_debug.inc"/>
+      <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
+      <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
+      <File filePath="g2_lib/g2_grw.4gl"/>
+      <File filePath="g2_lib/gl_grwCfg.per"/>
     </Library>
   </Group>
   <Group environment="value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects">
