@@ -1,17 +1,16 @@
 --------------------------------------------------------------------------------
 #+ Genero Logging Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 #+
-#+ No includes required.
-#+
 #+ Non GUI functions only
 
 IMPORT os
+--IMPORT FGL g2_core
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 
@@ -82,27 +81,27 @@ FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 		LET this.dirName = "../logs" -- C_DEFAULT_LOGDIR
 	END IF
 
-	IF NOT os.path.exists(this.dirName) THEN
-		IF NOT os.path.mkdir(this.dirName) THEN
+	IF NOT os.Path.exists(this.dirName) THEN
+		IF NOT os.Path.mkdir(this.dirName) THEN
 			CALL g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
 			CALL g2_exitProgram(200, "log dir issues")
 		ELSE
-			IF os.path.pathSeparator() = ":" THEN -- Linux/Unix/Mac/Android - ie not MSDOS!
-				IF NOT os.path.chrwx(this.dirName, ((7 * 64) + (7 * 8) + 5)) THEN
+			IF os.Path.pathSeparator() = ":" THEN -- Linux/Unix/Mac/Android - ie not MSDOS!
+				IF NOT os.Path.chRwx(this.dirName, ((7 * 64) + (7 * 8) + 5)) THEN
 					CALL g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
 					CALL g2_exitProgram(201, "log permissions")
 				END IF
 			END IF
 		END IF
 	END IF
-	IF NOT os.path.isDirectory(this.dirName) THEN
+	IF NOT os.Path.isDirectory(this.dirName) THEN
 		CALL g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
 		CALL g2_exitProgram(202, "logdir not a dir")
 	END IF
 
 -- Make sure the logdir ends with a slash.
-	IF this.dirName.getCharAt(this.dirName.getLength()) != os.path.separator() THEN
-		LET this.dirName = this.dirName.append(os.path.separator())
+	IF this.dirName.getCharAt(this.dirName.getLength()) != os.Path.separator() THEN
+		LET this.dirName = this.dirName.append(os.Path.separator())
 	END IF
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -127,9 +126,9 @@ FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 		--LET this.fileName = (TODAY USING "YYYYMMDD")||"-"||base.application.getProgramName()
 		IF this.useDate THEN
 			LET this.fileName =
-					base.application.getProgramName() || "-" || (TODAY USING "YYYYMMDD") || "-" || l_user
+					base.Application.getProgramName() || "-" || (TODAY USING "YYYYMMDD") || "-" || l_user
 		ELSE
-			LET this.fileName = base.application.getProgramName()
+			LET this.fileName = base.Application.getProgramName()
 		END IF
 	ELSE
 		LET this.fileName = l_file
@@ -137,7 +136,7 @@ FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 	LET this.fullLogPath = this.dirName || this.fileName || this.fileExt
 -- if we have a dirName / fileName / and Ext then try and create an empty log file.
 	IF this.fullLogPath IS NOT NULL THEN
-		IF NOT os.path.exists(this.fullLogPath) THEN
+		IF NOT os.Path.exists(this.fullLogPath) THEN
 			CALL this.logIt(SFMT("Log Started to %1", this.fullLogPath))
 		END IF
 	END IF

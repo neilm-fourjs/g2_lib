@@ -1,9 +1,21 @@
--- Library to encrypt a String with a cert and private key.
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+
+#+ Library to encrypt a String with a cert and private key.
+#+
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
 
 IMPORT xml
 IMPORT security
 
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,
@@ -91,7 +103,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 	DEFINE l_kek xml.CryptoKey
 	DEFINE l_list xml.DomNodeList
 
-	LET l_str = security.Base64.toString(l_str)
+	LET l_str = security.Base64.ToString(l_str)
 	LET l_doc = xml.DomDocument.Create()
 	# Notice that whitespaces are significants in crytography,
 	# therefore it is recommended to remove unnecessary ones
@@ -108,7 +120,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 	END TRY
 	TRY
 		# Load the private RSA key
-		LET l_kek = xml.CryptoKey.create("http://www.w3.org/2001/04/xmlenc#rsa-1_5")
+		LET l_kek = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#rsa-1_5")
 		CALL l_kek.loadPEM(this.privateKey)
 	CATCH
 		CALL this.g2_encryptError(
@@ -137,6 +149,6 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	LET this.errorMessage = l_msg
-	CALL g2_lib.g2_log.logIt(l_msg)
+	CALL g2_core.g2_log.logIt(l_msg)
 END FUNCTION
 --------------------------------------------------------------------------------

@@ -1,13 +1,14 @@
 --------------------------------------------------------------------------------
 #+ Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 >
+#+ Genero 4.00 >
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 --------------------------------------------------------------------------------
-IMPORT FGL g2_lib
+
+IMPORT FGL g2_core
 IMPORT FGL g2_aui
 IMPORT FGL g2_db
 &include "g2_debug.inc"
@@ -54,7 +55,7 @@ FUNCTION g2_lookup(
 		LET l_sel_stmt = "SELECT COUNT(*) FROM " || tabnam || " WHERE " || wher
 		PREPARE listcntpre FROM l_sel_stmt
 	CATCH
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
 		RETURN NULL --, NULL
 	END TRY
 -- do the count
@@ -63,7 +64,7 @@ FUNCTION g2_lookup(
 	FETCH listcntcur INTO l_tot_recs
 	CLOSE listcntcur
 	IF l_tot_recs < 1 THEN
-		CALL g2_lib.g2_errPopup(% "No Records Found")
+		CALL g2_core.g2_errPopup(% "No Records Found")
 		RETURN NULL
 	END IF
 	GL_DBGMSG(2, "g2_lookup: Counted:" || l_tot_recs)
@@ -80,7 +81,7 @@ FUNCTION g2_lookup(
 		CALL l_sql_handle.prepare(l_sel_stmt)
 		CALL l_sql_handle.openScrollCursor()
 	CATCH
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
 		RETURN NULL
 	END TRY
 	CALL l_fields.clear()

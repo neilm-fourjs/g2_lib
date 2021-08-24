@@ -1,9 +1,23 @@
-# Simple class to handle Application information.
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+
+#+ Simple class to handle Application information.
+#+
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
+
+--IMPORT FGL g2_core
 
 PUBLIC TYPE appInfo RECORD
 		appName,
 		appBuild,
-		progname,
+		progName,
 		progDesc,
 		progVersion,
 		progAuth,
@@ -43,14 +57,14 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) getClientInfo() RETURNS()
 	DEFINE x SMALLINT
-	LET this.fe_typ = UPSHIFT(ui.interface.getFrontEndName())
-	LET this.fe_ver = ui.interface.getFrontEndVersion()
-	LET this.uni_typ = ui.interface.getUniversalClientName()
+	LET this.fe_typ = UPSHIFT(ui.Interface.getFrontEndName())
+	LET this.fe_ver = ui.Interface.getFrontEndVersion()
+	LET this.uni_typ = ui.Interface.getUniversalClientName()
 	LET this.uni_ver = ui.Interface.getUniversalClientVersion()
-	CALL ui.interface.frontcall("standard", "feinfo", ["ostype"], [this.cli_os])
-	CALL ui.interface.frontcall("standard", "feinfo", ["osversion"], [this.cli_osver])
-	CALL ui.interface.frontCall("standard", "feinfo", ["screenresolution"], [this.cli_res])
-	CALL ui.interface.frontCall("standard", "feinfo", ["fepath"], [this.cli_dir])
+	CALL ui.Interface.frontCall("standard", "feinfo", ["ostype"], [this.cli_os])
+	CALL ui.Interface.frontCall("standard", "feinfo", ["osversion"], [this.cli_osver])
+	CALL ui.Interface.frontCall("standard", "feinfo", ["screenresolution"], [this.cli_res])
+	CALL ui.Interface.frontCall("standard", "feinfo", ["fepath"], [this.cli_dir])
 	LET x = this.cli_res.getIndexOf("x",1)
 	IF x > 1 THEN
 		LET this.scr_w = this.cli_res.subString(1,x-1)

@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero AUI Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -9,11 +9,11 @@
 #+
 #+ No includes required.
 #+
-#+ Non GUI functions only
+#+ Non GUI functions onlyb
 
 IMPORT os
 IMPORT util
-IMPORT FGL g2_lib
+IMPORT FGL g2_core
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN
@@ -32,7 +32,7 @@ FUNCTION g2_getWinNode(l_nam STRING) RETURNS om.DomNode
 		LET l_win = ui.Window.forName(l_nam)
 	END IF
 	IF l_win IS NULL THEN
-		CALL g2_lib.g2_errMsg(__FILE__, __LINE__, SFMT(% "lib.getwinnode.error", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"lib.getwinnode.error", l_nam))
 		RETURN l_ret -- l_ret is null here
 	ELSE
 		LET l_ret = l_win.getNode()
@@ -46,8 +46,8 @@ END FUNCTION
 #+ @return Node.
 FUNCTION g2_getFormNode(l_nam STRING) RETURNS om.DomNode
 	DEFINE l_frm ui.Form
-	DEFINE nl om.nodeList
-	DEFINE n om.domNode
+	DEFINE nl om.NodeList
+	DEFINE n om.DomNode
 
 	LET l_frm = g2_getForm(NULL)
 	IF l_nam IS NULL THEN
@@ -98,14 +98,13 @@ FUNCTION g2_genForm(l_nam STRING) RETURNS om.DomNode
 
 	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN
-		CALL g2_lib.g2_errMsg(
-				__FILE__, __LINE__, SFMT(% "genForm: failed to get Window '%1'", "CURRENT"))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"genForm: failed to get Window '%1'", "CURRENT"))
 		RETURN l_n
 	END IF
 
 	LET l_frm = l_win.createForm(l_nam)
 	IF l_frm IS NULL THEN
-		CALL g2_lib.g2_errMsg(__FILE__, __LINE__, SFMT(% "genForm: createForm('%1') failed !!", l_nam))
+		CALL g2_core.g2_errMsg(__FILE__, __LINE__, SFMT(%"genForm: createForm('%1') failed !!", l_nam))
 		RETURN l_n
 	END IF
 	LET l_n = l_frm.getNode()
@@ -118,7 +117,7 @@ END FUNCTION
 #+ @param msg   = String: Message text
 #+ @return none
 FUNCTION g2_notify(l_msg STRING) RETURNS()
-	DEFINE frm, g om.domNode
+	DEFINE frm, g om.DomNode
 
 	IF l_msg IS NULL THEN
 		CLOSE WINDOW notify
@@ -136,14 +135,14 @@ FUNCTION g2_notify(l_msg STRING) RETURNS()
 	CALL g.setAttribute("gridWidth", l_msg.getLength() + 1)
 	CALL g2_addLabel(g, 1, 2, l_msg, NULL, "big")
 	GL_DBGMSG(1, "g2_notify" || l_msg)
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Show the Genero & GRE license
 #+
 FUNCTION g2_showLicence() RETURNS()
-	DEFINE licstring STRING
+	DEFINE licString STRING
 	DEFINE winnode, frm, g, frmf, txte om.DomNode
 	DEFINE c base.Channel
 
@@ -165,26 +164,26 @@ FUNCTION g2_showLicence() RETURNS()
 	CALL txte.setAttribute("gridWidth", 80)
 	CALL txte.setAttribute("gridHeight", 20)
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 	LET c = base.Channel.create()
 	CALL c.openPipe("fglWrt -a info 2>&1", "r")
 	DISPLAY "Status:", STATUS
 	LET licString = "fglWrt -a info:\n"
 	WHILE NOT c.isEof()
-		LET licstring = licstring.append(c.readLine() || "\n")
+		LET licString = licString.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
 
 	CALL c.openPipe("greWrt -a info 2>&1", "r")
 	LET licString = licString.append("\n\ngreWrt -a info:\n")
 	WHILE NOT c.isEof()
-		LET licstring = licstring.append(c.readLine() || "\n")
+		LET licString = licString.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
 
-	DISPLAY "Lic:", licstring.trim()
-	DISPLAY BY NAME licstring
+	DISPLAY "Lic:", licString.trim()
+	DISPLAY BY NAME licString
 
 	MENU
 		COMMAND "close"
@@ -204,7 +203,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	DEFINE txt STRING
 	DEFINE c base.Channel
 
-	LET c = base.channel.create()
+	LET c = base.Channel.create()
 	LET txt = fgl_getenv("README")
 	IF txt IS NULL THEN
 		LET txt = "readme.txt"
@@ -212,13 +211,12 @@ FUNCTION g2_showReadMe() RETURNS()
 	TRY
 		CALL c.openFile(txt, "r")
 	CATCH
-		CALL g2_winMessage(
-				"ReadMe", SFMT(% "Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
+		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
 		RETURN
 	END TRY
 
 	LET txt = "ReadMe.txt:\n"
-	WHILE NOT c.isEOF()
+	WHILE NOT c.isEof()
 		LET txt = txt.append(c.readLine() || "\n")
 	END WHILE
 	CALL c.close()
@@ -229,12 +227,12 @@ FUNCTION g2_showReadMe() RETURNS()
 	LET vb = frm.createChild("VBox")
 	LET g = vb.createChild("Grid")
 	LET ff = g.createChild("FormField")
-	CALL ff.setATtribute("colName", "txt")
+	CALL ff.setAttribute("colName", "txt")
 	LET t = ff.createChild("TextEdit")
-	CALL t.setATtribute("scroll", "both")
-	CALL t.setATtribute("stretch", "both")
-	CALL t.setATtribute("gridWidth", "80")
-	CALL t.setATtribute("height", "60")
+	CALL t.setAttribute("scroll", "both")
+	CALL t.setAttribute("stretch", "both")
+	CALL t.setAttribute("gridWidth", "80")
+	CALL t.setAttribute("height", "60")
 
 	DISPLAY BY NAME txt
 	MENU
@@ -331,17 +329,19 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_HTTP_USER_AGENT"
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_REMOTE_ADDR"
 
-	LET l_envlistFile = os.path.join("..","etc")
-	LET l_envlistFile = os.path.join(l_envlistFile, "showenv.cfg")
-	IF os.path.exists( l_envlistFile ) THEN
+	LET l_envlistFile = os.Path.join("..", "etc")
+	LET l_envlistFile = os.Path.join(l_envlistFile, "showenv.cfg")
+	IF os.Path.exists(l_envlistFile) THEN
 		LET c = base.Channel.create()
 		TRY
 			CALL c.openFile(l_envlistFile, "r")
 			WHILE NOT c.isEof()
 				LET l_line = c.readLine().trim()
-				LET x = l_line.getIndexOf(" ",x)
-				IF x > 1 THEN LET l_line = l_line.subString(1,x) END IF
-				IF l_line IS NOT NULL AND l_line.getCharAt(1) != "#"  THEN
+				LET x = l_line.getIndexOf(" ", x)
+				IF x > 1 THEN
+					LET l_line = l_line.subString(1, x)
+				END IF
+				IF l_line IS NOT NULL AND l_line.getCharAt(1) != "#" THEN
 					LET env[env.getLength() + 1].nam = l_line
 				END IF
 			END WHILE
@@ -383,7 +383,7 @@ FUNCTION g2_showEnv() RETURNS()
 	DISPLAY ARRAY env TO showenv.* ATTRIBUTE(COUNT = env.getLength())
 		ON ACTION dumpenv
 			RUN "env | sort > env.txt"
-			CALL fgl_putFile("env.txt","env.txt")
+			CALL fgl_putfile("env.txt", "env.txt")
 	END DISPLAY
 	CLOSE WINDOW showEnv
 END FUNCTION
@@ -443,7 +443,7 @@ FUNCTION g2_progBar(l_meth SMALLINT, l_curval INT, l_txt STRING) RETURNS()
 		CLOSE WINDOW progbar
 	END IF
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -508,7 +508,7 @@ FUNCTION g2_winInfo(l_meth SMALLINT, l_txt STRING, l_icon STRING) RETURNS()
 		CLOSE WINDOW gl_winInfo
 	END IF
 
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -525,17 +525,9 @@ END FUNCTION
 #+ @param s Style.
 #+ @return nothing
 FUNCTION g2_addField(
-		f om.DomNode,
-		x SMALLINT,
-		y SMALLINT,
-		wgt STRING,
-		fld STRING,
-		w SMALLINT,
-		com STRING,
-		j STRING,
-		s STRING)
+		f om.DomNode, x SMALLINT, y SMALLINT, wgt STRING, fld STRING, w SMALLINT, com STRING, j STRING, s STRING)
 		RETURNS()
-	DEFINE n om.domNode
+	DEFINE n om.DomNode
 	DEFINE h SMALLINT
 
 	LET f = f.createChild("FormField")

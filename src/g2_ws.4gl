@@ -1,6 +1,18 @@
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+
+
 IMPORT com
 IMPORT util
+IMPORT FGL g2_core
 IMPORT FGL g2_logging
+
 PUBLIC DEFINE m_server STRING
 PUBLIC TYPE t_response RECORD
 	server STRING,
@@ -12,7 +24,7 @@ END RECORD
 PUBLIC DEFINE ws_response t_response
 ----------------------------------------------------------------------------------------------------
 -- Start the service loop
-PUBLIC FUNCTION start(L_module STRING, l_basePath STRING, g2_log g2_logging.logger INOUT)
+PUBLIC FUNCTION start(l_module STRING, l_basePath STRING, g2_log g2_logging.logger INOUT)
 	DEFINE l_ret SMALLINT
 	DEFINE l_msg STRING
 
@@ -72,5 +84,5 @@ PUBLIC FUNCTION service_reply(l_stat INT, l_reply STRING) RETURNS STRING
 	LET ws_response.server = m_server
 	LET ws_response.timestamp = CURRENT
 	LET ws_response.status = l_stat
-	RETURN util.json.stringify(ws_response)
+	RETURN util.JSON.stringify(ws_response)
 END FUNCTION
