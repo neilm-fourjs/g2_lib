@@ -1,4 +1,17 @@
-IMPORT FGL g2_lib
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
+
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 IMPORT util
 
 CONSTANT SQL_FIRST = 0
@@ -63,7 +76,7 @@ FUNCTION (this sql) g2_SQLcursor()
 	TRY
 		CALL this.handle.prepare(l_sql)
 	CATCH
-		CALL g2_lib.g2_errPopup(
+		CALL g2_core.g2_errPopup(
 				SFMT(% "Failed to doing prepare for select from '%1'\n%2!", this.table_name, SQLERRMESSAGE))
 		EXIT PROGRAM
 	END TRY
@@ -81,7 +94,7 @@ FUNCTION (this sql) g2_SQLcursor()
 		CALL this.g2_SQLsetColumnProps(x)
 	END FOR
 	IF this.key_field_num = 0 THEN
-		CALL g2_lib.g2_errPopup(
+		CALL g2_core.g2_errPopup(
 				SFMT(% "The key field '%1' doesn't appear to be in the table!", this.key_field.trim()))
 		EXIT PROGRAM
 	END IF
@@ -253,7 +266,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(this.current_row, FALSE)
 	ELSE
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to update record!\n%1!", SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to update record!\n%1!", SQLERRMESSAGE))
 		RETURN FALSE
 	END IF
 	RETURN TRUE
@@ -312,7 +325,7 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(SQL_LAST, FALSE)
 	ELSE
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to insert record!\n%1!", SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to insert record!\n%1!", SQLERRMESSAGE))
 		RETURN FALSE
 	END IF
 	RETURN TRUE
@@ -323,7 +336,7 @@ FUNCTION (this sql) g2_SQLdelete() RETURNS BOOLEAN
 	DEFINE l_sql, l_val STRING
 	LET l_val = this.handle.getResultValue(this.key_field_num)
 	LET l_sql = "DELETE FROM " || this.table_name || " WHERE " || this.key_field || " = ?"
-	IF g2_lib.g2_winQuestion(
+	IF g2_core.g2_winQuestion(
 							% "Confirm",
 							SFMT(% "Are you sure you want to delete this record?\n\n%1\nKey = %2", l_sql, l_val),
 							% "No",
@@ -341,7 +354,7 @@ FUNCTION (this sql) g2_SQLdelete() RETURNS BOOLEAN
 			LET this.rows_count = this.rows_count - 1
 			CALL this.g2_SQLgetRow(this.current_row, FALSE)
 		ELSE
-			CALL g2_lib.g2_errPopup(SFMT(% "Failed to delete record!\n%1!", SQLERRMESSAGE))
+			CALL g2_core.g2_errPopup(SFMT(% "Failed to delete record!\n%1!", SQLERRMESSAGE))
 			RETURN FALSE
 		END IF
 	ELSE

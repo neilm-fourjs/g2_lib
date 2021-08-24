@@ -1,8 +1,6 @@
 
 IMPORT util
-IMPORT FGL g2_lib
-IMPORT FGL g2_db
-IMPORT FGL g2_sql
+IMPORT FGL g2_lib.*
 
 IMPORT FGL lib_expect
 SCHEMA njm_demo310
@@ -14,7 +12,7 @@ MAIN
 	DEFINE l_keyField STRING = "stock_code"
 	DEFINE l_stk RECORD LIKE stock.*
 
-  CALL g2_lib.g2_init("S", NULL)
+  CALL g2_core.g2_init("S", NULL)
   CALL l_db.g2_connect("njm_demo310")
 
 -- attempt to get an invalid row

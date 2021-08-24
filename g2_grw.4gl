@@ -1,5 +1,18 @@
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
+
+PACKAGE g2_lib
+
 IMPORT os
-IMPORT FGL g2_lib
+IMPORT FGL g2_lib.*
 
 -- From $GREDIR/lib
 IMPORT FGL libgreprops
@@ -78,12 +91,12 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		LET this.rptName = os.path.join(this.reportsDir, this.rptName.append(".4rp"))
 	END IF
 	IF NOT os.path.exists(this.rptName) THEN
-		CALL g2_lib.g2_winMessage(
+		CALL g2_core.g2_winMessage(
 				"Error", SFMT("Report Design '%1' not found!", this.rptName), "exclamation")
 		RETURN FALSE
 	END IF
 	IF NOT libgre.fgl_report_loadCurrentSettings(this.rptName) THEN
-		CALL g2_lib.g2_winMessage("Error", "Report initialize failed!", "exclamation")
+		CALL g2_core.g2_winMessage("Error", "Report initialize failed!", "exclamation")
 		RETURN FALSE
 	END IF
 	IF NOT this.allOkay("load") THEN
@@ -224,9 +237,10 @@ FUNCTION (this greRpt) finish() RETURNS()
 	LET this.finished = CURRENT
 	MESSAGE SFMT("Report %1 Finished.", NVL(this.rptName, "ASCII"))
 	CALL ui.Interface.refresh()
-	IF NOT this.preview THEN
-		DISPLAY SFMT("Trying to open %1", os.path.join(this.greOutputDir, this.fileName) )
-		RUN "xdg-open "||os.path.join(this.greOutputDir, this.fileName)
+  IF NOT this.preview THEN
+    DISPLAY SFMT("Trying to open %1", os.Path.join(this.greOutputDir, this.fileName) )
+--TODO: need to detect OS version and change this !!
+    RUN "xdg-open "||os.Path.join(this.greOutputDir, this.fileName)
 	END IF
 END FUNCTION
 -------------------------------------------------------------------------------
@@ -278,7 +292,7 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		ON ACTION close LET int_flag = TRUE
 	END MENU
 	IF int_flag THEN
-		CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
+		CALL g2_core.g2_winMessage("Cancelled", "Report cancelled", "information")
 		RETURN FALSE
 	END IF
 	IF l_dest = "F" THEN
@@ -296,7 +310,7 @@ FUNCTION (this greRpt) getOutput() RETURNS BOOLEAN
 		END IF
 	END IF
 	IF int_flag THEN
-		CALL g2_lib.g2_winMessage("Cancelled", "Report cancelled", "information")
+		CALL g2_core.g2_winMessage("Cancelled", "Report cancelled", "information")
 		RETURN FALSE
 	END IF
 	DISPLAY SFMT("g2_grw: Filename: %1", this.fileName)

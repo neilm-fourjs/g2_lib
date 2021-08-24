@@ -17,18 +17,19 @@
 #+ This module initially written by: Neil J.Martin ( neilm@4js.com )
 #+
 
+PACKAGE g2_lib
+
 IMPORT xml
 IMPORT os
 IMPORT security
 IMPORT util
 
-IMPORT FGL g2_lib
-IMPORT FGL g2_encrypt
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 -- Private variables:
-DEFINE m_doc xml.domDocument
-DEFINE m_user_node, m_pass_node xml.domNode
+DEFINE m_doc xml.DomDocument
+DEFINE m_user_node, m_pass_node xml.DomNode
 DEFINE m_file STRING
 DEFINE m_enc encrypt
 
@@ -57,9 +58,9 @@ FUNCTION g2_genPassword() RETURNS STRING
 		END FOR
 	END WHILE
 -- Add a random symbol to the random string.
-	CALL util.math.srand()
-	LET x = util.math.rand(C_DEFPASSLEN - 1) + 1
-	LET y = util.math.rand(C_SYMBOLS.getLength())
+	CALL util.Math.srand()
+	LET x = util.Math.rand(C_DEFPASSLEN - 1) + 1
+	LET y = util.Math.rand(C_SYMBOLS.getLength())
 	DISPLAY "X:", x, " Y:", y
 	LET l_pass[x] = C_SYMBOLS.getCharAt(y)
 --	DISPLAY "Pass:",l_pass
@@ -84,20 +85,20 @@ FUNCTION g2_genSalt(l_hashtype STRING) RETURNS STRING
 	END IF
 	CASE l_hashtype
 		WHEN "BCRYPT"
-			CALL g2_lib.g2_log.logIt("Generating BCrypt Salt")
+			CALL g2_core.g2_log.logIt("Generating BCrypt Salt")
 			TRY
 				LET l_salt = security.BCrypt.GenerateSalt(12)
 			CATCH
-				CALL g2_lib.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+				CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
 			END TRY
 		WHEN "SHA512"
-			CALL g2_lib.g2_log.logIt("Generating Random Salt")
+			CALL g2_core.g2_log.logIt("Generating Random Salt")
 			LET l_salt = security.RandomGenerator.CreateRandomString(16)
 		OTHERWISE
-			CALL g2_lib.g2_errPopup(% "Unsupported Encryption Type Requested!")
+			CALL g2_core.g2_errPopup(% "Unsupported Encryption Type Requested!")
 			EXIT PROGRAM
 	END CASE
-	CALL g2_lib.g2_log.logIt("Salt Generated:" || l_salt || " (" || l_salt.getLength() || ")")
+	CALL g2_core.g2_log.logIt("Salt Generated:" || l_salt || " (" || l_salt.getLength() || ")")
 	RETURN l_salt
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -123,10 +124,10 @@ FUNCTION g2_genPasswordHash(l_pass STRING, l_salt STRING, l_hashtype STRING) RET
 	TRY
 		CASE l_hashtype
 			WHEN "BCRYPT"
-				CALL g2_lib.g2_log.logIt("Generating BCrypt HashPassword")
-				LET l_hash = Security.BCrypt.HashPassword(l_pass, l_salt)
+				CALL g2_core.g2_log.logIt("Generating BCrypt HashPassword")
+				LET l_hash = security.BCrypt.HashPassword(l_pass, l_salt)
 			WHEN "SHA512"
-				CALL g2_lib.g2_log.logIt("Generating " || l_hashtype || " HashPassword")
+				CALL g2_core.g2_log.logIt("Generating " || l_hashtype || " HashPassword")
 				LET l_hash = l_pass || l_salt
 				FOR x = 1 TO C_SHA_ITERATIONS
 					LET l_dgst = security.Digest.CreateDigest(l_hashtype)
@@ -134,12 +135,12 @@ FUNCTION g2_genPasswordHash(l_pass STRING, l_salt STRING, l_hashtype STRING) RET
 					LET l_hash = l_dgst.DoBase64Digest()
 				END FOR
 			OTHERWISE
-				CALL g2_lib.g2_errPopup(% "Unsupported Encryption Type Requested!")
+				CALL g2_core.g2_errPopup(% "Unsupported Encryption Type Requested!")
 				EXIT PROGRAM
 		END CASE
-		CALL g2_lib.g2_log.logIt("Hash created:" || l_hash || " (" || l_hash.getLength() || ")")
+		CALL g2_core.g2_log.logIt("Hash created:" || l_hash || " (" || l_hash.getLength() || ")")
 	CATCH
-		CALL g2_lib.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+		CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
 	END TRY
 
 	RETURN l_hash
@@ -164,28 +165,28 @@ FUNCTION g2_chkPassword(
 	END IF
 	CASE l_hashtype
 		WHEN "BCRYPT"
-			CALL g2_lib.g2_log.logIt("checking password using BCRYPT")
+			CALL g2_core.g2_log.logIt("checking password using BCRYPT")
 			TRY
-				IF Security.BCrypt.CheckPassword(l_pass, l_passhash) THEN
-					CALL g2_lib.g2_log.logIt("Password checked okay.")
+				IF security.BCrypt.CheckPassword(l_pass, l_passhash) THEN
+					CALL g2_core.g2_log.logIt("Password checked okay.")
 					RETURN TRUE
 				END IF
 			CATCH
-				CALL g2_lib.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+				CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
 			END TRY
 		WHEN "SHA512"
-			CALL g2_lib.g2_log.logIt("checking password using " || l_hashtype)
+			CALL g2_core.g2_log.logIt("checking password using " || l_hashtype)
 			LET l_hash = g2_genPasswordHash(l_pass, l_salt, l_hashtype)
 			IF l_hash = l_passhash THEN
-				CALL g2_lib.g2_log.logIt("Password checked okay.")
+				CALL g2_core.g2_log.logIt("Password checked okay.")
 				RETURN TRUE
 			END IF
 		OTHERWISE
-			CALL g2_lib.g2_errPopup(% "Unsupported Encryption Type Requested!")
+			CALL g2_core.g2_errPopup(% "Unsupported Encryption Type Requested!")
 			EXIT PROGRAM
 	END CASE
 
-	CALL g2_lib.g2_log.logIt("Password checked failed.")
+	CALL g2_core.g2_log.logIt("Password checked failed.")
 	RETURN FALSE
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -270,9 +271,9 @@ FUNCTION g2_fromBase64(l_str STRING) RETURNS STRING
 		RETURN NULL
 	END IF
 	TRY
-		LET l_str = security.Base64.toString(l_str)
+		LET l_str = security.Base64.ToString(l_str)
 	CATCH
-		CALL g2_lib.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
+		CALL g2_core.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
 		LET l_str = NULL
 	END TRY
 
@@ -291,7 +292,7 @@ FUNCTION g2_toBase64(l_str STRING) RETURNS STRING
 	TRY
 		LET l_str = security.Base64.fromString(l_str)
 	CATCH
-		CALL g2_lib.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
+		CALL g2_core.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
 		LET l_str = NULL
 	END TRY
 
@@ -329,7 +330,7 @@ FUNCTION g2_getCreds(l_typ STRING) RETURNS(STRING, STRING)
 		IF l_list.getCount() == 1 THEN
 			LET l_node = l_list.getItem(1)
 		ELSE
-			CALL g2_lib.g2_log.logIt("No encrypted l_node found")
+			CALL g2_core.g2_log.logIt("No encrypted l_node found")
 			EXIT PROGRAM 210
 		END IF
 		# Check if symmetric key name matches the expected "MySecretKey" (Not mandatory)
@@ -340,11 +341,11 @@ FUNCTION g2_getCreds(l_typ STRING) RETURNS(STRING, STRING)
 						"dsig",
 						"http://www.w3.org/2000/09/xmldsig#")
 		IF l_list.getCount() != 1 THEN
-			CALL g2_lib.g2_log.logIt("Key name doesn't match")
+			CALL g2_core.g2_log.logIt("Key name doesn't match")
 			EXIT PROGRAM 211
 		END IF
 	CATCH
-		CALL g2_lib.g2_log.logIt(
+		CALL g2_core.g2_log.logIt(
 				"Unable to load / process XML file :" || STATUS || ":" || err_get(STATUS))
 		EXIT PROGRAM 212
 	END TRY
@@ -363,7 +364,7 @@ FUNCTION g2_getCreds(l_typ STRING) RETURNS(STRING, STRING)
 		--DISPLAY l_doc.saveToString()
 		--DISPLAY "Successful decrypted"
 	CATCH
-		CALL g2_lib.g2_log.logIt("Unable to decrypt XML file :" || STATUS || ":" || err_get(STATUS))
+		CALL g2_core.g2_log.logIt("Unable to decrypt XML file :" || STATUS || ":" || err_get(STATUS))
 		EXIT PROGRAM 213
 	END TRY
 
@@ -400,7 +401,7 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 	DEFINE l_old_usr, l_old_pass STRING
 	DEFINE l_root xml.DomNode
 	DEFINE enc xml.Encryption
-	DEFINE symkey xml.CryptoKey
+	DEFINE symKey xml.CryptoKey
 	DEFINE l_myKey CHAR(32)
 	DEFINE l_dte STRING
 
@@ -415,22 +416,22 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 		CALL m_pass_node.setNodeValue(l_pass)
 		# CALL m_doc.save("DecryptedXMLFile.xml")
 		IF NOT os.Path.rename(m_file, m_file || l_dte) THEN
-			CALL g2_lib.g2_log.logIt("Failed to backup creds file:" || STATUS || ":" || err_get(STATUS))
+			CALL g2_core.g2_log.logIt("Failed to backup creds file:" || STATUS || ":" || err_get(STATUS))
 			RETURN FALSE
 		END IF
 		# Create symmetric AES256 key for XML encryption purposes
-		LET symkey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
-		CALL symkey.setKey(l_mykey) # password of 256 bits
+		LET symKey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+		CALL symKey.setKey(l_myKey) # password of 256 bits
 		CALL symKey.setFeature(
 				"KeyName", "MySecretKey") # Name the password in order to identify the key (Not mandatory)
 		# Encrypt the entire document
 		LET enc = xml.Encryption.Create()
-		CALL enc.setKey(symkey) # Set the symmetric key to be used
+		CALL enc.setKey(symKey) # Set the symmetric key to be used
 		CALL enc.encryptElement(l_root) # Encrypt
 		# Save encrypted document back to disk
 		CALL m_doc.save(m_file)
 	CATCH
-		CALL g2_lib.g2_log.logIt("Unable to encrypt XML file :" || STATUS || ":" || err_get(STATUS))
+		CALL g2_core.g2_log.logIt("Unable to encrypt XML file :" || STATUS || ":" || err_get(STATUS))
 		RETURN FALSE
 	END TRY
 	RETURN TRUE
@@ -439,16 +440,16 @@ END FUNCTION
 FUNCTION g2_saveSession(l_id STRING, l_user STRING) RETURNS()
 	DEFINE l_val STRING
 
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN
 	END IF
-	IF NOT g2_lib.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
+	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
 		RETURN
 	END IF
 	CALL m_enc.init(C_CERTFILE, C_PRIVATEKEY)
 	LET l_val = m_enc.encrypt(CURRENT YEAR TO MINUTE || "|" || l_user)
 	IF l_val IS NOT NULL THEN
-		CALL g2_lib.g2_log.logIt(SFMT("Save Session id=%1 val=%2", l_id, l_val))
+		CALL g2_core.g2_log.logIt(SFMT("Save Session id=%1 val=%2", l_id, l_val))
 		CALL ui.Interface.frontCall("localStorage", "setItem", [l_id, l_val], [])
 	END IF
 END FUNCTION
@@ -457,14 +458,14 @@ FUNCTION g2_getSession(l_id STRING, l_age INTEGER) RETURNS STRING
 	DEFINE l_val STRING
 	DEFINE l_ts DATETIME YEAR TO MINUTE
 	DEFINE x SMALLINT
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN NULL
 	END IF
-	IF NOT g2_lib.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
+	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
 		RETURN NULL
 	END IF
 	IF NOT os.Path.readable(C_PRIVATEKEY) THEN
-		CALL g2_lib.g2_winMessage(
+		CALL g2_core.g2_winMessage(
 				"Warning", "Private key file can not be read!\nAuto login not available.", "information")
 		RETURN NULL
 	END IF
@@ -474,15 +475,15 @@ FUNCTION g2_getSession(l_id STRING, l_age INTEGER) RETURNS STRING
 		CALL ui.Interface.frontCall("localStorage", "getItem", l_id, l_val)
 		GL_DBGMSG(1, "localStorage - getItem done")
 	CATCH
-		CALL g2_lib.g2_errPopup("localStorage - getItem Failed!")
+		CALL g2_core.g2_errPopup("localStorage - getItem Failed!")
 		RETURN NULL
 	END TRY
-	CALL g2_lib.g2_log.logIt(SFMT("Get Session id=%1 val=%2", l_id, l_val))
+	CALL g2_core.g2_log.logIt(SFMT("Get Session id=%1 val=%2", l_id, l_val))
 	IF l_val IS NULL THEN
 		RETURN NULL
 	END IF
 	LET l_val = m_enc.decrypt(l_val)
---	CALL g2_lib.g2_logIt(SFMT("Get Session val=%1",l_val))
+--	CALL g2_core.g2_logIt(SFMT("Get Session val=%1",l_val))
 	LET x = l_val.getIndexOf("|", 1)
 	LET l_ts = l_val.subString(1, x - 1)
 	IF l_ts IS NULL THEN
@@ -498,10 +499,10 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION g2_removeSession(l_id STRING)
 
-	IF ui.interface.getFrontEndName() = "GGC" THEN
+	IF ui.Interface.getFrontEndName() = "GGC" THEN
 		RETURN
 	END IF
-	IF NOT g2_lib.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
+	IF NOT g2_core.g2_chkClientVer("GDC", "3.10.18", "localeStorage") THEN
 		RETURN
 	END IF
 
@@ -618,8 +619,8 @@ END FUNCTION
 PRIVATE FUNCTION get_credFile() RETURNS()
 	LET m_file = "../etc/.creds.xml"
 	IF NOT os.Path.exists(m_file) THEN
-		CALL g2_lib.g2_log.logIt("Creditials File is Missing!")
+		CALL g2_core.g2_log.logIt("Creditials File is Missing!")
 	ELSE
-		CALL g2_lib.g2_log.logIt("Creditials File is " || m_file)
+		CALL g2_core.g2_log.logIt("Creditials File is " || m_file)
 	END IF
 END FUNCTION

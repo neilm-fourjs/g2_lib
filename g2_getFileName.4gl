@@ -1,6 +1,18 @@
+--------------------------------------------------------------------------------
+#+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
+#+ This library is intended as an example of useful library code for use with
+#+ Genero 4.00 and above
+#+  
+#+ No warrantee of any kind, express or implied, is included with this software;
+#+ use at your own risk, responsibility for damages (if any) to anyone resulting
+#+ from the use of this software rests entirely with the user.
+#+  
+#+ No includes required.
+
+PACKAGE g2_lib
+
 IMPORT os
-IMPORT FGL g2_lib
-IMPORT FGL g2_simpleLookup
+IMPORT FGL g2_lib.*
 --------------------------------------------------------------------------------------------------------------
 -- Do a simple list of files and return selected name
 --
@@ -19,13 +31,13 @@ FUNCTION g2_getFileName(l_folder STRING, l_ext STRING, l_titl STRING, l_head STR
 		WHILE TRUE
 			LET l_path = os.Path.dirNext(d)
 			IF l_path IS NULL THEN EXIT WHILE END IF
-			IF os.path.isDirectory(l_path) THEN CONTINUE WHILE END IF
-			IF NOT os.path.extension(l_path) MATCHES l_ext THEN CONTINUE WHILE END IF
-			LET sl.arr[ sl.arr.getLength() + 1 ].desc = os.path.rootName( l_path )
+			IF os.Path.isDirectory(l_path) THEN CONTINUE WHILE END IF
+			IF NOT os.Path.extension(l_path) MATCHES l_ext THEN CONTINUE WHILE END IF
+			LET sl.arr[ sl.arr.getLength() + 1 ].desc = os.Path.rootName( l_path )
 		END WHILE
 	END IF
 	IF sl.arr.getLength() = 0 THEN
-		CALL g2_lib.g2_winMessage("Error",SFMT("No '%1' files found in %2",l_ext,l_folder),"exclamation")
+		CALL g2_core.g2_winMessage("Error",SFMT("No '%1' files found in %2",l_ext,l_folder),"exclamation")
 		RETURN NULL
 	END IF
 	LET sl.title = l_titl

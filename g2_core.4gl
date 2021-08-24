@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -9,10 +9,11 @@
 #+
 #+ No includes required.
 
+PACKAGE g2_lib
+
 IMPORT os
 IMPORT util
-IMPORT FGL g2_logging
-IMPORT FGL g2_appInfo
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 PUBLIC DEFINE g2_log g2_logging.logger
@@ -28,19 +29,18 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
 	CALL STARTLOG(g2_err.fullLogPath)
 	LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
-	GL_DBGMSG(0, SFMT("g2_lib: Program: %1 pwd: %2", base.application.getProgramName(), os.path.pwd() ))
-	GL_DBGMSG(1, SFMT("g2_lib: debug level = %1", gl_dbgLev))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLDIR=%1", fgl_getEnv("FGLDIR")))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
-	GL_DBGMSG(1, SFMT("g2_lib: FGLPROFILE=%1", fgl_getEnv("FGLPROFILE")))
-	GL_DBGMSG(1, SFMT("g2_lib: flm.license.number=%1", fgl_getResource("flm.license.number")))
+	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
+	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
+	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getEnv("FGLDIR")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
+
 	WHENEVER ANY ERROR CALL g2_error
 
 -- Try and figure out what the client is capable of GDC(Native/UR) / GBC
 	LET l_gbc = ui.Interface.getUniversalClientName()
 	LET l_fe = ui.Interface.getFrontEndName()
-	GL_DBGMSG(1, SFMT("g2_lib: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
+	GL_DBGMSG(1, SFMT("g2_core: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
 	IF l_gbc.getLength() < 3 THEN
 		LET l_gbc = "?"
 	END IF
@@ -106,14 +106,14 @@ FUNCTION g2_loadStyles(l_stName STRING) RETURNS()
 	IF m_isGDC AND NOT m_isUniversal THEN LET l_fe = "GDC" END IF
 	LET l_name = l_stName || "_" || l_fe
 	TRY
-		CALL ui.interface.loadStyles(l_name)
+		CALL ui.Interface.loadStyles(l_name)
 	CATCH
 		LET l_name = l_stName
 		LET l_ok = FALSE
 	END TRY
 	IF NOT l_ok THEN
 		TRY
-			CALL ui.interface.loadStyles(l_name)
+			CALL ui.Interface.loadStyles(l_name)
 			LET l_ok = TRUE
 		CATCH
 			LET l_name = l_name.append(" FAILED using 'default'")
@@ -121,7 +121,7 @@ FUNCTION g2_loadStyles(l_stName STRING) RETURNS()
 	END IF
 	IF NOT l_ok THEN
 		TRY
-			CALL ui.interface.loadStyles("default")
+			CALL ui.Interface.loadStyles("default")
 		CATCH
 			LET l_name = l_name.append(" & default FAILED!")
 		END TRY
@@ -205,7 +205,7 @@ END FUNCTION
 #+ @param l_icon			= Icon name, "exclamation"
 #+ @return none
 FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS()
-	DEFINE l_win ui.window
+	DEFINE l_win ui.Window
 	IF l_title IS NULL THEN
 		LET l_title = "No Title!"
 	END IF
@@ -218,7 +218,7 @@ FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS(
 		RETURN
 	END IF
 
-	LET l_win = ui.window.getcurrent()
+	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN -- Needs a current window or dialog doesn't work!!
 		OPEN WINDOW dummy AT 1, 1 WITH 1 ROWS, 1 COLUMNS
 		-- clear default window title to avoid 'dummy' showing in gbc.
@@ -252,7 +252,7 @@ FUNCTION g2_winQuestion(
 		l_title STRING, l_message STRING, l_ans STRING, l_items STRING, l_icon STRING)
 		RETURNS STRING
 	DEFINE l_result STRING
-	DEFINE l_toks base.STRINGTOKENIZER
+	DEFINE l_toks base.StringTokenizer
 	DEFINE l_dum BOOLEAN
 	DEFINE l_opt DYNAMIC ARRAY OF STRING
 	DEFINE x SMALLINT
@@ -278,7 +278,7 @@ FUNCTION g2_winQuestion(
 
 	-- Handle the case when there is no current window
 	LET l_dum = FALSE
-	IF ui.window.getCurrent() IS NULL THEN
+	IF ui.Window.getCurrent() IS NULL THEN
 		OPEN WINDOW dummy AT 1, 1 WITH 1 ROWS, 2 COLUMNS ATTRIBUTE(STYLE = "naked")
 		CALL ui.Window.getCurrent().setText(l_title)
 		LET l_dum = TRUE
@@ -477,9 +477,9 @@ END FUNCTION
 #+ @param l_prod String of product name, eg: fglrun
 #+ @return String or NULL
 FUNCTION g2_getProductVer(l_prod STRING) RETURNS STRING
-	DEFINE l_file base.channel
+	DEFINE l_file base.Channel
 	DEFINE l_line STRING
-	LET l_file = base.channel.create()
+	LET l_file = base.Channel.create()
 	CALL l_file.openPipe("fpi -l", "r")
 	WHILE NOT l_file.isEof()
 		LET l_line = l_file.readLine()
@@ -514,14 +514,14 @@ END FUNCTION
 #+ @return uname of the OS
 FUNCTION g2_getHostname() RETURNS STRING
 	DEFINE l_hostname STRING
-	DEFINE c base.channel
+	DEFINE c base.Channel
 	IF os.Path.pathSeparator() = ";" THEN -- Windows
 		LET l_hostname = fgl_getEnv("COMPUTERNAME")
 	ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
 		LET l_hostname = fgl_getEnv("HOSTNAME")
 	END IF
 	IF l_hostname.getLength() < 2 THEN
-		LET c = base.channel.create()
+		LET c = base.Channel.create()
 		CALL c.openPipe("hostname -f", "r")
 		LET l_hostname = c.readLine()
 		CALL c.close()
@@ -534,8 +534,8 @@ END FUNCTION
 #+ @return uname of the OS
 FUNCTION g2_getUname() RETURNS STRING
 	DEFINE l_uname STRING
-	DEFINE c base.channel
-	LET c = base.channel.create()
+	DEFINE c base.Channel
+	LET c = base.Channel.create()
 	CALL c.openPipe("uname", "r")
 	LET l_uname = c.readLine()
 	CALL c.close()
@@ -547,7 +547,7 @@ END FUNCTION
 #+ @return OS Version
 FUNCTION g2_getLinuxVer() RETURNS STRING
 	DEFINE l_ver STRING
-	DEFINE c base.channel
+	DEFINE c base.Channel
 	DEFINE l_file DYNAMIC ARRAY OF STRING
 	DEFINE x SMALLINT
 
@@ -569,7 +569,7 @@ FUNCTION g2_getLinuxVer() RETURNS STRING
 	END FOR
 
 -- read the first line of existing file
-	LET c = base.channel.create()
+	LET c = base.Channel.create()
 	CALL c.openFile(l_file[x], "r")
 	LET l_ver = c.readLine()
 	CALL c.close()
@@ -597,7 +597,7 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
 			AT 1, 1
 			WITH 1 ROWS, 1 COLUMNS
 			ATTRIBUTE(STYLE = "default noborder dialog2 bg_white")
-	LET f = ui.window.getCurrent().createForm("splash").getNode()
+	LET f = ui.Window.getCurrent().createForm("splash").getNode()
 	LET g = f.createChild("Grid")
 	LET n = g.createChild("Image")
 	CALL n.setAttribute("name", "logo")
@@ -609,7 +609,7 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
 	CALL n.setAttribute("width", l_w || "px")
 	CALL n.setAttribute("stretch", "both")
 	CALL n.setAttribute("autoScale", "1")
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 	IF l_dur > 0 THEN
 		SLEEP l_dur
@@ -636,7 +636,7 @@ FUNCTION g2_getImagePath() RETURNS STRING
 	DEFINE l_imgPath STRING
 	DEFINE x SMALLINT
 	LET l_imgPath = fgl_getEnv("FGLIMAGEPATH")
-	LET x = l_imgPath.getIndexOf(os.path.pathSeparator(),1)
+	LET x = l_imgPath.getIndexOf(os.Path.pathSeparator(),1)
 	IF x > 0 THEN
 		LET l_imgPath = l_imgPath.subString(1,x-1)
 	END IF

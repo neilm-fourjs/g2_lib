@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 >
+#+ Genero 4.00 >
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -31,9 +31,9 @@
 --	DISPLAY "Selected value:", l_lookup.g2_lookup2()
 --
 
-IMPORT FGL g2_lib
-IMPORT FGL g2_aui
-IMPORT FGL g2_db
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 PUBLIC TYPE lookup RECORD
@@ -92,7 +92,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 -- Check to make sure there are records.
 	LET this.totalRecords = this.countRows(this.whereClause)
 	IF this.totalRecords < 1 THEN
-		CALL g2_lib.g2_errPopup(% "No Records Found")
+		CALL g2_core.g2_errPopup(% "No Records Found")
 		RETURN NULL
 	END IF
 
@@ -111,7 +111,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 		CALL this.sqlQueryHandle.prepare(this.sql_getData)
 		CALL this.sqlQueryHandle.openScrollCursor()
 	CATCH
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_getData, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_getData, SQLERRMESSAGE))
 		RETURN NULL
 	END TRY
 	CALL this.fields.clear()
@@ -384,7 +384,7 @@ FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
 	TRY
 		PREPARE listcntpre FROM this.sql_count
 	CATCH
-		CALL g2_lib.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_count, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", this.sql_count, SQLERRMESSAGE))
 		RETURN 0
 	END TRY
 	DECLARE listcntcur CURSOR FOR listcntpre
@@ -411,11 +411,11 @@ PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
 		LET this.allowInsert = FALSE -- can't do this no table name!
 		LET this.allowUpdate = FALSE -- can't do this no table name!
 	END IF
-	IF this.columnlist IS NULL AND this.sql_getData IS NULL THEN
+	IF this.columnList IS NULL AND this.sql_getData IS NULL THEN
 		LET l_err = l_err.append("columnList ")
 	END IF
-	IF this.columnTitles IS NULL AND this.columnlist != "*" THEN
-		LET this.columnTitles = this.columnlist
+	IF this.columnTitles IS NULL AND this.columnList != "*" THEN
+		LET this.columnTitles = this.columnList
 	END IF
 	IF this.whereClause IS NULL THEN
 		LET this.whereClause = "1=1"
@@ -434,7 +434,7 @@ PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
 	END WHILE
 
 	IF l_err IS NOT NULL THEN
-		CALL g2_lib.g2_winMessage(
+		CALL g2_core.g2_winMessage(
 				"Error",
 				SFMT(% "Lookup called by initiated correctly!\nThe following are not set:%1", l_err),
 				"exclamation")
@@ -447,7 +447,7 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 	DEFINE l_confirm CHAR(1)
 	DEFINE l_sql STRING
 	LET l_confirm =
-			g2_lib.g2_winQuestion(
+			g2_core.g2_winQuestion(
 					"Delete", SFMT("Delete this record?\nKey'%1'", l_key), "Yes", "Yes|No", "question")
 	IF l_confirm = "Y" THEN
 		LET l_sql = SFMT("DELETE FROM %1 WHERE %2 = '%3'", this.tableName, this.fields[1].name, l_key)
@@ -457,7 +457,7 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 			RETURN FALSE
 		CATCH
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
-			CALL g2_lib.g2_winMessage(
+			CALL g2_core.g2_winMessage(
 					"Error", SFMT("Failed to delete!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
 		END TRY
 	END IF
@@ -502,7 +502,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 				IF l_key IS NULL AND NOT this.isKeySerial THEN
 					LET l_newKey = l_dia.getFieldValue(this.fields[1].name.trimRight())
 					IF this.countRows(SFMT("%1 = '%2'", this.fields[1].name, l_newKey)) > 0 THEN
-						CALL g2_lib.g2_winMessage(
+						CALL g2_core.g2_winMessage(
 								"Error", SFMT(% "Key '%1' already used!", l_newKey), "exclamation")
 						CALL l_dia.nextField(this.fields[1].name)
 					END IF
@@ -563,7 +563,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 		--DISPLAY "SQLCode:",SQLCA.sqlcode, " SQLERRD2:",SQLCA.sqlerrd[2], " sqlawarn:",SQLCA.sqlawarn
 		IF SQLCA.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
-			CALL g2_lib.g2_winMessage(
+			CALL g2_core.g2_winMessage(
 					"Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
 			RETURN TRUE -- int_flag
 		END IF

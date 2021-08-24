@@ -1,17 +1,16 @@
 --------------------------------------------------------------------------------
 #+ Genero About Window - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 3.20 and above
+#+ Genero 4.00 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 #+
 #+ No includes required.
+PACKAGE g2_lib
 IMPORT os
-IMPORT FGL g2_lib
-IMPORT FGL g2_aui
-IMPORT FGL g2_appInfo
+IMPORT FGL g2_lib.*
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+
@@ -19,31 +18,27 @@ IMPORT FGL g2_appInfo
 #+ @return Nothing.
 FUNCTION g2_about(l_appInfo appInfo INOUT)
 	DEFINE f, n, g, w om.DomNode
-	DEFINE nl om.nodeList
+	DEFINE nl om.NodeList
 	DEFINE gver, info, txt STRING
-	DEFINE l_fe_typ, l_fe_ver STRING
 	DEFINE y SMALLINT
 
-	LET gver = "build ", fgl_getVersion()
+	LET gver = "build ", fgl_getversion()
 
 	IF l_appInfo.fe_typ IS NULL THEN
 		CALL l_appInfo.getClientInfo()
-	END IF
-	IF l_fe_ver IS NULL THEN
-		LET l_fe_ver = "unknown"
 	END IF
 
 	IF l_appInfo.userName IS NULL THEN
 		CALL l_appInfo.setUserName(NULL)
 	END IF
 	IF l_appInfo.hostname IS NULL THEN
-		LET l_appInfo.hostname = g2_lib.g2_getHostname()
+		LET l_appInfo.hostname = g2_core.g2_getHostname()
 	END IF
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
-	LET n = g2_getWinNode(NULL)
-	CALL n.setAttribute("text", l_appInfo.progdesc)
-	LET f = g2_genForm("about")
+	LET n = g2_aui.g2_getWinNode(NULL)
+	CALL n.setAttribute("text", l_appInfo.progDesc)
+	LET f = g2_aui.g2_genForm("about")
 	LET n = f.createChild("VBox")
 	CALL n.setAttribute("posY", "0")
 	CALL n.setAttribute("posX", "0")
@@ -88,15 +83,15 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Program") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(
-			g, 10, y, l_appInfo.progname || " - " || l_appInfo.progversion, NULL, "black")
+			g, 10, y, l_appInfo.progName || " - " || l_appInfo.progVersion, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Description") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progdesc, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progDesc, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Author") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progauth, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progAuth, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -164,7 +159,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.uni_typ || " " || l_appInfo.uni_ver, NULL, "black")
 	LET y = y + 1
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("FrontEnd Version-FEinfo") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_fe_typ || " " || l_fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.fe_typ || " " || l_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
 	IF l_appInfo.cli_dir.getLength() > 1 THEN
@@ -226,9 +221,9 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		ON ACTION showreadme
 			CALL g2_aui.g2_showReadMe()
 		ON ACTION showlicence
-			CALL g2_aui.g2_showlicence()
+			CALL g2_aui.g2_showLicence()
 		ON ACTION copyabout
-			CALL ui.interface.frontCall("standard", "cbset", info, y)
+			CALL ui.Interface.frontCall("standard", "cbset", info, y)
 	END MENU
 	CLOSE WINDOW about
 
