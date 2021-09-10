@@ -152,7 +152,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		TRY
 			GL_DBGMSG(0, SFMT("Connecting to %1 Using: %2 Source: %3 ...", this.connection, this.driver, this.source))
 			DATABASE this.connection
-			GL_DBGMSG(0, "Connected.")
+			GL_DBGMSG(0, SFMT("Connected to %1 %2.", this.connection, this.type))
 		CATCH
 			LET l_failed = TRUE
 			LET l_msg =
@@ -172,7 +172,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		TRY
 			GL_DBGMSG(0, SFMT("Connecting to %1 User: %2 ...", l_customName, l_dbUser))
 			CONNECT TO l_customName USER l_dbUser USING l_dbPass
-			GL_DBGMSG(0, "Connected.")
+			GL_DBGMSG(0, SFMT("Connected to %1 %2.", this.connection, this.type))
 			LET this.name = l_customName
 		CATCH
 			LET l_failed = TRUE
@@ -208,6 +208,11 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			CALL g2_core.g2_errPopup(SFMT(% "Fatal Error %1", l_msg))
 			CALL g2_core.g2_exitProgram(1, l_msg)
 		END IF
+	END IF
+
+	IF this.type = "ifx" AND fgl_getEnv("SQLEXPLAIN") = "ON" THEN
+		GL_DBGMSG(0, "SQL Explain ON.")
+		SET EXPLAIN ON
 	END IF
 
 	IF l_lockMode THEN
