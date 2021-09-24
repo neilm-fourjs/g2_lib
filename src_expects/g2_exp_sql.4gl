@@ -17,7 +17,7 @@ MAIN
 
 -- attempt to get an invalid row
 	CALL l_sql.g2_SQLinit(l_table,"*",l_keyField, SFMT("%1 = '%2'",l_keyField,"dummy"))
-	CALL l_Sql.g2_SQLgetRow(1,TRUE)
+	CALL l_sql.g2_SQLgetRow(1,TRUE)
 	IF l_sql.rows_count != 0 THEN
 		CALL lib_expect.failed( SFMT(" row count = ", l_sql.rows_count))
 	ELSE
@@ -26,7 +26,7 @@ MAIN
 
 -- Fetch a row
 	CALL l_sql.g2_SQLinit(l_table,"*",l_keyField, SFMT("%1 = '%2'",l_keyField,"FR01"))
-	CALL l_Sql.g2_SQLgetRow(1,TRUE)
+	CALL l_sql.g2_SQLgetRow(1,TRUE)
 	IF l_sql.rows_count != 1 THEN
 		CALL lib_expect.failed( SFMT(" row count = ", l_sql.rows_count))
 	ELSE
