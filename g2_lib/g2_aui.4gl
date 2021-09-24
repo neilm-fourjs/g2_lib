@@ -169,7 +169,7 @@ FUNCTION g2_showLicence() RETURNS()
 
 	LET c = base.Channel.create()
 	CALL c.openPipe("fglWrt -a info 2>&1", "r")
-	DISPLAY "Status:", STATUS
+	DISPLAY "Status:", status
 	LET licString = "fglWrt -a info:\n"
 	WHILE NOT c.isEof()
 		LET licString = licString.append(c.readLine() || "\n")
@@ -212,7 +212,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	TRY
 		CALL c.openFile(txt, "r")
 	CATCH
-		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
+		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(status)), "information")
 		RETURN
 	END TRY
 

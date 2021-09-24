@@ -89,7 +89,7 @@ FUNCTION g2_genSalt(l_hashtype STRING) RETURNS STRING
 			TRY
 				LET l_salt = security.BCrypt.GenerateSalt(12)
 			CATCH
-				CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+				CALL g2_core.g2_log.logIt("ERROR:" || status || ":" || sqlca.sqlerrm)
 			END TRY
 		WHEN "SHA512"
 			CALL g2_core.g2_log.logIt("Generating Random Salt")
@@ -140,7 +140,7 @@ FUNCTION g2_genPasswordHash(l_pass STRING, l_salt STRING, l_hashtype STRING) RET
 		END CASE
 		CALL g2_core.g2_log.logIt("Hash created:" || l_hash || " (" || l_hash.getLength() || ")")
 	CATCH
-		CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+		CALL g2_core.g2_log.logIt("ERROR:" || status || ":" || sqlca.sqlerrm)
 	END TRY
 
 	RETURN l_hash
@@ -172,7 +172,7 @@ FUNCTION g2_chkPassword(
 					RETURN TRUE
 				END IF
 			CATCH
-				CALL g2_core.g2_log.logIt("ERROR:" || STATUS || ":" || SQLCA.SQLERRM)
+				CALL g2_core.g2_log.logIt("ERROR:" || status || ":" || sqlca.sqlerrm)
 			END TRY
 		WHEN "SHA512"
 			CALL g2_core.g2_log.logIt("checking password using " || l_hashtype)
@@ -273,7 +273,7 @@ FUNCTION g2_fromBase64(l_str STRING) RETURNS STRING
 	TRY
 		LET l_str = security.Base64.ToString(l_str)
 	CATCH
-		CALL g2_core.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
+		CALL g2_core.g2_errPopup(% "Error in security module!\n" || sqlca.sqlerrm)
 		LET l_str = NULL
 	END TRY
 
@@ -290,9 +290,9 @@ FUNCTION g2_toBase64(l_str STRING) RETURNS STRING
 		RETURN NULL
 	END IF
 	TRY
-		LET l_str = security.Base64.fromString(l_str)
+		LET l_str = security.Base64.FromString(l_str)
 	CATCH
-		CALL g2_core.g2_errPopup(% "Error in security module!\n" || SQLCA.SQLERRM)
+		CALL g2_core.g2_errPopup(% "Error in security module!\n" || sqlca.sqlerrm)
 		LET l_str = NULL
 	END TRY
 
@@ -346,7 +346,7 @@ FUNCTION g2_getCreds(l_typ STRING) RETURNS(STRING, STRING)
 		END IF
 	CATCH
 		CALL g2_core.g2_log.logIt(
-				"Unable to load / process XML file :" || STATUS || ":" || err_get(STATUS))
+				"Unable to load / process XML file :" || status || ":" || err_get(status))
 		EXIT PROGRAM 212
 	END TRY
 
@@ -364,7 +364,7 @@ FUNCTION g2_getCreds(l_typ STRING) RETURNS(STRING, STRING)
 		--DISPLAY l_doc.saveToString()
 		--DISPLAY "Successful decrypted"
 	CATCH
-		CALL g2_core.g2_log.logIt("Unable to decrypt XML file :" || STATUS || ":" || err_get(STATUS))
+		CALL g2_core.g2_log.logIt("Unable to decrypt XML file :" || status || ":" || err_get(status))
 		EXIT PROGRAM 213
 	END TRY
 
@@ -416,7 +416,7 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 		CALL m_pass_node.setNodeValue(l_pass)
 		# CALL m_doc.save("DecryptedXMLFile.xml")
 		IF NOT os.Path.rename(m_file, m_file || l_dte) THEN
-			CALL g2_core.g2_log.logIt("Failed to backup creds file:" || STATUS || ":" || err_get(STATUS))
+			CALL g2_core.g2_log.logIt("Failed to backup creds file:" || status || ":" || err_get(status))
 			RETURN FALSE
 		END IF
 		# Create symmetric AES256 key for XML encryption purposes
@@ -431,7 +431,7 @@ FUNCTION g2_updCreds(l_typ STRING, l_user STRING, l_pass STRING) RETURNS BOOLEAN
 		# Save encrypted document back to disk
 		CALL m_doc.save(m_file)
 	CATCH
-		CALL g2_core.g2_log.logIt("Unable to encrypt XML file :" || STATUS || ":" || err_get(STATUS))
+		CALL g2_core.g2_log.logIt("Unable to encrypt XML file :" || status || ":" || err_get(status))
 		RETURN FALSE
 	END TRY
 	RETURN TRUE

@@ -59,7 +59,7 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) getClientInfo() RETURNS()
 	DEFINE x SMALLINT
-	LET this.fe_typ = UPSHIFT(ui.Interface.getFrontEndName())
+	LET this.fe_typ = upshift(ui.Interface.getFrontEndName())
 	LET this.fe_ver = ui.Interface.getFrontEndVersion()
 	LET this.uni_typ = ui.Interface.getUniversalClientName()
 	LET this.uni_ver = ui.Interface.getUniversalClientVersion()
@@ -76,9 +76,9 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) setUserName(l_user STRING) RETURNS()
 	IF l_user IS NULL THEN
-		LET this.userName = fgl_getEnv("USERNAME")
+		LET this.userName = fgl_getenv("USERNAME")
 		IF this.userName.getLength() < 2 THEN
-			LET this.userName = fgl_getEnv("LOGNAME")
+			LET this.userName = fgl_getenv("LOGNAME")
 		END IF
 	ELSE
 		LET this.userName = l_user
