@@ -329,6 +329,7 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_HTTP_REFERER"
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_HTTP_USER_AGENT"
 	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_REMOTE_ADDR"
+	LET env[env.getLength() + 1].nam = "FGL_WEBSERVER_REMOTE_USER"
 
 	LET l_envlistFile = os.Path.join("..", "etc")
 	LET l_envlistFile = os.Path.join(l_envlistFile, "showenv.cfg")
