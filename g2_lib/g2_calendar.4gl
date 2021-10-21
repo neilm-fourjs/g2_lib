@@ -12,7 +12,10 @@
 #+  
 #+ No includes required.
 
+<<<<<<< HEAD:g2_lib/g2_calendar.4gl
 PACKAGE g2_lib
+=======
+>>>>>>> origin/master:src/g2_calendar.4gl
 IMPORT util
 
 PUBLIC CONSTANT C_MONTHS_IS

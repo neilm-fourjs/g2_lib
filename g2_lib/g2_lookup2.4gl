@@ -31,9 +31,15 @@
 --	DISPLAY "Selected value:", l_lookup.g2_lookup2()
 --
 
+<<<<<<< HEAD:g2_lib/g2_lookup2.4gl
 PACKAGE g2_lib
 
 IMPORT FGL g2_lib.*
+=======
+IMPORT FGL g2_core
+IMPORT FGL g2_db
+IMPORT FGL g2_aui
+>>>>>>> origin/master:src/g2_lookup2.4gl
 &include "g2_debug.inc"
 
 PUBLIC TYPE lookup RECORD
@@ -456,9 +462,15 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 			EXECUTE IMMEDIATE l_sql
 			RETURN FALSE
 		CATCH
+<<<<<<< HEAD:g2_lib/g2_lookup2.4gl
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
 					"Error", SFMT("Failed to delete!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
+=======
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+			CALL g2_core.g2_winMessage(
+					"Error", SFMT("Failed to delete!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+>>>>>>> origin/master:src/g2_lookup2.4gl
 		END TRY
 	END IF
 	RETURN TRUE
@@ -560,11 +572,19 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 	TRY
 		EXECUTE IMMEDIATE l_sql
 	CATCH
+<<<<<<< HEAD:g2_lib/g2_lookup2.4gl
 		--DISPLAY "SQLCode:",sqlca.sqlcode, " SQLERRD2:",sqlca.sqlerrd[2], " sqlawarn:",sqlca.sqlawarn
 		IF sqlca.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
 					"Error", SFMT("Failed!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
+=======
+		--DISPLAY "SQLCode:",SQLCA.sqlcode, " SQLERRD2:",SQLCA.sqlerrd[2], " sqlawarn:",SQLCA.sqlawarn
+		IF SQLCA.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+			CALL g2_core.g2_winMessage(
+					"Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+>>>>>>> origin/master:src/g2_lookup2.4gl
 			RETURN TRUE -- int_flag
 		END IF
 	END TRY

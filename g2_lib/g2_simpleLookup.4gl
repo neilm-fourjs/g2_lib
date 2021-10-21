@@ -12,9 +12,14 @@
 #+  
 #+ No includes required.
 
+<<<<<<< HEAD:g2_lib/g2_simpleLookup.4gl
 PACKAGE g2_lib
 
 IMPORT FGL g2_lib.*
+=======
+IMPORT FGL g2_core
+IMPORT FGL g2_aui
+>>>>>>> origin/master:src/g2_simpleLookup.4gl
 
 &include "g2_debug.inc"
 PUBLIC TYPE simpleLookup RECORD

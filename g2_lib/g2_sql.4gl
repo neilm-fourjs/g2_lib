@@ -9,9 +9,13 @@
 #+  
 #+ No includes required.
 
+<<<<<<< HEAD:g2_lib/g2_sql.4gl
 PACKAGE g2_lib
 
 IMPORT FGL g2_lib.*
+=======
+IMPORT FGL g2_core
+>>>>>>> origin/master:src/g2_sql.4gl
 IMPORT util
 
 CONSTANT SQL_FIRST = 0

@@ -11,13 +11,20 @@
 #+ from the use of this software rests entirely with the user.
 #+  
 #+ No includes required.
+<<<<<<< HEAD:g2_lib/g2_encrypt.4gl
 
 PACKAGE g2_lib
+=======
+>>>>>>> origin/master:src/g2_encrypt.4gl
 
 IMPORT xml
 IMPORT security
 
+<<<<<<< HEAD:g2_lib/g2_encrypt.4gl
 IMPORT FGL g2_lib.*
+=======
+IMPORT FGL g2_core
+>>>>>>> origin/master:src/g2_encrypt.4gl
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,
@@ -151,6 +158,10 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	LET this.errorMessage = l_msg
+<<<<<<< HEAD:g2_lib/g2_encrypt.4gl
 	CALL g2_init.g2_log.logIt(l_msg)
+=======
+	CALL g2_core.g2_log.logIt(l_msg)
+>>>>>>> origin/master:src/g2_encrypt.4gl
 END FUNCTION
 --------------------------------------------------------------------------------

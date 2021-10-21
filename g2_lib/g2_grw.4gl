@@ -9,10 +9,15 @@
 #+  
 #+ No includes required.
 
+<<<<<<< HEAD:g2_lib/g2_grw.4gl
 PACKAGE g2_lib
 
 IMPORT os
 IMPORT FGL g2_lib.*
+=======
+IMPORT os
+IMPORT FGL g2_core
+>>>>>>> origin/master:src/g2_grw.4gl
 
 -- From $GREDIR/lib
 IMPORT FGL libgreprops
@@ -90,7 +95,11 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 		END IF
 		LET this.rptName = os.Path.join(this.reportsDir, this.rptName.append(".4rp"))
 	END IF
+<<<<<<< HEAD:g2_lib/g2_grw.4gl
 	IF NOT os.Path.exists(this.rptName) THEN
+=======
+	IF NOT os.path.exists(this.rptName) THEN
+>>>>>>> origin/master:src/g2_grw.4gl
 		CALL g2_core.g2_winMessage(
 				"Error", SFMT("Report Design '%1' not found!", this.rptName), "exclamation")
 		RETURN FALSE

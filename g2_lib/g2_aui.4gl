@@ -9,12 +9,20 @@
 #+
 #+ No includes required.
 #+
+<<<<<<< HEAD:g2_lib/g2_aui.4gl
 #+ Non GUI functions only
 PACKAGE g2_lib
 
 IMPORT os
 IMPORT util
 IMPORT FGL g2_lib.*
+=======
+#+ Non GUI functions onlyb
+
+IMPORT os
+IMPORT util
+IMPORT FGL g2_core
+>>>>>>> origin/master:src/g2_aui.4gl
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN
@@ -212,7 +220,11 @@ FUNCTION g2_showReadMe() RETURNS()
 	TRY
 		CALL c.openFile(txt, "r")
 	CATCH
+<<<<<<< HEAD:g2_lib/g2_aui.4gl
 		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(status)), "information")
+=======
+		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
+>>>>>>> origin/master:src/g2_aui.4gl
 		RETURN
 	END TRY
 

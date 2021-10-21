@@ -12,9 +12,13 @@
 #+  
 #+ No includes required.
 
+<<<<<<< HEAD:g2_lib/g2_appInfo.4gl
 PACKAGE g2_lib
 
 IMPORT FGL g2_lib.g2_util
+=======
+--IMPORT FGL g2_core
+>>>>>>> origin/master:src/g2_appInfo.4gl
 
 PUBLIC TYPE appInfo RECORD
 		appName,
@@ -59,7 +63,11 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) getClientInfo() RETURNS()
 	DEFINE x SMALLINT
+<<<<<<< HEAD:g2_lib/g2_appInfo.4gl
 	LET this.fe_typ = upshift(ui.Interface.getFrontEndName())
+=======
+	LET this.fe_typ = UPSHIFT(ui.Interface.getFrontEndName())
+>>>>>>> origin/master:src/g2_appInfo.4gl
 	LET this.fe_ver = ui.Interface.getFrontEndVersion()
 	LET this.uni_typ = ui.Interface.getUniversalClientName()
 	LET this.uni_ver = ui.Interface.getUniversalClientVersion()
