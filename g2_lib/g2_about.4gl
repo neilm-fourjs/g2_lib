@@ -32,7 +32,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		CALL l_appInfo.setUserName(NULL)
 	END IF
 	IF l_appInfo.hostname IS NULL THEN
-		LET l_appInfo.hostname = g2_core.g2_getHostname()
+		LET l_appInfo.hostname = g2_util.g2_getHostname()
 	END IF
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")

@@ -151,6 +151,6 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	LET this.errorMessage = l_msg
-	CALL g2_core.g2_log.logIt(l_msg)
+	CALL g2_init.g2_log.logIt(l_msg)
 END FUNCTION
 --------------------------------------------------------------------------------

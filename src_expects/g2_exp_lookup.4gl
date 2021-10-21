@@ -5,7 +5,7 @@ IMPORT FGL lib_expect
 MAIN
 	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
 
-	CALL g2_core.g2_init("S",NULL)
+	CALL g2_init.g2_init("S",NULL)
 
   CALL l_db.g2_connect("njm_demo310")
 	

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Project defaultApplication="-1343789213" gstVersion="40001" version="3.4">
+<Project defaultApplication="-1343789213" gstVersion="40003" version="3.4">
   <Settings>
     <DynamicProperties version="4">
       <DynamicProperty description="Accent color (Android 5.0 and later)" initialValue="#9575CD" isDefaultInherited="false" isHidden="false" label="Accent color" name="gma-accent-color" readOnly="false" type="COLOR"/>
@@ -111,7 +111,7 @@
     </Language>
   </LanguageList>
   <PlatformList version="1.0"/>
-  <Group environment="value:GENVER=400" id="75644415" label="g2_lib" language="Genero (NJM no link)" targetDirectory="$(ProjectDir)/../njm_app_bin$(GENVER)">
+  <Group environment="value:GENVER=400" id="75644415" label="g2_lib" language="Genero (no link)" targetDirectory="$(ProjectDir)/../njm_app_bin400">
     <Library binaryName="g2_lib" cwd="$(ProjectDir)" dependencies="1986" id="14000" label="g2_lib">
       <File filePath="g2_lib/g2_debug.4gl"/>
       <File filePath="g2_lib/g2_debug.inc"/>
@@ -130,14 +130,16 @@
       <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
       <File filePath="g2_lib/g2_getFileName.4gl"/>
       <File filePath="g2_lib/g2_grw.4gl"/>
+      <File filePath="g2_lib/g2_init.4gl"/>
       <File filePath="g2_lib/g2_lookup2.4gl"/>
       <File filePath="g2_lib/g2_secure.4gl"/>
       <File filePath="g2_lib/g2_simpleLookup.4gl"/>
+      <File filePath="g2_lib/g2_util.4gl"/>
       <File filePath="g2_lib/g2_ws.4gl"/>
       <File filePath="g2_lib/gl_grwCfg.per"/>
     </Library>
   </Group>
-  <Group environment="value:GENVER=400,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects$(GENVER)">
+  <Group environment="value:GENVER=400,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects400">
     <Library binaryName="etc" id="-894407244" label="etc">
       <File filePath="etc/profile"/>
     </Library>

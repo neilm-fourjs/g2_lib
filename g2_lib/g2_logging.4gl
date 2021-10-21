@@ -11,7 +11,8 @@
 PACKAGE g2_lib
 
 IMPORT os
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 

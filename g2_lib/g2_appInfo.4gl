@@ -14,7 +14,7 @@
 
 PACKAGE g2_lib
 
-IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_util
 
 PUBLIC TYPE appInfo RECORD
 		appName,
@@ -49,7 +49,7 @@ FUNCTION (this appInfo)
 	LET this.progAuth = l_progAuth
 	LET this.progVersion = l_progVer
 	LET this.splashImage = l_progImg
-	LET this.hostname = g2_core.g2_getHostname()
+	LET this.hostname = g2_util.g2_getHostname()
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) appInfo(l_appName STRING, l_appBuild STRING) RETURNS()

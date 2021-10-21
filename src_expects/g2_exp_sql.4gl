@@ -12,7 +12,7 @@ MAIN
 	DEFINE l_keyField STRING = "stock_code"
 	DEFINE l_stk RECORD LIKE stock.*
 
-  CALL g2_core.g2_init("S", NULL)
+  CALL g2_init.g2_init("S", NULL)
   CALL l_db.g2_connect("njm_demo310")
 
 -- attempt to get an invalid row
