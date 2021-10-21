@@ -7,20 +7,11 @@
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 
-<<<<<<< HEAD:g2_lib/g2_ws.4gl
 PACKAGE g2_lib
 
 IMPORT com
 IMPORT util
 IMPORT FGL g2_lib.*
-=======
-
-IMPORT com
-IMPORT util
-IMPORT FGL g2_core
-IMPORT FGL g2_logging
-
->>>>>>> origin/master:src/g2_ws.4gl
 PUBLIC DEFINE m_server STRING
 PUBLIC TYPE t_response RECORD
 	server STRING,

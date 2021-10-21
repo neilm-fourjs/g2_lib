@@ -8,15 +8,9 @@
 #+ from the use of this software rests entirely with the user.
 --------------------------------------------------------------------------------
 
-<<<<<<< HEAD:g2_lib/g2_lookup.4gl
 PACKAGE g2_lib
 
 IMPORT FGL g2_lib.*
-=======
-IMPORT FGL g2_core
-IMPORT FGL g2_aui
-IMPORT FGL g2_db
->>>>>>> origin/master:src/g2_lookup.4gl
 &include "g2_debug.inc"
 CONSTANT MAXCOLWIDTH = 40
 --------------------------------------------------------------------------------

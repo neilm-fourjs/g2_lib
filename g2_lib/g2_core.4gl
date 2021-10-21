@@ -23,48 +23,7 @@ PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
 PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
 PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 PUBLIC DEFINE m_appInfo appInfo
-<<<<<<< HEAD:g2_lib/g2_core.4gl
 
-=======
-FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
-	DEFINE l_gbc, l_fe STRING
-	CALL g2_log.init(NULL, NULL, "log", "TRUE")
-	CALL g2_err.init(NULL, NULL, "err", "TRUE")
-	CALL STARTLOG(g2_err.fullLogPath)
-	LET gl_dbgLev = fgl_getEnv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
-	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
-	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
-	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getEnv("FGLDIR")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getEnv("FGLIMAGEPATH")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getEnv("FGLRESOURCEPATH")))
-
-	WHENEVER ANY ERROR CALL g2_error
-
--- Try and figure out what the client is capable of GDC(Native/UR) / GBC
-	LET l_gbc = ui.Interface.getUniversalClientName()
-	LET l_fe = ui.Interface.getFrontEndName()
-	GL_DBGMSG(1, SFMT("g2_core: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
-	IF l_gbc.getLength() < 3 THEN
-		LET l_gbc = "?"
-	END IF
-	IF l_fe = "GBC" THEN
-		LET l_gbc = "GBC"
-	END IF
-	IF l_fe = "GDC" THEN
-		LET m_isGDC = TRUE
-	END IF
-	IF l_gbc != "GBC" THEN
-		LET m_isUniversal = FALSE
-	END IF
-	IF m_appInfo.progDesc IS NOT NULL THEN
-		CALL ui.Interface.setText(m_appInfo.progDesc)
-	END IF
-	CALL g2_loadStyles(l_cfgname)
-	CALL g2_loadToolBar(l_cfgname)
-	CALL g2_loadActions(l_cfgname)
-	CALL g2_mdisdi(l_mdi)
-END FUNCTION
->>>>>>> origin/master:src/g2_lib.4gl
 --------------------------------------------------------------------------------
 #+ Set MDI or not
 #+ C = child
@@ -477,112 +436,6 @@ FUNCTION g2_error() RETURNS ()
 
 END FUNCTION
 --------------------------------------------------------------------------------
-<<<<<<< HEAD:g2_lib/g2_core.4gl
-=======
-#+ Get the product version from the $FGLDIR/etc/fpi-fgl
-#+ @param l_prod String of product name, eg: fglrun
-#+ @return String or NULL
-FUNCTION g2_getProductVer(l_prod STRING) RETURNS STRING
-	DEFINE l_file base.Channel
-	DEFINE l_line STRING
-	LET l_file = base.Channel.create()
-	CALL l_file.openPipe("fpi -l", "r")
-	WHILE NOT l_file.isEof()
-		LET l_line = l_file.readLine()
-		IF l_line.getIndexOf(l_prod, 1) > 0 THEN
-			LET l_line = l_line.subString(8, l_line.getLength() - 1)
-			EXIT WHILE
-		END IF
-	END WHILE
-	CALL l_file.close()
-	RETURN l_line
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Attempt to convert a String to a date
-#+
-#+ @param l_str A string containing a date
-#+ @returns DATE or NULL
-FUNCTION g2_strToDate(l_str STRING) RETURNS DATE
-	DEFINE l_date DATE
-	TRY
-		LET l_date = l_str
-	CATCH
-	END TRY
-	IF l_date IS NOT NULL THEN
-		RETURN l_date
-	END IF
-	LET l_date = util.Date.parse(l_str, "dd/mm/yyyy")
-	RETURN l_date
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Return the result from the hostname commend on Unix / Linux / Mac.
-#+
-#+ @return uname of the OS
-FUNCTION g2_getHostname() RETURNS STRING
-	DEFINE l_hostname STRING
-	DEFINE c base.Channel
-	IF os.Path.pathSeparator() = ";" THEN -- Windows
-		LET l_hostname = fgl_getEnv("COMPUTERNAME")
-	ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
-		LET l_hostname = fgl_getEnv("HOSTNAME")
-	END IF
-	IF l_hostname.getLength() < 2 THEN
-		LET c = base.Channel.create()
-		CALL c.openPipe("hostname -f", "r")
-		LET l_hostname = c.readLine()
-		CALL c.close()
-	END IF
-	RETURN l_hostname
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Return the result from the uname commend on Unix / Linux / Mac.
-#+
-#+ @return uname of the OS
-FUNCTION g2_getUname() RETURNS STRING
-	DEFINE l_uname STRING
-	DEFINE c base.Channel
-	LET c = base.Channel.create()
-	CALL c.openPipe("uname", "r")
-	LET l_uname = c.readLine()
-	CALL c.close()
-	RETURN l_uname
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Return the Linux Version
-#+
-#+ @return OS Version
-FUNCTION g2_getLinuxVer() RETURNS STRING
-	DEFINE l_ver STRING
-	DEFINE c base.Channel
-	DEFINE l_file DYNAMIC ARRAY OF STRING
-	DEFINE x SMALLINT
-
--- possible files containing version info
-	LET l_file[l_file.getLength() + 1] = "/etc/redhat-release"
-	LET l_file[l_file.getLength() + 1] = "/etc/issue.net"
-	LET l_file[l_file.getLength() + 1] = "/etc/issue"
-	LET l_file[l_file.getLength() + 1] = "/etc/debian_version"
-	LET l_file[l_file.getLength() + 1] = "/etc/SuSE-release"
-
--- loop thru and see which ones exist
-	FOR x = 1 TO l_file.getLength() + 1
-		IF l_file[x] IS NULL THEN
-			RETURN "Unknown"
-		END IF
-		IF os.Path.exists(l_file[x]) THEN
-			EXIT FOR
-		END IF
-	END FOR
-
--- read the first line of existing file
-	LET c = base.Channel.create()
-	CALL c.openFile(l_file[x], "r")
-	LET l_ver = c.readLine()
-	CALL c.close()
-	RETURN l_ver
-END FUNCTION
---------------------------------------------------------------------------------
->>>>>>> origin/master:src/g2_lib.4gl
 #+ Splash Screen
 #+
 #+ @param l_dur > 0 for sleep then close, 0=just open window, -1=close window
@@ -642,11 +495,7 @@ END FUNCTION
 FUNCTION g2_getImagePath() RETURNS STRING
 	DEFINE l_imgPath STRING
 	DEFINE x SMALLINT
-<<<<<<< HEAD:g2_lib/g2_core.4gl
 	LET l_imgPath = fgl_getenv("FGLIMAGEPATH")
-=======
-	LET l_imgPath = fgl_getEnv("FGLIMAGEPATH")
->>>>>>> origin/master:src/g2_lib.4gl
 	LET x = l_imgPath.getIndexOf(os.Path.pathSeparator(),1)
 	IF x > 0 THEN
 		LET l_imgPath = l_imgPath.subString(1,x-1)

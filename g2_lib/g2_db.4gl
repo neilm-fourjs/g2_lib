@@ -9,17 +9,11 @@
 #+  
 #+ No includes required.
 
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 PACKAGE g2_lib
 
 IMPORT os
 IMPORT util
 IMPORT FGL g2_lib.*
-=======
-IMPORT os
-IMPORT util
-IMPORT FGL g2_core
->>>>>>> origin/master:src/g2_db.4gl
 &include "g2_debug.inc"
 
 # Informix
@@ -130,13 +124,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			WHEN "mys"
 				LET l_lockMode = FALSE
 			WHEN "sqt"
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 				IF NOT os.Path.exists(this.dir) THEN
 					IF NOT os.Path.mkdir(this.dir) THEN
-=======
-				IF NOT os.path.EXISTS(this.dir) THEN
-					IF NOT os.path.mkdir(this.dir) THEN
->>>>>>> origin/master:src/g2_db.4gl
 						CALL g2_core.g2_winMessage(
 								"Error",
 								SFMT("Failed to create dbdir '%1' !\n%2", this.dir, err_get(status)),
@@ -147,11 +136,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				IF this.source IS NULL OR this.source = " " THEN
 					LET this.source = this.dir || "/" || this.name || ".db"
 				END IF
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 				IF NOT os.Path.exists(this.source) THEN
-=======
-				IF NOT os.path.EXISTS(this.source) THEN
->>>>>>> origin/master:src/g2_db.4gl
 					CALL g2_core.g2_winMessage(
 							"Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
 				ELSE
@@ -249,15 +234,9 @@ END FUNCTION
 FUNCTION (this dbInfo) g2_sqt_createdb(l_dir STRING, l_file STRING) RETURNS()
 	DEFINE c base.Channel
 	LET c = base.Channel.create()
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 	IF NOT os.Path.exists(l_dir) THEN
 		IF NOT os.Path.mkdir(l_dir) THEN
 			CALL g2_core.g2_exitProgram(status, SFMT("DB Folder Creation Failed for: %1", l_dir))
-=======
-	IF NOT os.path.exists(l_dir) THEN
-		IF NOT os.path.mkdir(l_dir) THEN
-			CALL g2_core.g2_exitProgram(STATUS, SFMT("DB Folder Creation Failed for: %1", l_dir))
->>>>>>> origin/master:src/g2_db.4gl
 		END IF
 	END IF
 	CALL c.openFile(l_file, "w")
@@ -275,11 +254,7 @@ FUNCTION (this dbInfo) g2_mdb_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 			CALL g2_core.g2_exitProgram(status, "DB Creation Failed!")
-=======
-			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
->>>>>>> origin/master:src/g2_db.4gl
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid in
@@ -293,11 +268,7 @@ FUNCTION (this dbInfo) g2_ifx_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 			CALL g2_core.g2_exitProgram(status, "DB Creation Failed!")
-=======
-			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
->>>>>>> origin/master:src/g2_db.4gl
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid infintate loop!
@@ -425,11 +396,7 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 		PREPARE pre_chk FROM l_stmt
 		EXECUTE pre_chk INTO l_cnt
 	CATCH
-<<<<<<< HEAD:g2_lib/g2_db.4gl
 		CALL g2_core.g2_winMessage("SQL Error", SFMT("%1 %2", status, SQLERRMESSAGE), "exclamation")
-=======
-		CALL g2_core.g2_winMessage("SQL Error", SFMT("%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
->>>>>>> origin/master:src/g2_db.4gl
 		LET l_where = NULL
 	END TRY
 	IF l_cnt = 0 THEN

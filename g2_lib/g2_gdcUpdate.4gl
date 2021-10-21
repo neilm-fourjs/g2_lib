@@ -12,22 +12,13 @@
 #+  
 #+ No includes required.
 
-<<<<<<< HEAD:g2_lib/g2_gdcUpdate.4gl
 PACKAGE g2_lib
 
-=======
->>>>>>> origin/master:src/g2_gdcUpdate.4gl
 IMPORT os
 IMPORT com
 IMPORT util
 
-<<<<<<< HEAD:g2_lib/g2_gdcUpdate.4gl
 IMPORT FGL g2_lib.*
-=======
-IMPORT FGL g2_core
-IMPORT FGL g2_gdcUpdateCommon
-IMPORT FGL g2_aui
->>>>>>> origin/master:src/g2_gdcUpdate.4gl
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD
