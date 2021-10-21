@@ -12,10 +12,12 @@
 #+  
 #+ No includes required.
 
+PACKAGE g2_lib
+
 IMPORT xml
 IMPORT security
 
-IMPORT FGL g2_core
+IMPORT FGL g2_lib.*
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,
@@ -61,7 +63,7 @@ FUNCTION (this encrypt) encrypt(l_str STRING) RETURNS STRING
 		CALL l_root.appendChild(l_str_node)
 	CATCH
 		CALL this.g2_encryptError(
-				SFMT(% "Error building XML from '%1':%2:%3", l_str, STATUS, err_get(STATUS)))
+				SFMT(% "Error building XML from '%1':%2:%3", l_str, status, err_get(status)))
 		RETURN NULL
 	END TRY
 	TRY
@@ -72,7 +74,7 @@ FUNCTION (this encrypt) encrypt(l_str STRING) RETURNS STRING
 		# Generate symmetric key for XML l_encryption purpose
 	CATCH
 		CALL this.g2_encryptError(
-				SFMT(% "Error with certificate '%1':%2:%3", this.certFile, STATUS, err_get(STATUS)))
+				SFMT(% "Error with certificate '%1':%2:%3", this.certFile, status, err_get(status)))
 		RETURN NULL
 	END TRY
 	TRY
@@ -86,7 +88,7 @@ FUNCTION (this encrypt) encrypt(l_str STRING) RETURNS STRING
 		CALL l_enc.encryptElement(l_root) # Encrypt
 		RETURN security.Base64.FromString(l_doc.saveToString())
 	CATCH
-		CALL this.g2_encryptError(SFMT(% "Unable to l_encrypt XML file %1:%2", STATUS, err_get(STATUS)))
+		CALL this.g2_encryptError(SFMT(% "Unable to l_encrypt XML file %1:%2", status, err_get(status)))
 		RETURN NULL
 	END TRY
 END FUNCTION
@@ -115,7 +117,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 --		DISPLAY "Decrypt XML:",l_root.toString()
 	CATCH
 		CALL this.g2_encryptError(
-				SFMT(% "Error Loading XML from '%1':%2:%3", l_str, STATUS, err_get(STATUS)))
+				SFMT(% "Error Loading XML from '%1':%2:%3", l_str, status, err_get(status)))
 		RETURN NULL
 	END TRY
 	TRY
@@ -124,7 +126,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 		CALL l_kek.loadPEM(this.privateKey)
 	CATCH
 		CALL this.g2_encryptError(
-				SFMT(% "Error with private key '%1':%2:%3", this.privateKey, STATUS, err_get(STATUS)))
+				SFMT(% "Error with private key '%1':%2:%3", this.privateKey, status, err_get(status)))
 		RETURN NULL
 	END TRY
 	TRY
@@ -134,7 +136,7 @@ FUNCTION (this encrypt) decrypt(l_str STRING) RETURNS STRING
 				l_kek) # Set the key-encryption key to decrypted the protected symmetric key
 		CALL l_enc.decryptElement(l_root) # Decrypt
 	CATCH
-		CALL this.g2_encryptError(SFMT(% "Unable to decrypt XML file %1:%2", STATUS, err_get(STATUS)))
+		CALL this.g2_encryptError(SFMT(% "Unable to decrypt XML file %1:%2", status, err_get(status)))
 		RETURN NULL
 	END TRY
 	LET l_list = l_doc.getElementsByTagName("Value")
@@ -149,6 +151,6 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	LET this.errorMessage = l_msg
-	CALL g2_core.g2_log.logIt(l_msg)
+	CALL g2_init.g2_log.logIt(l_msg)
 END FUNCTION
 --------------------------------------------------------------------------------

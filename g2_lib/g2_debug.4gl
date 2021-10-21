@@ -9,6 +9,8 @@
 #+  
 #+ No includes required.
 
+PACKAGE g2_lib
+
 IMPORT os
 &define G2_DEBUG
 &include "g2_debug.inc"
@@ -40,10 +42,10 @@ FUNCTION g2_dbgMsg(l_fil STRING, l_lno INT, l_lev STRING, l_msg STRING)
 			LET l_lin[1, x] = l_fil.trim()
 			IF gl_dbgLev > 2 THEN
 				DISPLAY CURRENT, " ", l_lin, ":", l_lev USING "<<&", ": ", l_msg.trim()
-				CALL errorlog(CURRENT || " " || l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
+				CALL ERRORLOG(CURRENT || " " || l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
 			ELSE
 				DISPLAY l_lin, ":", l_lev USING "<<&", ": ", l_msg.trim()
-				CALL errorlog(l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
+				CALL ERRORLOG(l_lin || ":" || (l_lev USING "<<&") || ": " || l_msg.trim())
 			END IF
 		END IF
 	END IF

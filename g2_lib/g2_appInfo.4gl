@@ -12,7 +12,9 @@
 #+  
 #+ No includes required.
 
---IMPORT FGL g2_core
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.g2_util
 
 PUBLIC TYPE appInfo RECORD
 		appName,
@@ -47,7 +49,7 @@ FUNCTION (this appInfo)
 	LET this.progAuth = l_progAuth
 	LET this.progVersion = l_progVer
 	LET this.splashImage = l_progImg
-	LET this.hostname = g2_getHostname()
+	LET this.hostname = g2_util.g2_getHostname()
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) appInfo(l_appName STRING, l_appBuild STRING) RETURNS()
@@ -57,7 +59,7 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) getClientInfo() RETURNS()
 	DEFINE x SMALLINT
-	LET this.fe_typ = UPSHIFT(ui.Interface.getFrontEndName())
+	LET this.fe_typ = upshift(ui.Interface.getFrontEndName())
 	LET this.fe_ver = ui.Interface.getFrontEndVersion()
 	LET this.uni_typ = ui.Interface.getUniversalClientName()
 	LET this.uni_ver = ui.Interface.getUniversalClientVersion()
@@ -74,9 +76,9 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this appInfo) setUserName(l_user STRING) RETURNS()
 	IF l_user IS NULL THEN
-		LET this.userName = fgl_getEnv("USERNAME")
+		LET this.userName = fgl_getenv("USERNAME")
 		IF this.userName.getLength() < 2 THEN
-			LET this.userName = fgl_getEnv("LOGNAME")
+			LET this.userName = fgl_getenv("LOGNAME")
 		END IF
 	ELSE
 		LET this.userName = l_user

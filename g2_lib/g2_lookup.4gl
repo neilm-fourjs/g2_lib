@@ -8,9 +8,9 @@
 #+ from the use of this software rests entirely with the user.
 --------------------------------------------------------------------------------
 
-IMPORT FGL g2_core
-IMPORT FGL g2_aui
-IMPORT FGL g2_db
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 CONSTANT MAXCOLWIDTH = 40
 --------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ FUNCTION g2_lookup(
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup: Opening Window.")
 	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
-	CALL fgl_setTitle("Listing from " || tabnam)
+	CALL fgl_settitle("Listing from " || tabnam)
 	LET l_frm =
 			g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
@@ -185,7 +185,7 @@ FUNCTION g2_lookup(
 -- Fetch the data
 	CALL l_sql_handle.fetchFirst()
 	LET x = 0
-	WHILE SQLCA.sqlcode = 0
+	WHILE sqlca.sqlcode = 0
 		LET x = x + 1
 		CALL l_dlg.setCurrentRow("tablistv", x) -- must set the current row before setting values
 		FOR i = 1 TO l_sql_handle.getResultCount()

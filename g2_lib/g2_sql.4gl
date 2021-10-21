@@ -9,7 +9,9 @@
 #+  
 #+ No includes required.
 
-IMPORT FGL g2_core
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 IMPORT util
 
 CONSTANT SQL_FIRST = 0
@@ -85,7 +87,7 @@ FUNCTION (this sql) g2_SQLcursor()
 		LET this.fields[x].colType = this.handle.getResultType(x)
 		LET this.fields[x].formOnly = FALSE
 		LET this.fields[x].isKey = FALSE
-		IF this.fields[x].colname.trim() = this.key_field.trim() THEN
+		IF this.fields[x].colName.trim() = this.key_field.trim() THEN
 			LET this.fields[x].isKey = TRUE
 			LET this.key_field_num = x
 		END IF
@@ -189,7 +191,7 @@ FUNCTION (this sql) g2_SQLgetRow(l_row INTEGER, l_msg BOOLEAN)
 			CALL this.handle.fetchAbsolute(l_row)
 			LET this.current_row = l_row
 	END CASE
-	IF STATUS = 0 THEN
+	IF status = 0 THEN
 		FOR x = 1 TO this.fields.getLength()
 			LET this.fields[x].value = this.handle.getResultValue(x)
 		END FOR
@@ -212,7 +214,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 	LET l_sql = "update " || this.table_name || " SET ("
 	FOR x = 1 TO this.fields.getLength()
 		IF x != this.key_field_num THEN
-			LET l_sql = l_sql.append(this.fields[x].colname)
+			LET l_sql = l_sql.append(this.fields[x].colName)
 			IF x != this.fields.getLength() THEN
 				LET l_sql = l_sql.append(",")
 			END IF
@@ -256,11 +258,11 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 	TRY
 		CALL l_updsql.execute()
 		MESSAGE "Record Updated"
-		DISPLAY "Record Updated, status:", STATUS
+		DISPLAY "Record Updated, status:", status
 	CATCH
 		ERROR "Update Failed!"
 	END TRY
-	IF SQLCA.sqlcode = 0 THEN -- refresh the cursor so it shows the updated row.
+	IF sqlca.sqlcode = 0 THEN -- refresh the cursor so it shows the updated row.
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(this.current_row, FALSE)
 	ELSE
@@ -281,7 +283,7 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 -- Build the SQL
 	LET l_sql = "insert into " || this.table_name || " ("
 	FOR x = 1 TO this.fields.getLength()
-		LET l_sql = l_sql.append(this.fields[x].colname)
+		LET l_sql = l_sql.append(this.fields[x].colName)
 		IF x != this.fields.getLength() THEN
 			LET l_sql = l_sql.append(",")
 		END IF
@@ -319,7 +321,7 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 	CATCH
 		ERROR "Insert Failed!"
 	END TRY
-	IF SQLCA.sqlcode = 0 THEN
+	IF sqlca.sqlcode = 0 THEN
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(SQL_LAST, FALSE)
 	ELSE
@@ -347,7 +349,7 @@ FUNCTION (this sql) g2_SQLdelete() RETURNS BOOLEAN
 			EXECUTE del_stmt USING l_val
 		CATCH
 		END TRY
-		IF SQLCA.sqlcode = 0 THEN
+		IF sqlca.sqlcode = 0 THEN
 			CALL this.g2_SQLcursor()
 			LET this.rows_count = this.rows_count - 1
 			CALL this.g2_SQLgetRow(this.current_row, FALSE)
@@ -367,7 +369,7 @@ FUNCTION (this sql) g2_SQLrec2Json()
 	DEFINE x SMALLINT
 	LET this.json_rec = util.JSONObject.create()
 	FOR x = 1 TO this.fields.getLength()
-		CALL this.json_rec.put(this.fields[x].colname, this.fields[x].value.trimRight())
+		CALL this.json_rec.put(this.fields[x].colName, this.fields[x].value.trimRight())
 	END FOR
 --  DISPLAY this.json_rec.toString()
 END FUNCTION

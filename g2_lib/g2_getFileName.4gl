@@ -7,11 +7,12 @@
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 #+  
-#+ No includes required
+#+ No includes required.
+
+PACKAGE g2_lib
 
 IMPORT os
-IMPORT FGL g2_core
-IMPORT FGL g2_simpleLookup
+IMPORT FGL g2_lib.*
 --------------------------------------------------------------------------------------------------------------
 -- Do a simple list of files and return selected name
 --

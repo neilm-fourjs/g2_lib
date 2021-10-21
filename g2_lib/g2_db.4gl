@@ -9,9 +9,11 @@
 #+  
 #+ No includes required.
 
+PACKAGE g2_lib
+
 IMPORT os
 IMPORT util
-IMPORT FGL g2_core
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 # Informix
@@ -45,7 +47,7 @@ END RECORD
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	DEFINE l_msg STRING
 	DEFINE l_lockMode, l_fglprofile, l_failed BOOLEAN
-	DEFINE l_CustomName, l_dbUser, l_dbPass STRING
+	DEFINE l_customName, l_dbUser, l_dbPass STRING
 
 	LET l_fglprofile = FALSE
 
@@ -79,28 +81,28 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END IF
 
 -- setup stuff from fglprofile
-	LET l_msg = fgl_getResource("dbi.database." || this.name || ".source")
+	LET l_msg = fgl_getresource("dbi.database." || this.name || ".source")
 	IF l_msg IS NOT NULL AND l_msg != " " THEN
 		LET this.source = l_msg
 		LET l_fglprofile = TRUE
 	END IF
-	LET l_msg = fgl_getResource("dbi.database." || this.name || ".driver")
+	LET l_msg = fgl_getresource("dbi.database." || this.name || ".driver")
 	IF l_msg IS NULL OR l_msg = " " THEN
-		LET l_msg = fgl_getResource("dbi.default.driver")
+		LET l_msg = fgl_getresource("dbi.default.driver")
 	END IF
 
 	LET this.serial_emu =
-			fgl_getResource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
+			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
 	LET this.serial_errd =
-			fgl_getResource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
+			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
 
 	IF l_msg IS NOT NULL AND l_msg != " " THEN
 		LET this.driver = l_msg
 	END IF
-	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 fglprofile:%3 Serial Emu:%4 Errd: %5", this.name, this.driver, fgl_getEnv("FGLPROFILE"), this.serial_emu, this.serial_errd))
+	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 fglprofile:%3 Serial Emu:%4 Errd: %5", this.name, this.driver, fgl_getenv("FGLPROFILE"), this.serial_emu, this.serial_errd))
 	LET this.type = this.driver.subString(4, 6)
 	IF this.type != "sqt" AND l_dbName IS NULL THEN -- allow a custom dbname & user
-		CALL getCustomDBUser() RETURNING l_CustomName, l_dbUser, l_dbPass
+		CALL getCustomDBUser() RETURNING l_customName, l_dbUser, l_dbPass
 	END IF
 	LET this.connection = this.name
 	LET l_lockMode = TRUE
@@ -110,31 +112,31 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				LET this.desc = "PostgreSQL " || this.driver.subString(7, 9)
 				LET this.connection = "db+driver='" || this.driver || "',source='" || this.name || "'"
 			WHEN "ifx"
-				LET this.source = fgl_getEnv("INFORMIXSERVER")
+				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.desc = "Informix " || this.driver.subString(7, 9)
-				LET this.source = fgl_getEnv("INFORMIXSERVER")
+				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.connection = this.name
-				DISPLAY "INFORMIXDIR:", fgl_getEnv("INFORMIXDIR")
-				DISPLAY "INFORMIXSERVER:", fgl_getEnv("INFORMIXSERVER")
-				DISPLAY "INFORMIXSQLHOSTS:", fgl_getEnv("INFORMIXSQLHOSTS")
+				DISPLAY "INFORMIXDIR:", fgl_getenv("INFORMIXDIR")
+				DISPLAY "INFORMIXSERVER:", fgl_getenv("INFORMIXSERVER")
+				DISPLAY "INFORMIXSQLHOSTS:", fgl_getenv("INFORMIXSQLHOSTS")
 			WHEN "mdb"
 				LET l_lockMode = FALSE
 			WHEN "mys"
 				LET l_lockMode = FALSE
 			WHEN "sqt"
-				IF NOT os.path.EXISTS(this.dir) THEN
-					IF NOT os.path.mkdir(this.dir) THEN
+				IF NOT os.Path.exists(this.dir) THEN
+					IF NOT os.Path.mkdir(this.dir) THEN
 						CALL g2_core.g2_winMessage(
 								"Error",
-								SFMT("Failed to create dbdir '%1' !\n%2", this.dir, ERR_GET(STATUS)),
+								SFMT("Failed to create dbdir '%1' !\n%2", this.dir, err_get(status)),
 								"exclamation")
 					END IF
 				END IF
-				LET this.source = fgl_getEnv("SQLITEDB")
+				LET this.source = fgl_getenv("SQLITEDB")
 				IF this.source IS NULL OR this.source = " " THEN
 					LET this.source = this.dir || "/" || this.name || ".db"
 				END IF
-				IF NOT os.path.EXISTS(this.source) THEN
+				IF NOT os.Path.exists(this.source) THEN
 					CALL g2_core.g2_winMessage(
 							"Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
 				ELSE
@@ -162,7 +164,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					this.driver,
 					"\n",
 					"Status:",
-					SQLCA.SQLCODE,
+					sqlca.sqlcode,
 					"\n",
 					SQLERRMESSAGE
 		END TRY
@@ -180,26 +182,26 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					"\nUser:",
 					l_dbUser,
 					"\nStatus:",
-					SQLCA.SQLCODE,
+					sqlca.sqlcode,
 					"\n",
 					SQLERRMESSAGE
 		END TRY
 	END IF
 	IF l_failed THEN
 		DISPLAY l_msg
-		IF this.create_db AND SQLCA.SQLCODE = -329 AND this.type = "ifx" THEN
+		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
 			LET l_msg = NULL
 		END IF
-		IF this.create_db AND SQLCA.SQLCODE = -6372 AND (this.type = "mdb" OR this.type = "mys") THEN
+		IF this.create_db AND sqlca.sqlcode = -6372 AND (this.type = "mdb" OR this.type = "mys") THEN
 			CALL this.g2_mdb_createdb()
 			LET l_msg = NULL
 		END IF
-		IF this.create_db AND SQLCA.SQLCODE = -6372 AND this.type = "sqt" THEN
+		IF this.create_db AND sqlca.sqlcode = -6372 AND this.type = "sqt" THEN
 			CALL this.g2_sqt_createdb(this.dir, this.source)
 			LET l_msg = NULL
 		END IF
-		IF SQLCA.SQLCODE = -6366 THEN
+		IF sqlca.sqlcode = -6366 THEN
 			RUN "echo $LD_LIBRARY_PATH;ldd $FGLDIR/dbdrivers/" || this.driver || ".so"
 		END IF
 		IF l_msg IS NOT NULL THEN
@@ -212,7 +214,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		SET LOCK MODE TO WAIT 3
 	END IF
 
-	CALL fgl_setEnv("DBCON", this.name)
+	CALL fgl_setenv("DBCON", this.name)
 
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -232,9 +234,9 @@ END FUNCTION
 FUNCTION (this dbInfo) g2_sqt_createdb(l_dir STRING, l_file STRING) RETURNS()
 	DEFINE c base.Channel
 	LET c = base.Channel.create()
-	IF NOT os.path.exists(l_dir) THEN
-		IF NOT os.path.mkdir(l_dir) THEN
-			CALL g2_core.g2_exitProgram(STATUS, SFMT("DB Folder Creation Failed for: %1", l_dir))
+	IF NOT os.Path.exists(l_dir) THEN
+		IF NOT os.Path.mkdir(l_dir) THEN
+			CALL g2_core.g2_exitProgram(status, SFMT("DB Folder Creation Failed for: %1", l_dir))
 		END IF
 	END IF
 	CALL c.openFile(l_file, "w")
@@ -252,7 +254,7 @@ FUNCTION (this dbInfo) g2_mdb_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
+			CALL g2_core.g2_exitProgram(status, "DB Creation Failed!")
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid in
@@ -266,7 +268,7 @@ FUNCTION (this dbInfo) g2_ifx_createdb() RETURNS()
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
 		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-			CALL g2_core.g2_exitProgram(STATUS, "DB Creation Failed!")
+			CALL g2_core.g2_exitProgram(status, "DB Creation Failed!")
 		END IF
 	END TRY
 	LET this.create_db = FALSE -- avoid infintate loop!
@@ -301,7 +303,7 @@ FUNCTION (this dbInfo) g2_showInfo(stat INTEGER) RETURNS()
 	ELSE
 		DISPLAY "dbi.database." || this.name || "." || this.type || ".schema" TO lab7
 	END IF
-	DISPLAY fgl_getResource("dbi.database." || this.name || "." || this.type || ".schema") TO fld7
+	DISPLAY fgl_getresource("dbi.database." || this.name || "." || this.type || ".schema") TO fld7
 
 	DISPLAY "dbsrc" TO lab8
 	DISPLAY this.source TO fld8
@@ -315,7 +317,7 @@ FUNCTION (this dbInfo) g2_showInfo(stat INTEGER) RETURNS()
 	DISPLAY "LD_LIBRARY_PATH" TO lab11
 	DISPLAY fgl_getenv("LD_LIBRARY_PATH") TO fld11
 
-	DISPLAY "STATUS" TO lab13
+	DISPLAY "status" TO lab13
 	DISPLAY stat TO fld13
 	DISPLAY "SQLSTATE" TO lab14
 	DISPLAY SQLSTATE TO fld14
@@ -394,7 +396,7 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 		PREPARE pre_chk FROM l_stmt
 		EXECUTE pre_chk INTO l_cnt
 	CATCH
-		CALL g2_core.g2_winMessage("SQL Error", SFMT("%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+		CALL g2_core.g2_winMessage("SQL Error", SFMT("%1 %2", status, SQLERRMESSAGE), "exclamation")
 		LET l_where = NULL
 	END TRY
 	IF l_cnt = 0 THEN
@@ -440,7 +442,7 @@ END FUNCTION
 FUNCTION g2_sqlStatus(l_line INT, l_mod STRING, l_stmt STRING) RETURNS BOOLEAN
 	DEFINE l_stat INTEGER
 
-	LET l_stat = STATUS
+	LET l_stat = status
 	LET l_mod = l_mod || " Line:", (l_line USING "<<<<<<<")
 	IF l_stat = 0 THEN
 		RETURN TRUE
@@ -469,7 +471,7 @@ FUNCTION g2_sqlStatus(l_line INT, l_mod STRING, l_stmt STRING) RETURNS BOOLEAN
 		GL_DBGMSG(0, "gl_sqlStatus: Stmt         ='" || l_stmt || "'")
 	END IF
 	GL_DBGMSG(0, "gl_sqlStatus: WHERE        :" || l_mod)
-	GL_DBGMSG(0, "gl_sqlStatus: STATUS       :" || l_stat)
+	GL_DBGMSG(0, "gl_sqlStatus: status       :" || l_stat)
 	GL_DBGMSG(0, "gl_sqlStatus: SQLSTATE     :" || SQLSTATE)
 	GL_DBGMSG(0, "gl_sqlStatus: SQLERRMESSAGE:" || SQLERRMESSAGE)
 
@@ -691,7 +693,7 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	OPEN g2_db_checkrec_cur
 	LET l_exists = TRUE
 	FETCH g2_db_checkrec_cur
-	IF STATUS = NOTFOUND THEN
+	IF status = NOTFOUND THEN
 		LET l_exists = FALSE
 	END IF
 	CLOSE g2_db_checkrec_cur
@@ -728,16 +730,16 @@ FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
 		password STRING
 	END RECORD
 
-	LET l_file = fgl_getEnv("CUSTOM_DB")
+	LET l_file = fgl_getenv("CUSTOM_DB")
 	IF l_file.getLength() < 1 THEN 
-		LET l_file = os.path.join(l_path, l_fileName)
-		IF NOT os.path.exists(l_file) THEN
-			LET l_path = os.path.join("..", "..")
-			LET l_file = os.path.join(l_path, l_fileName)
+		LET l_file = os.Path.join(l_path, l_fileName)
+		IF NOT os.Path.exists(l_file) THEN
+			LET l_path = os.Path.join("..", "..")
+			LET l_file = os.Path.join(l_path, l_fileName)
 		END IF
 	END IF
 
-	IF NOT os.path.exists(l_file) THEN
+	IF NOT os.Path.exists(l_file) THEN
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
 		RETURN NULL, NULL, NULL
 	END IF
@@ -745,7 +747,7 @@ FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
 		LOCATE l_jsonText IN FILE l_file
 		CALL util.JSON.parse(l_jsonText, db)
 	CATCH
-		GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, STATUS, ERR_GET(STATUS)))
+		GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, status, err_get(status)))
 		DISPLAY l_jsonText
 		RETURN NULL, NULL, NULL
 	END TRY

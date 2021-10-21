@@ -8,11 +8,9 @@
 #+ from the use of this software rests entirely with the user.
 #+
 #+ No includes required.
-
+PACKAGE g2_lib
 IMPORT os
-IMPORT FGL g2_core
-IMPORT FGL g2_appInfo
-IMPORT FGL g2_aui
+IMPORT FGL g2_lib.*
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+
@@ -34,7 +32,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		CALL l_appInfo.setUserName(NULL)
 	END IF
 	IF l_appInfo.hostname IS NULL THEN
-		LET l_appInfo.hostname = g2_core.g2_getHostname()
+		LET l_appInfo.hostname = g2_util.g2_getHostname()
 	END IF
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
@@ -123,15 +121,15 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getEnv("DBNAME"), NULL, NULL)
+	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBNAME"), NULL, NULL)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Type") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, UPSHIFT(fgl_db_driver_type()), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, upshift(fgl_db_driver_type()), NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("DBDATE") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getEnv("DBDATE"), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBDATE"), NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")

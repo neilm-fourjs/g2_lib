@@ -12,6 +12,7 @@
 #+  
 #+ No includes required.
 
+PACKAGE g2_lib
 IMPORT util
 
 PUBLIC CONSTANT C_MONTHS_IS

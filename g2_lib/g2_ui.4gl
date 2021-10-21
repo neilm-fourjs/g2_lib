@@ -7,8 +7,9 @@
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 
-IMPORT FGL g2_core
-IMPORT FGL g2_sql
+PACKAGE g2_lib
+
+IMPORT FGL g2_lib.*
 
 PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()

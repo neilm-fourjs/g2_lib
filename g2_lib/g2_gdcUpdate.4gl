@@ -12,13 +12,13 @@
 #+  
 #+ No includes required.
 
+PACKAGE g2_lib
+
 IMPORT os
 IMPORT com
 IMPORT util
 
-IMPORT FGL g2_core
-IMPORT FGL g2_gdcUpdateCommon
-IMPORT FGL g2_aui
+IMPORT FGL g2_lib.*
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD
@@ -42,7 +42,7 @@ FUNCTION g2_gdcUpate() RETURNS()
 	DEFINE l_stat SMALLINT
 	DEFINE l_ret SMALLINT
 
-	IF DOWNSHIFT(ui.Interface.getFrontEndName()) != "gdc" THEN
+	IF downshift(ui.Interface.getFrontEndName()) != "gdc" THEN
 		RETURN
 	END IF
 
@@ -92,8 +92,8 @@ FUNCTION g2_gdcUpate() RETURNS()
 	CALL g2_aui.g2_notify(SFMT(% "%1\nPreparing\nPlease Wait ...", g2_gdcUpdateCommon.m_ret.reply))
 
 -- does the GDC update file exist on our server
-	LET l_localFile = os.path.join(g2_gdcUpdateCommon.m_gdcUpdateDir, g2_gdcUpdateCommon.m_ret.upd_file)
-	IF NOT os.path.exists(l_localFile) THEN
+	LET l_localFile = os.Path.join(g2_gdcUpdateCommon.m_gdcUpdateDir, g2_gdcUpdateCommon.m_ret.upd_file)
+	IF NOT os.Path.exists(l_localFile) THEN
 		IF g2_gdcUpdateCommon.m_ret.upd_url IS NOT NULL THEN
 			CALL g2_aui.g2_notify(
 					SFMT(% "%1\nServer Downloading Update File\nPlease Wait ...", g2_gdcUpdateCommon.m_ret.reply))
@@ -110,8 +110,8 @@ FUNCTION g2_gdcUpate() RETURNS()
 	END IF
 
 -- we have a new GDC to update to - a client temp folder name
-	CALL ui.Interface.frontcall("standard", "feinfo", "ostype", [l_os])
-	CALL ui.Interface.frontcall("standard", "getenv", ["TEMP"], [l_tmp])
+	CALL ui.Interface.frontCall("standard", "feinfo", "ostype", [l_os])
+	CALL ui.Interface.frontCall("standard", "getenv", ["TEMP"], [l_tmp])
 	IF l_os = "WINDOWS" THEN
 		IF l_tmp.getLength() < 2 THEN
 			LET l_tmp = "C:\\TEMP"
@@ -134,8 +134,8 @@ FUNCTION g2_gdcUpate() RETURNS()
 	CATCH
 		CALL abortGDCUpdate(
 				SFMT(% "Copy of GDC auto update file failed!\nSource:%1\nDest:%2\nErr:%3",
-						os.path.join(g2_gdcUpdateCommon.m_ret.upd_dir, g2_gdcUpdateCommon.m_ret.upd_file), l_newFile,
-						err_get(STATUS)))
+						os.Path.join(g2_gdcUpdateCommon.m_ret.upd_dir, g2_gdcUpdateCommon.m_ret.upd_file), l_newFile,
+						err_get(status)))
 		RETURN
 	END TRY
 
@@ -176,7 +176,7 @@ PRIVATE FUNCTION useGDCUpdateWS(l_url STRING) RETURNS()
 					SFMT("WS chkgdc call failed!\n%1\n%1-%2", l_url, l_stat, l_resp.getStatusDescription()))
 		END IF
 	CATCH
-		LET l_stat = STATUS
+		LET l_stat = status
 		LET g2_gdcUpdateCommon.m_ret.reply = err_get(l_stat)
 	END TRY
 END FUNCTION
@@ -185,7 +185,7 @@ END FUNCTION
 PRIVATE FUNCTION getGDCUpdateZipFile(l_localFile STRING, l_url STRING, l_file STRING) RETURNS BOOLEAN
 
 	MESSAGE "Getting GDC zip from " || l_url || "  Please wait ... "
-	CALL ui.interface.refresh()
+	CALL ui.Interface.refresh()
 
 	RUN SFMT("wget -q -O %1 %2/%3", l_localFile, l_url, l_file)
 
