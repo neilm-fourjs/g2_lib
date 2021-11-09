@@ -16,7 +16,9 @@ PACKAGE g2_lib
 
 IMPORT os
 
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_core
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD

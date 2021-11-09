@@ -9,7 +9,10 @@
 
 PACKAGE g2_lib
 
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_sql
 
 PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
 PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
@@ -26,8 +29,7 @@ PUBLIC TYPE g2_ui RECORD
 	fields DYNAMIC ARRAY OF g2_sql.t_fields
 END RECORD
 --------------------------------------------------------------------------------
-FUNCTION (this g2_ui)
-		g2_UIinput(
+FUNCTION (this g2_ui) g2_UIinput(
 		l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
 	DEFINE x SMALLINT
 	DEFINE l_evt, l_fld STRING
@@ -142,8 +144,7 @@ FUNCTION (this g2_ui)
 
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION (this g2_ui)
-		g2_addFormOnlyField(
+FUNCTION (this g2_ui) g2_addFormOnlyField(
 		l_name STRING, l_type STRING, l_value STRING, l_noEntry BOOLEAN)
 	DEFINE x SMALLINT
 	CALL this.fields.appendElement()

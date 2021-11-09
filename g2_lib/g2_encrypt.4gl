@@ -17,7 +17,8 @@ PACKAGE g2_lib
 IMPORT xml
 IMPORT security
 
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_init
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,

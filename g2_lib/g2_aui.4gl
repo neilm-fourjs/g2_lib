@@ -14,7 +14,9 @@ PACKAGE g2_lib
 
 IMPORT os
 IMPORT util
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+&include "g2_import_all.inc"
+
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN

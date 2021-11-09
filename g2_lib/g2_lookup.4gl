@@ -10,7 +10,11 @@
 
 PACKAGE g2_lib
 
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_db
 &include "g2_debug.inc"
 CONSTANT MAXCOLWIDTH = 40
 --------------------------------------------------------------------------------

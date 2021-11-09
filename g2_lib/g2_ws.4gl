@@ -11,7 +11,10 @@ PACKAGE g2_lib
 
 IMPORT com
 IMPORT util
-IMPORT FGL g2_lib.*
+
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_logging
+
 PUBLIC DEFINE m_server STRING
 PUBLIC TYPE t_response RECORD
 	server STRING,

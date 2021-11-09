@@ -14,7 +14,9 @@
 
 PACKAGE g2_lib
 
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_aui
 
 &include "g2_debug.inc"
 PUBLIC TYPE simpleLookup RECORD

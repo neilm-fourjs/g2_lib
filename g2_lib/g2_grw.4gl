@@ -12,7 +12,8 @@
 PACKAGE g2_lib
 
 IMPORT os
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_core
 
 -- From $GREDIR/lib
 IMPORT FGL libgreprops

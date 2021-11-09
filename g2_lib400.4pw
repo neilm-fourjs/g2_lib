@@ -113,30 +113,34 @@
   <PlatformList version="1.0"/>
   <Group environment="value:GENVER=400" id="75644415" label="g2_lib" language="Genero (no link)" targetDirectory="$(ProjectDir)/../njm_app_bin400">
     <Library binaryName="g2_lib" cwd="$(ProjectDir)" dependencies="1986" id="14000" label="g2_lib">
-      <File filePath="g2_lib/g2_debug.4gl"/>
-      <File filePath="g2_lib/g2_debug.inc"/>
-      <File filePath="g2_lib/g2_logging.4gl"/>
-      <File filePath="g2_lib/g2_aui.4gl"/>
-      <File filePath="g2_lib/g2_db.4gl"/>
-      <File filePath="g2_lib/g2_appInfo.4gl"/>
+      <VirtualFolder label="forms">
+        <File filePath="g2_lib/gl_grwCfg.per"/>
+      </VirtualFolder>
+      <VirtualFolder label="inc">
+        <File filePath="g2_lib/g2_debug.inc"/>
+      </VirtualFolder>
       <File filePath="g2_lib/g2_about.4gl"/>
+      <File filePath="g2_lib/g2_appInfo.4gl"/>
+      <File filePath="g2_lib/g2_aui.4gl"/>
       <File filePath="g2_lib/g2_calendar.4gl"/>
       <File filePath="g2_lib/g2_core.4gl"/>
-      <File filePath="g2_lib/g2_sql.4gl"/>
-      <File filePath="g2_lib/g2_ui.4gl"/>
-      <File filePath="g2_lib/g2_lookup.4gl"/>
+      <File filePath="g2_lib/g2_db.4gl"/>
+      <File filePath="g2_lib/g2_debug.4gl"/>
       <File filePath="g2_lib/g2_encrypt.4gl"/>
       <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
       <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
       <File filePath="g2_lib/g2_getFileName.4gl"/>
       <File filePath="g2_lib/g2_grw.4gl"/>
       <File filePath="g2_lib/g2_init.4gl"/>
+      <File filePath="g2_lib/g2_logging.4gl"/>
+      <File filePath="g2_lib/g2_lookup.4gl"/>
       <File filePath="g2_lib/g2_lookup2.4gl"/>
       <File filePath="g2_lib/g2_secure.4gl"/>
       <File filePath="g2_lib/g2_simpleLookup.4gl"/>
+      <File filePath="g2_lib/g2_sql.4gl"/>
+      <File filePath="g2_lib/g2_ui.4gl"/>
       <File filePath="g2_lib/g2_util.4gl"/>
       <File filePath="g2_lib/g2_ws.4gl"/>
-      <File filePath="g2_lib/gl_grwCfg.per"/>
     </Library>
   </Group>
   <Group environment="value:GENVER=400,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects400">
