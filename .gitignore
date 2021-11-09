@@ -2,6 +2,7 @@
 *.42?
 
 # Genero Studio generated  project files
+*.4pdb
 *.4pwvs
 *.4pwdb
 *.4pwcfg
