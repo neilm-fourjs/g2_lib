@@ -144,25 +144,19 @@
     </Library>
   </Group>
   <Group environment="value:GENVER=400,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects400">
-    <Library binaryName="etc" id="-894407244" label="etc">
-      <File filePath="etc/profile"/>
-    </Library>
-    <Application binaryName="g2_exp_lookup" dependencies="14000,-3234353" id="-615368558" label="g2_exp_lookup">
-      <Configuration id="-1343789213" label="g2_exp_lookup"/>
-      <File filePath="src_expects/g2_exp_lookup.4gl"/>
-    </Application>
-    <Application binaryName="g2_exp_sql" dependencies="14000,-3234353" id="269619776" label="g2_exp_sql">
-      <Configuration id="1040204014" label="g2_exp_sql"/>
-      <File filePath="src_expects/g2_exp_sql.4gl"/>
-    </Application>
-    <Application binaryName="g2_ext_ws" dependencies="14000,-3234353" id="668499250" label="g2_ext_ws">
-      <Configuration id="1896123809" label="g2_ext_ws"/>
-      <File filePath="src_expects/g2_exp_ws.4gl"/>
-    </Application>
-    <Library binaryName="lib_expect" id="-3234353" label="lib_expect">
+    <Library binaryName="Expect Test" dependencies="14000" id="-3234353" label="Expect Test">
+      <VirtualFolder label="etc">
+        <File filePath="src_expects/njm_demo310.4db"/>
+        <File filePath="etc/profile"/>
+      </VirtualFolder>
+      <Configuration binaryName="g2_exp_lookup" id="-1343789213" label="g2_exp_lookup"/>
+      <Configuration binaryName="g2_exp_sql" id="1040204014" label="g2_exp_sql"/>
+      <Configuration binaryName="g2_exp_ws" id="1896123809" label="g2_ext_ws"/>
       <File filePath="src_expects/form.per"/>
+      <File filePath="src_expects/g2_exp_lookup.4gl"/>
+      <File filePath="src_expects/g2_exp_sql.4gl"/>
+      <File filePath="src_expects/g2_exp_ws.4gl"/>
       <File filePath="src_expects/lib_expect.4gl"/>
-      <File filePath="src_expects/njm_demo310.4db"/>
     </Library>
   </Group>
 </Project>
