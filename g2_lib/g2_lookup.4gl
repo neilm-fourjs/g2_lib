@@ -99,12 +99,13 @@ FUNCTION g2_lookup(
 
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup: Opening Window.")
-	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
+	OPEN WINDOW listv AT 1, 1 WITH 15 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
 	CALL fgl_settitle("Listing from " || tabnam)
 	LET l_frm =
 			g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
 	LET l_grid = l_frm.createChild('Grid')
+{
 -- Create a centered window l_title.
 	LET l_hbx = l_grid.createChild('HBox')
 	CALL l_hbx.setAttribute("posY", "0")
@@ -113,13 +114,13 @@ FUNCTION g2_lookup(
 	CALL l_titl.setAttribute("text", "Listing from " || tabnam CLIPPED)
 	CALL l_titl.setAttribute("style", "tabtitl")
 	LET l_sp = l_hbx.createChild('SpacerItem')
-
+}
 	GL_DBGMSG(2, "g2_lookup: Generating Table...")
 -- Create the table
 	LET l_tabl = l_grid.createChild('Table')
 	CALL l_tabl.setAttribute("tabName", "tablistv")
-	CALL l_tabl.setAttribute("height", "20")
-	CALL l_tabl.setAttribute("pageSize", "20")
+	CALL l_tabl.setAttribute("height", "10")
+	CALL l_tabl.setAttribute("pageSize", "10")
 	CALL l_tabl.setAttribute("posY", "1")
 	CALL l_tabl.setAttribute("doubleClick", "accept")
 
