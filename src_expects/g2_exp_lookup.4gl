@@ -1,5 +1,12 @@
 
+&ifdef gen320
+IMPORT FGL g2_init
+IMPORT FGL g2_db
+IMPORT FGL g2_lookup
+IMPORT FGL g2_lookup2
+&else
 IMPORT FGL g2_lib.*
+&endif
 IMPORT FGL lib_expect
 
 MAIN
