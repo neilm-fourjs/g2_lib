@@ -17,14 +17,21 @@
 #+ This module initially written by: Neil J.Martin ( neilm@4js.com )
 #+
 
-PACKAGE g2_lib
-
 IMPORT xml
 IMPORT os
 IMPORT security
 IMPORT util
 
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+IMPORT FGL g2_init
+IMPORT FGL g2_encrypt
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
 &include "g2_debug.inc"
 
 -- Private variables:

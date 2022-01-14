@@ -8,14 +8,19 @@
 #+ from the use of this software rests entirely with the user.
 #+
 
-PACKAGE g2_lib
-
 IMPORT os
 IMPORT util
 
---IMPORT FGL g2_lib.*
+&ifdef gen320
+IMPORT FGL g2_appInfo
+IMPORT FGL g2_debug
+IMPORT FGL g2_logging
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_appInfo
 IMPORT FGL g2_lib.g2_debug
+&endif
+
 &include "g2_debug.inc"
 
 PUBLIC DEFINE m_mdi CHAR(1)

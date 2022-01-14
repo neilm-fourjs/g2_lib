@@ -6,7 +6,10 @@
 #+
 #+ No includes required.
 
+&ifdef gen320
+&else
 PACKAGE g2_lib
+&endif
 
 IMPORT util
 IMPORT os

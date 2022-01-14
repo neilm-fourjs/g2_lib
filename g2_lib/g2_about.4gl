@@ -8,9 +8,17 @@
 #+ from the use of this software rests entirely with the user.
 #+
 #+ No includes required.
-PACKAGE g2_lib
+
 IMPORT os
+&ifdef gen320
+IMPORT FGL g2_util
+IMPORT FGL g2_aui
+IMPORT FGL g2_appInfo
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+

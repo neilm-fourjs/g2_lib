@@ -7,11 +7,18 @@
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 
-PACKAGE g2_lib
-
 IMPORT com
 IMPORT util
+
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+IMPORT FGL g2_logging
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
 PUBLIC DEFINE m_server STRING
 PUBLIC TYPE t_response RECORD
 	server STRING,

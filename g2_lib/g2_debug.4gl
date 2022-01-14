@@ -9,10 +9,15 @@
 #+  
 #+ No includes required.
 
-PACKAGE g2_lib
-
 IMPORT os
+
 &define G2_DEBUG
+
+&ifdef gen320
+&else
+PACKAGE g2_lib
+&endif
+
 &include "g2_debug.inc"
 
 --------------------------------------------------------------------------------

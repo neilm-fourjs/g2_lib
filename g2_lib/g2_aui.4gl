@@ -10,11 +10,18 @@
 #+ No includes required.
 #+
 #+ Non GUI functions only
-PACKAGE g2_lib
 
 IMPORT os
 IMPORT util
+
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN

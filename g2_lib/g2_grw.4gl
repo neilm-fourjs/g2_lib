@@ -9,10 +9,15 @@
 #+  
 #+ No includes required.
 
-PACKAGE g2_lib
-
 IMPORT os
+
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
 
 -- From $GREDIR/lib
 IMPORT FGL libgreprops

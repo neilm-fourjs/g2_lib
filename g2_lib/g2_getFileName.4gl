@@ -9,10 +9,17 @@
 #+  
 #+ No includes required.
 
-PACKAGE g2_lib
-
 IMPORT os
+
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_simpleLookup
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
+
 --------------------------------------------------------------------------------------------------------------
 -- Do a simple list of files and return selected name
 --

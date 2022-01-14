@@ -12,13 +12,20 @@
 #+  
 #+ No includes required.
 
-PACKAGE g2_lib
-
 IMPORT os
 IMPORT com
 IMPORT util
 
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+IMPORT FGL g2_aui
+IMPORT FGL g2_gdcUpdateCommon
+&else
+PACKAGE g2_lib
 IMPORT FGL g2_lib.*
+&endif
+
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD

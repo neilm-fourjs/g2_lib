@@ -12,9 +12,14 @@
 #+  
 #+ No includes required.
 
+&ifdef gen320
+IMPORT FGL g2_debug
+IMPORT FGL g2_aui
+IMPORT FGL g2_db
+&else
 PACKAGE g2_lib
-
 IMPORT FGL g2_lib.*
+&endif
 
 &include "g2_debug.inc"
 PUBLIC TYPE simpleLookup RECORD

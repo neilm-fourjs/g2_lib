@@ -12,9 +12,12 @@
 #+  
 #+ No includes required.
 
+&ifdef gen320
+IMPORT FGL g2_util
+&else
 PACKAGE g2_lib
-
 IMPORT FGL g2_lib.g2_util
+&endif
 
 PUBLIC TYPE appInfo RECORD
 		appName,
