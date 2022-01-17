@@ -9,11 +9,12 @@
 #+  
 #+ No includes required.
 
+&ifdef gen320
+IMPORT FGL g2_core
+&else
 PACKAGE g2_lib
-
---IMPORT FGL g2_lib.* -- fails in GST
-IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_core
+&endif
 
 IMPORT util
 

@@ -112,12 +112,17 @@
   </LanguageList>
   <PlatformList version="1.0"/>
   <Group environment="value:GENVER=400" id="75644415" label="g2_lib" language="Genero (no link)" targetDirectory="$(ProjectDir)/../njm_app_bin400">
+    <Library binaryName="g2_gdcUpdate" id="-985216769" label="g2_gdcUpdate">
+      <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
+      <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
+    </Library>
     <Library binaryName="g2_lib" cwd="$(ProjectDir)" dependencies="1986" id="14000" label="g2_lib">
       <VirtualFolder label="forms">
         <File filePath="g2_lib/gl_grwCfg.per"/>
       </VirtualFolder>
       <VirtualFolder label="inc">
         <File filePath="g2_lib/g2_debug.inc"/>
+        <File filePath="g2_lib/g2_import_all.inc"/>
       </VirtualFolder>
       <File filePath="g2_lib/g2_about.4gl"/>
       <File filePath="g2_lib/g2_appInfo.4gl"/>
@@ -127,8 +132,6 @@
       <File filePath="g2_lib/g2_db.4gl"/>
       <File filePath="g2_lib/g2_debug.4gl"/>
       <File filePath="g2_lib/g2_encrypt.4gl"/>
-      <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
-      <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
       <File filePath="g2_lib/g2_getFileName.4gl"/>
       <File filePath="g2_lib/g2_grw.4gl"/>
       <File filePath="g2_lib/g2_init.4gl"/>

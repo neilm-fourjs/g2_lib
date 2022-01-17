@@ -8,13 +8,20 @@
 #+ from the use of this software rests entirely with the user.
 #+
 #+ No includes required.
-PACKAGE g2_lib
-IMPORT os
 
---IMPORT FGL g2_lib.* -- fails in GST.
+&ifdef gen320
+IMPORT FGL g2_appInfo
+IMPORT FGL g2_aui
+IMPORT FGL g2_util
+&else
+PACKAGE g2_lib
+-- IMPORT FGL g2_lib.* -- failed in GST?
 IMPORT FGL g2_lib.g2_appInfo
 IMPORT FGL g2_lib.g2_aui
 IMPORT FGL g2_lib.g2_util
+&endif
+
+IMPORT os
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+

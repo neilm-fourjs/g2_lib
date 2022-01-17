@@ -10,12 +10,19 @@
 #+ No includes required.
 #+
 #+ Non GUI functions only
+
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+&else
 PACKAGE g2_lib
+--IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
+&endif
 
 IMPORT os
 IMPORT util
---IMPORT FGL g2_lib.* -- fails in GST
-&include "g2_import_all.inc"
 
 &include "g2_debug.inc"
 

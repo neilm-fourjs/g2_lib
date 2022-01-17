@@ -6,14 +6,18 @@
 #+
 #+ No includes required.
 
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_logging
+IMPORT FGL g2_debug
+&else
 PACKAGE g2_lib
-
-IMPORT os
-
---IMPORT FGL g2_lib.* -- fails in GST
+IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_logging
 IMPORT FGL g2_lib.g2_debug
-IMPORT FGL g2_lib.g2_core
+&endif
+
+IMPORT os
 &include "g2_debug.inc"
 
 PUBLIC DEFINE g2_log g2_logging.logger
