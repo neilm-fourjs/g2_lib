@@ -17,8 +17,7 @@ IMPORT FGL g2_debug
 IMPORT FGL g2_logging
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.g2_appInfo
-IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.*
 &endif
 
 &include "g2_debug.inc"
