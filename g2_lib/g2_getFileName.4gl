@@ -9,17 +9,16 @@
 #+  
 #+ No includes required.
 
-IMPORT os
-
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_simpleLookup
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_simpleLookup
 &endif
 
-
+IMPORT os
 --------------------------------------------------------------------------------------------------------------
 -- Do a simple list of files and return selected name
 --

@@ -38,7 +38,10 @@ IMPORT FGL g2_aui
 IMPORT FGL g2_db
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_db
 &endif
 
 &include "g2_debug.inc"
@@ -135,7 +138,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup2: Opening Window.")
-	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
+	OPEN WINDOW listv AT 1, 1 WITH 15 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
 	CALL fgl_settitle(this.windowTitle)
 	LET l_frm = g2_aui.g2_genForm(this.formName) -- ensures form name is specific for this lookup
 	CALL l_frm.setAttribute("width", 100)
@@ -143,6 +146,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 	LET l_grid = l_frm.createChild('Grid')
 	CALL l_grid.setAttribute("width", 100)
 	CALL l_grid.setAttribute("gridWidth", 100)
+{
 -- Create a centered window l_title.
 	LET l_hbx = l_grid.createChild('HBox')
 	CALL l_hbx.setAttribute("posY", "0")
@@ -153,15 +157,15 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 	CALL l_titl.setAttribute("text", this.windowTitle)
 	CALL l_titl.setAttribute("style", "tabtitl")
 	LET l_sp = l_hbx.createChild('SpacerItem')
-
+}
 	GL_DBGMSG(2, "g2_lookup2: Generating Table...")
 -- Create the table
 	LET l_tabl = l_grid.createChild('Table')
 	CALL l_tabl.setAttribute("width", 100)
 	CALL l_tabl.setAttribute("gridWidth", 100)
 	CALL l_tabl.setAttribute("tabName", "tablistv")
-	CALL l_tabl.setAttribute("height", "20")
-	CALL l_tabl.setAttribute("pageSize", "20")
+	CALL l_tabl.setAttribute("height", "10")
+	CALL l_tabl.setAttribute("pageSize", "10")
 	CALL l_tabl.setAttribute("posY", "1")
 	CALL l_tabl.setAttribute("doubleClick", "accept")
 

@@ -12,12 +12,12 @@
 #+  
 #+ No includes required.
 
-IMPORT util
-
 &ifdef gen320
 &else
 PACKAGE g2_lib
 &endif
+
+IMPORT util
 
 PUBLIC CONSTANT C_MONTHS_IS
 		= "Janúar|Febrúar|Mars|Apríl|Maí|Júní|Júlí|Agúst|September|Október|Nóvember|Desember"

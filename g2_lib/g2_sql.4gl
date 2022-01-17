@@ -9,14 +9,14 @@
 #+  
 #+ No includes required.
 
-IMPORT util
-
 &ifdef gen320
 IMPORT FGL g2_core
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
 &endif
+
+IMPORT util
 
 CONSTANT SQL_FIRST = 0
 CONSTANT SQL_PREV = -1

@@ -9,16 +9,19 @@
 #+
 #+ No includes required.
 
-IMPORT os
 &ifdef gen320
-IMPORT FGL g2_util
-IMPORT FGL g2_aui
 IMPORT FGL g2_appInfo
+IMPORT FGL g2_aui
+IMPORT FGL g2_util
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+-- IMPORT FGL g2_lib.* -- failed in GST?
+IMPORT FGL g2_lib.g2_appInfo
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_util
 &endif
 
+IMPORT os
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+

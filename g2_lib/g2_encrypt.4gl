@@ -12,16 +12,18 @@
 #+  
 #+ No includes required.
 
-IMPORT xml
-IMPORT security
-
 &ifdef gen320
 IMPORT FGL g2_init
 IMPORT FGL g2_logging
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_init
+IMPORT FGL g2_lib.g2_logging
 &endif
+
+IMPORT xml
+IMPORT security
 
 PUBLIC TYPE encrypt RECORD
 	certFile STRING,

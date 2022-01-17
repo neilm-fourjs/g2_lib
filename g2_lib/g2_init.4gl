@@ -6,19 +6,18 @@
 #+
 #+ No includes required.
 
-IMPORT os
-
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_logging
 IMPORT FGL g2_debug
 &else
 PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_logging
 IMPORT FGL g2_lib.g2_debug
-IMPORT FGL g2_lib.g2_core
 &endif
 
+IMPORT os
 &include "g2_debug.inc"
 
 PUBLIC DEFINE g2_log g2_logging.logger
@@ -33,6 +32,7 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
 	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
 	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getenv("FGLDIR")))
+	GL_DBGMSG(1, SFMT("g2_core: FGLSERVER=%1", fgl_getenv("FGLSERVER")))
 	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getenv("FGLIMAGEPATH")))
 	GL_DBGMSG(1, SFMT("g2_core: FGLGBCDIR=%1", fgl_getenv("FGLGBCDIR")))
 	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getenv("FGLRESOURCEPATH")))

@@ -9,14 +9,14 @@
 #+
 #+ Non GUI functions only
 
-IMPORT os
-
 &ifdef gen320
 IMPORT FGL g2_core
 &else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_core
 &endif
+
+IMPORT os
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 

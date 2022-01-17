@@ -9,16 +9,18 @@
 #+  
 #+ No includes required.
 
-IMPORT os
-IMPORT util
-
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_debug
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+--IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
 &endif
+
+IMPORT os
+IMPORT util
 
 &include "g2_debug.inc"
 

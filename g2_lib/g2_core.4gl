@@ -8,9 +8,6 @@
 #+ from the use of this software rests entirely with the user.
 #+
 
-IMPORT os
-IMPORT util
-
 &ifdef gen320
 IMPORT FGL g2_appInfo
 IMPORT FGL g2_debug
@@ -19,6 +16,9 @@ IMPORT FGL g2_logging
 PACKAGE g2_lib
 IMPORT FGL g2_lib.*
 &endif
+
+IMPORT os
+IMPORT util
 
 &include "g2_debug.inc"
 

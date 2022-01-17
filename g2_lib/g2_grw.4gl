@@ -9,16 +9,16 @@
 #+  
 #+ No includes required.
 
-IMPORT os
-
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_debug
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.*
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
 &endif
 
+IMPORT os
 -- From $GREDIR/lib
 IMPORT FGL libgreprops
 IMPORT FGL libgre
