@@ -55,7 +55,7 @@ END RECORD
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	DEFINE l_msg STRING
 	DEFINE l_lockMode, l_fglprofile, l_failed BOOLEAN
-	DEFINE l_customName, l_dbUser, l_dbPass STRING
+	DEFINE l_customConnect, l_dbUser, l_dbPass STRING
 
 	LET l_fglprofile = FALSE
 
@@ -109,16 +109,19 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END IF
 	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 fglprofile:%3 Serial Emu:%4 Errd: %5", this.name, this.driver, fgl_getenv("FGLPROFILE"), this.serial_emu, this.serial_errd))
 	LET this.type = this.driver.subString(4, 6)
-	IF this.type != "sqt" AND l_dbName IS NULL THEN -- allow a custom dbname & user
-		CALL getCustomDBUser() RETURNING l_customName, l_dbUser, l_dbPass
+	IF this.type != "sqt" THEN -- allow a custom dbname & user
+		CALL getCustomDBUser(this.name, this.driver, this.create_db) RETURNING this.name, l_customConnect, l_dbUser, l_dbPass
+		LET this.connection = l_customConnect
+	ELSE
+		LET this.connection = this.name
 	END IF
-	LET this.connection = this.name
+
 	LET l_lockMode = TRUE
 	IF NOT l_fglprofile THEN -- no fglprofile setting to do it the long way.
 		CASE this.type
 			WHEN "pgs"
 				LET this.desc = "PostgreSQL " || this.driver.subString(7, 9)
-				LET this.connection = "db+driver='" || this.driver || "',source='" || this.name || "'"
+				LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.name)
 			WHEN "ifx"
 				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.desc = "Informix " || this.driver.subString(7, 9)
@@ -152,11 +155,11 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				END IF
 				LET l_lockMode = FALSE
 				LET this.desc = "SQLite " || this.driver.subString(7, 9)
-				LET this.connection = "db+driver='" || this.driver || "',source='" || this.source || "'"
+				LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
 		END CASE
 	END IF
 	LET l_failed = FALSE
-	IF l_customName IS NULL THEN
+	IF l_customConnect IS NULL THEN
 		TRY
 			GL_DBGMSG(0, SFMT("Connecting to %1 Using: %2 Source: %3 ...", this.connection, this.driver, this.source))
 			DATABASE this.connection
@@ -178,15 +181,14 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		END TRY
 	ELSE
 		TRY
-			GL_DBGMSG(0, SFMT("Connecting to %1 User: %2 ...", l_customName, l_dbUser))
-			CONNECT TO l_customName USER l_dbUser USING l_dbPass
+			GL_DBGMSG(0, SFMT("Connecting to %1 User: %2 ...", l_customConnect, l_dbUser))
+			CONNECT TO l_customConnect USER l_dbUser USING l_dbPass
 			GL_DBGMSG(0, "Connected.")
-			LET this.name = l_customName
 		CATCH
 			LET l_failed = TRUE
 			LET l_msg =
 					"Connect to failed\nDB:",
-					l_customName,
+					l_customConnect,
 					"\nUser:",
 					l_dbUser,
 					"\nStatus:",
@@ -727,16 +729,24 @@ END FUNCTION
 --   "password": "12neilm"
 -- }
 
-FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
+FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS(STRING, STRING, STRING, STRING)
 	DEFINE l_path STRING = ".."
 	DEFINE l_fileName STRING = "custom_db.json"
 	DEFINE l_file STRING
+	DEFINE l_info STRING
+	DEFINE l_tmp STRING
 	DEFINE l_jsonText TEXT
 	DEFINE db RECORD
-		dbname STRING,
+		name STRING,
+		driver STRING,
+		source STRING,
 		username STRING,
-		password STRING
+		password STRING,
+		connection STRING
 	END RECORD
+
+	LET db.name = l_db
+	LET db.driver = l_driver
 
 	LET l_file = fgl_getenv("CUSTOM_DB")
 	IF l_file.getLength() < 1 THEN 
@@ -749,17 +759,73 @@ FUNCTION getCustomDBUser() RETURNS(STRING, STRING, STRING)
 
 	IF NOT os.Path.exists(l_file) THEN
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
-		RETURN NULL, NULL, NULL
+		LET l_info = SFMT("'%1' - No custom database configuration found.", l_file)
+	ELSE
+		TRY
+			LOCATE l_jsonText IN FILE l_file
+			CALL util.JSON.parse(l_jsonText, db)
+			LET l_info = SFMT("Custom database configuration found in '%1'", l_file)
+		CATCH
+			GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, status, err_get(status)))
+			DISPLAY l_jsonText
+			LET db.connection = NULL
+			LET l_info = SFMT("Custom database configuration found in '%1' but was invalid JSON!", l_file)
+		END TRY
 	END IF
-	TRY
+
+	IF l_create THEN -- do UI for database connection info
+		LET int_flag = FALSE
+		OPEN WINDOW db_connection WITH FORM "mk_db_connection"
+		DISPLAY l_info TO info
+		LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+		OPTIONS INPUT WRAP
+		INPUT BY NAME db.* ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
+			AFTER FIELD name
+				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+				IF db.source IS NULL THEN LET db.source = db.name END IF
+			AFTER FIELD driver
+				IF db.driver.subString(1,3) != "dbm" THEN
+					ERROR "Invalid driver name!"
+					NEXT FIELD driver
+				END IF
+				LET l_tmp =  os.path.join( os.path.join( fgl_getEnv("FGLDIR"), "dbdrivers" ), db.driver||".so")
+				IF NOT os.path.exists( l_tmp ) THEN
+					ERROR SFMT("Driver '%1' not found on server!", l_tmp)
+					NEXT FIELD driver
+				END IF
+				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+			AFTER FIELD source
+				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+			ON ACTION test ATTRIBUTES(TEXT="Test", IMAGE="fa-magic")
+				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+				TRY
+					IF db.username IS NOT NULL THEN
+						LET l_info = SFMT("Connect using '%1' ",db.username)
+						CONNECT TO db.connection USER db.username USING db.password
+					ELSE
+						LET l_info = "Connect using local user "
+						CONNECT TO db.connection
+					END IF
+					LET l_info = l_info.append("Okay")
+					DISCONNECT CURRENT
+				CATCH
+					LET l_info = l_info.append(SFMT("Failed!\n%1 - %2", STATUS, SQLERRMESSAGE))
+				END TRY
+				DISPLAY l_info TO info
+			ON ACTION quit
+				CALL g2_core.g2_exitProgram(1, "DB Connection Dialog Quit")
+		END INPUT
+		CLOSE WINDOW db_connection
+		IF int_flag THEN
+			LET int_flag = FALSE
+			GL_DBGMSG(0, "getCustomDBUser: connection ui cancelled, using defaults.")
+			RETURN l_db, NULL, NULL, NULL
+		END IF
 		LOCATE l_jsonText IN FILE l_file
-		CALL util.JSON.parse(l_jsonText, db)
-	CATCH
-		GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, status, err_get(status)))
-		DISPLAY l_jsonText
-		RETURN NULL, NULL, NULL
-	END TRY
+		LET l_jsonText = util.JSON.stringify(db)
+	END IF
+
 	GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
-	RETURN db.dbname, db.username, db.password
+	RETURN db.name, db.connection, db.username, db.password
 END FUNCTION
 --------------------------------------------------------------------------------
