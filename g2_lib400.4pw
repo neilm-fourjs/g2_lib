@@ -130,6 +130,7 @@
       <File filePath="g2_lib/g2_calendar.4gl"/>
       <File filePath="g2_lib/g2_core.4gl"/>
       <File filePath="g2_lib/g2_db.4gl"/>
+      <File filePath="g2_lib/g2_db_connection.per"/>
       <File filePath="g2_lib/g2_debug.4gl"/>
       <File filePath="g2_lib/g2_encrypt.4gl"/>
       <File filePath="g2_lib/g2_getFileName.4gl"/>
