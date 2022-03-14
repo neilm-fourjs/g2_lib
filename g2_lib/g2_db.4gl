@@ -783,6 +783,7 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 			AFTER FIELD name
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				IF db.source IS NULL THEN LET db.source = db.name END IF
+
 			AFTER FIELD driver
 				IF db.driver.subString(1,3) != "dbm" THEN
 					ERROR "Invalid driver name!"
@@ -794,9 +795,12 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 					NEXT FIELD driver
 				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+
 			AFTER FIELD source
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+
 			ON ACTION test ATTRIBUTES(TEXT="Test", IMAGE="fa-magic")
+				IF db.source IS NULL THEN LET db.source = db.name END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				TRY
 					IF db.username IS NOT NULL THEN
