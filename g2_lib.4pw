@@ -115,6 +115,7 @@
       <File filePath="g2_lib/g2_about.4gl"/>
       <File filePath="g2_lib/g2_calendar.4gl"/>
       <File filePath="g2_lib/g2_core.4gl"/>
+      <File filePath="g2_lib/g2_db_connection.per"/>
       <File filePath="g2_lib/g2_sql.4gl"/>
       <File filePath="g2_lib/g2_ui.4gl"/>
       <File filePath="g2_lib/g2_lookup.4gl"/>

@@ -775,7 +775,7 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 
 	IF l_create THEN -- do UI for database connection info
 		LET int_flag = FALSE
-		OPEN WINDOW db_connection WITH FORM "mk_db_connection"
+		OPEN WINDOW db_connection WITH FORM "g2_db_connection"
 		DISPLAY l_info TO info
 		LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 		OPTIONS INPUT WRAP
