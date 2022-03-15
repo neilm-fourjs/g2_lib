@@ -791,8 +791,8 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 					ERROR "Invalid driver name!"
 					NEXT FIELD driver
 				END IF
-				LET l_tmp =  os.path.join( os.path.join( fgl_getEnv("FGLDIR"), "dbdrivers" ), db.driver||".so")
-				IF NOT os.path.exists( l_tmp ) THEN
+				LET l_tmp =  os.Path.join( os.Path.join( fgl_getEnv("FGLDIR"), "dbdrivers" ), db.driver||".so")
+				IF NOT os.Path.exists( l_tmp ) THEN
 					ERROR SFMT("Driver '%1' not found on server!", l_tmp)
 					NEXT FIELD driver
 				END IF
