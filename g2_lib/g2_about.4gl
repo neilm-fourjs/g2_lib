@@ -11,6 +11,7 @@
 
 &ifdef gen320
 IMPORT FGL g2_appInfo
+IMPORT FGL g2_core
 IMPORT FGL g2_aui
 IMPORT FGL g2_util
 IMPORT FGL g2_db
@@ -18,6 +19,7 @@ IMPORT FGL g2_db
 PACKAGE g2_lib
 -- IMPORT FGL g2_lib.* -- failed in GST?
 IMPORT FGL g2_lib.g2_appInfo
+IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_aui
 IMPORT FGL g2_lib.g2_util
 IMPORT FGL g2_lib.g2_db
@@ -29,7 +31,7 @@ IMPORT os
 #+
 #+ @param l_ver a version string
 #+ @return Nothing.
-FUNCTION g2_about(l_appInfo appInfo INOUT)
+FUNCTION g2_about()
 	DEFINE f, n, g, w om.DomNode
 	DEFINE nl om.NodeList
 	DEFINE gver, info, txt STRING
@@ -37,26 +39,26 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 
 	LET gver = "build ", fgl_getversion()
 
-	IF l_appInfo.fe_typ IS NULL THEN
-		CALL l_appInfo.getClientInfo()
+	IF g2_core.m_appInfo.fe_typ IS NULL THEN
+		CALL g2_core.m_appInfo.getClientInfo()
 	END IF
 
-	IF l_appInfo.userName IS NULL THEN
-		CALL l_appInfo.setUserName(NULL)
+	IF g2_core.m_appInfo.userName IS NULL THEN
+		CALL g2_core.m_appInfo.setUserName(NULL)
 	END IF
-	IF l_appInfo.hostname IS NULL THEN
-		LET l_appInfo.hostname = g2_util.g2_getHostname()
+	IF g2_core.m_appInfo.hostname IS NULL THEN
+		LET g2_core.m_appInfo.hostname = g2_util.g2_getHostname()
 	END IF
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
 	LET n = g2_aui.g2_getWinNode(NULL)
-	CALL n.setAttribute("text", l_appInfo.progDesc)
+	CALL n.setAttribute("text", g2_core.m_appInfo.progDesc)
 	LET f = g2_aui.g2_genForm("about")
 	LET n = f.createChild("VBox")
 	CALL n.setAttribute("posY", "0")
 	CALL n.setAttribute("posX", "0")
 
-	IF l_appInfo.splashImage IS NOT NULL AND l_appInfo.splashImage != " " THEN
+	IF g2_core.m_appInfo.splashImage IS NOT NULL AND g2_core.m_appInfo.splashImage != " " THEN
 		LET g = n.createChild("HBox")
 		CALL g.setAttribute("posY", y)
 		CALL g.setAttribute("gridWidth", 36)
@@ -71,7 +73,7 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		CALL w.setAttribute("stretch", "x")
 		CALL w.setAttribute("autoScale", "1")
 		CALL w.setAttribute("gridWidth", "12")
-		CALL w.setAttribute("image", l_appInfo.splashImage)
+		CALL w.setAttribute("image", g2_core.m_appInfo.splashImage)
 		CALL w.setAttribute("height", "100px")
 		CALL w.setAttribute("width", "290px")
 
@@ -88,23 +90,23 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	CALL g.setAttribute("style", "about")
 	CALL g.setAttribute("gridWidth", 36)
 
-	IF l_appInfo.appBuild IS NOT NULL THEN
+	IF g2_core.m_appInfo.appBuild IS NOT NULL THEN
 		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Application"), "right", "black")
-		CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.appName || " - " || l_appInfo.appBuild, NULL, NULL)
+		CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.appName || " - " || g2_core.m_appInfo.appBuild, NULL, NULL)
 		LET y = y + 1
 	END IF
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Program") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(
-			g, 10, y, l_appInfo.progName || " - " || l_appInfo.progVersion, NULL, "black")
+			g, 10, y, g2_core.m_appInfo.progName || " - " || g2_core.m_appInfo.progVersion, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Description") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progDesc, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.progDesc, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Author") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.progAuth, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.progAuth, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -118,15 +120,15 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server OS") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.os, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.os, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.hostname, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.hostname, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Application User") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.userName, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.userName, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server Time:") || ":", "right", "black")
@@ -157,11 +159,11 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	CALL w.setAttribute("gridWidth", 25)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Client OS") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.cli_os || " / " || l_appInfo.cli_osver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.cli_os || " / " || g2_core.m_appInfo.cli_osver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Clint OS User") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, NVL(l_appInfo.cli_un, "Unknown"), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, NVL(g2_core.m_appInfo.cli_un, "Unknown"), NULL, "black")
 	LET y = y + 1
 
 	{IF m_user_agent.getLength() > 1 THEN
@@ -170,24 +172,24 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 		END IF}
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("FrontEnd Version") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.fe_typ || " " || l_appInfo.fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Universal Renderer") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.uni_typ || " " || l_appInfo.uni_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.uni_typ || " " || g2_core.m_appInfo.uni_ver, NULL, "black")
 	LET y = y + 1
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("FrontEnd Version-FEinfo") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.fe_typ || " " || l_appInfo.fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
-	IF l_appInfo.cli_dir.getLength() > 1 THEN
+	IF g2_core.m_appInfo.cli_dir.getLength() > 1 THEN
 		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Client Directory") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.cli_dir, NULL, "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.cli_dir, NULL, "black")
 		LET y = y + 1
 	END IF
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Screen Resolution") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, l_appInfo.cli_res, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.cli_res, NULL, "black")
 	LET y = y + 1
 
 	LET g = g.createChild("HBox")
