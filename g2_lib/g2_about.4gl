@@ -13,12 +13,14 @@
 IMPORT FGL g2_appInfo
 IMPORT FGL g2_aui
 IMPORT FGL g2_util
+IMPORT FGL g2_db
 &else
 PACKAGE g2_lib
 -- IMPORT FGL g2_lib.* -- failed in GST?
 IMPORT FGL g2_lib.g2_appInfo
 IMPORT FGL g2_lib.g2_aui
 IMPORT FGL g2_lib.g2_util
+IMPORT FGL g2_lib.g2_db
 &endif
 
 IMPORT os
@@ -131,14 +133,19 @@ FUNCTION g2_about(l_appInfo appInfo INOUT)
 	CALL g2_aui.g2_addLabel(g, 10, y, TODAY || " " || TIME, NULL, "black")
 	LET y = y + 1
 
+	IF g2_db.m_db.name IS NULL THEN
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBNAME"), NULL, NULL)
+	CALL g2_aui.g2_addLabel(g, 10, y, "No Database", NULL, NULL)
+	LET y = y + 1
+	ELSE
+	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (source: %2)",g2_db.m_db.name, g2_db.m_db.source), NULL, NULL)
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Type") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, upshift(fgl_db_driver_type()), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y,g2_db.m_db.type, NULL, "black")
 	LET y = y + 1
-
+	END IF
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("DBDATE") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBDATE"), NULL, "black")
 	LET y = y + 1
