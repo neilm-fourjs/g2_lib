@@ -1,5 +1,5 @@
 
-export GENVER=400
+export GENVER=320
 export BIN=../njm_app_bin
 
 export PROJBASE=$(PWD)
@@ -9,7 +9,7 @@ TARGETS=$(BIN)/g2_lib.42x
 all: $(TARGETS)
 
 $(BIN)/g2_lib.42x: g2_lib/*.4gl
-	gsmake g2_lib$(GENVER).4pw
+	gsmake g2_lib.4pw
 
 test:
 	gsmake test.4pw
