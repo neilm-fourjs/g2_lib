@@ -66,7 +66,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
     LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
   END IF
   LET this.name = l_dbName
-	LET this.source = "local"
+	LET this.source = NULL
   IF this.dir IS NULL OR this.dir = " " THEN
     LET this.dir = DEF_DBDIR
   END IF
@@ -111,11 +111,12 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END IF
 	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 fglprofile:%3 Serial Emu:%4 Errd: %5", this.name, this.driver, fgl_getenv("FGLPROFILE"), this.serial_emu, this.serial_errd))
 	LET this.type = this.driver.subString(4, 6)
+	LET this.connection = this.name
 	IF this.type != "sqt" THEN -- allow a custom dbname & user
-		CALL getCustomDBUser(this.name, this.driver, this.create_db) RETURNING this.name, this.source, l_customConnect, l_dbUser, l_dbPass
-		LET this.connection = l_customConnect
-	ELSE
-		LET this.connection = this.name
+		CALL getCustomDBUser(this.name, this.driver, this.source, this.create_db) RETURNING this.name, this.source, l_customConnect, l_dbUser, l_dbPass
+		IF l_customConnect IS NOT NULL THEN
+			LET this.connection = l_customConnect
+		END IF
 	END IF
 
 	LET l_lockMode = TRUE
@@ -123,7 +124,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		CASE this.type
 			WHEN "pgs"
 				LET this.desc = "PostgreSQL " || this.driver.subString(7, 9)
-				LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
+				IF this.source IS NOT NULL THEN
+					LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
+				END IF
 			WHEN "ifx"
 				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.desc = "Informix " || this.driver.subString(7, 9)
@@ -731,7 +734,8 @@ END FUNCTION
 --   "password": "12neilm"
 -- }
 
-FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS(STRING, STRING, STRING, STRING, STRING)
+FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_source STRING, l_create BOOLEAN) 
+	RETURNS(STRING, STRING, STRING, STRING, STRING)
 	DEFINE l_path STRING = ".."
 	DEFINE l_fileName STRING = "custom_db.json"
 	DEFINE l_file STRING
@@ -749,6 +753,7 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 
 	LET db.name = l_db
 	LET db.driver = l_driver
+	LET db.source = l_source
 
 	LET l_file = fgl_getenv("CUSTOM_DB")
 	IF l_file.getLength() < 1 THEN 
@@ -799,6 +804,7 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 
 			AFTER FIELD source
+				IF db.source IS NULL THEN LET db.source = db.name END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 
 			ON ACTION test ATTRIBUTES(TEXT="Test", IMAGE="fa-magic")
@@ -825,12 +831,12 @@ FUNCTION getCustomDBUser(l_db STRING, l_driver STRING, l_create BOOLEAN) RETURNS
 		IF int_flag THEN
 			LET int_flag = FALSE
 			GL_DBGMSG(0, "getCustomDBUser: connection ui cancelled, using defaults.")
-			RETURN l_db, "local", NULL, NULL, NULL
+			RETURN l_db, l_source, NULL, NULL, NULL
 		END IF
 		LOCATE l_jsonText IN FILE l_file
 		LET l_jsonText = util.JSON.stringify(db)
 	END IF
-
+	IF db.source IS NULL THEN LET db.source = db.name END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
 	RETURN db.name, db.source, db.connection, db.username, db.password
 END FUNCTION
