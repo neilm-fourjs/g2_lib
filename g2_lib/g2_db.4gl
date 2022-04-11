@@ -353,13 +353,17 @@ END FUNCTION
 #+
 #+ @param l_tab Table name
 #+ @param l_col Column(s)
-FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING) RETURNS()
+#+ @param l_isSerial Serials are primary key by default in MySQL
+FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING, l_isSerial BOOLEAN) RETURNS()
 	DEFINE l_sql_stmt STRING
 	DEFINE l_cmd STRING
 	LET l_cmd = "PRIMARY KEY"
 	IF this.type = "sqt" THEN
 		RETURN
 	END IF -- can't add pk to sqlite!!
+	IF this.type = "mys" AND l_isSerial THEN
+		RETURN
+	END IF -- can't add pk for serial column in MySQL
 	IF this.type = "ifx" THEN
 		LET l_cmd = "CONSTRAINT UNIQUE"
 	END IF
