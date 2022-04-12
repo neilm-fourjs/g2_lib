@@ -119,7 +119,6 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		END IF
 	END IF
 
-	LET l_lockMode = TRUE
 	IF NOT l_fglprofile THEN -- no fglprofile setting to do it the long way.
 		CASE this.type
 			WHEN "pgs"
@@ -135,10 +134,6 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				DISPLAY "INFORMIXDIR:", fgl_getenv("INFORMIXDIR")
 				DISPLAY "INFORMIXSERVER:", fgl_getenv("INFORMIXSERVER")
 				DISPLAY "INFORMIXSQLHOSTS:", fgl_getenv("INFORMIXSQLHOSTS")
-			WHEN "mdb"
-				LET l_lockMode = FALSE
-			WHEN "mys"
-				LET l_lockMode = FALSE
 			WHEN "sqt"
 				IF NOT os.Path.exists(this.dir) THEN
 					IF NOT os.Path.mkdir(this.dir) THEN
@@ -158,11 +153,20 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				ELSE
 					DISPLAY "Database file exists:", this.source
 				END IF
-				LET l_lockMode = FALSE
+
 				LET this.desc = "SQLite " || this.driver.subString(7, 9)
 				LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
 		END CASE
 	END IF
+
+	LET l_lockMode = FALSE
+	CASE this.type
+		WHEN "ifx"
+			LET l_lockMode = TRUE
+		WHEN "msc"
+			LET l_lockMode = TRUE
+	END CASE
+
 	LET l_failed = FALSE
 	IF l_customConnect IS NULL THEN
 		TRY
@@ -188,7 +192,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		TRY
 			GL_DBGMSG(0, SFMT("Connecting to %1 User: %2 ...", l_customConnect, l_dbUser))
 			CONNECT TO l_customConnect USER l_dbUser USING l_dbPass
-			GL_DBGMSG(0, "Connected.")
+			GL_DBGMSG(0, SFMT("Connected, Type: %1", this.type))
 		CATCH
 			LET l_failed = TRUE
 			LET l_msg =
