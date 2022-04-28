@@ -361,13 +361,13 @@ END FUNCTION
 FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING, l_isSerial BOOLEAN) RETURNS()
 	DEFINE l_sql_stmt STRING
 	DEFINE l_cmd STRING
-	LET l_cmd = "PRIMARY KEY"
 	IF this.type = "sqt" THEN
 		RETURN
 	END IF -- can't add pk to sqlite!!
-	IF this.type = "mys" AND l_isSerial THEN
+	IF l_isSerial AND (this.type = "mys" OR this.type = "mdb") THEN
 		RETURN
-	END IF -- can't add pk for serial column in MySQL
+	END IF -- can't add pk for serial column in MySQL or MariaDB
+	LET l_cmd = "PRIMARY KEY"
 	IF this.type = "ifx" THEN
 		LET l_cmd = "CONSTRAINT UNIQUE"
 	END IF
