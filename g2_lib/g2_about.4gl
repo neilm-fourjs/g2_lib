@@ -32,10 +32,10 @@ IMPORT os
 #+ @param l_ver a version string
 #+ @return Nothing.
 FUNCTION g2_about()
-	DEFINE f, n, g, w om.DomNode
-	DEFINE nl om.NodeList
+	DEFINE f, n, g, w      om.DomNode
+	DEFINE nl              om.NodeList
 	DEFINE gver, info, txt STRING
-	DEFINE y SMALLINT
+	DEFINE y               SMALLINT
 
 	LET gver = "build ", fgl_getversion()
 
@@ -97,8 +97,7 @@ FUNCTION g2_about()
 	END IF
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Program") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(
-			g, 10, y, g2_core.m_appInfo.progName || " - " || g2_core.m_appInfo.progVersion, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.progName || " - " || g2_core.m_appInfo.progVersion, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Description") || ":", "right", "black")
@@ -136,17 +135,17 @@ FUNCTION g2_about()
 	LET y = y + 1
 
 	IF g2_db.m_db.name IS NULL THEN
-	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, "No Database", NULL, NULL)
-	LET y = y + 1
+		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, "No Database", NULL, NULL)
+		LET y = y + 1
 	ELSE
-	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (source: %2)",g2_db.m_db.name, g2_db.m_db.source), NULL, NULL)
-	LET y = y + 1
+		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (from: %2)", g2_db.m_db.name, g2_db.m_db.db_cfg), NULL, "black")
+		LET y = y + 1
 
-	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Type") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y,g2_db.m_db.type, NULL, "black")
-	LET y = y + 1
+		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Driver") || ":", "right", "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (source: %2)", g2_db.m_db.driver, g2_db.m_db.source), NULL, "black")
+		LET y = y + 1
 	END IF
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("DBDATE") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBDATE"), NULL, "black")
@@ -220,7 +219,7 @@ FUNCTION g2_about()
 
 	LET nl = f.selectByTagName("Label")
 	FOR y = 1 TO nl.getLength()
-		LET w = nl.item(y)
+		LET w   = nl.item(y)
 		LET txt = w.getAttribute("text")
 		IF txt IS NULL THEN
 			LET txt = "(null)"
