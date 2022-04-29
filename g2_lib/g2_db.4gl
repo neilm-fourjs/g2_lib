@@ -47,9 +47,12 @@ PUBLIC TYPE dbInfo RECORD
 	dir STRING,
 	dbspace STRING,
 	connection STRING,
+	db_user STRING,
+	db_passwd STRING,
 	create_db BOOLEAN,
 	serial_emu STRING,
 	serial_errd BOOLEAN,
+	use_custom BOOLEAN, 
 	db_cfg STRING
 END RECORD
 
@@ -58,10 +61,10 @@ PUBLIC DEFINE m_db dbInfo --should be used instead of defining this in the call 
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	DEFINE l_msg STRING
 	DEFINE l_lockMode, l_fglprofile, l_failed BOOLEAN
-	DEFINE l_customConnect, l_dbUser, l_dbPass STRING
 
-	LET l_fglprofile = FALSE
+	LET this.use_custom = FALSE
 	LET this.db_cfg = "local"
+
 -- setup stuff from environment or defaults
   IF l_dbName IS NULL OR l_dbName = " " THEN
     LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
@@ -102,30 +105,28 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	IF l_msg IS NULL OR l_msg = " " THEN
 		LET l_msg = fgl_getresource("dbi.default.driver")
 	END IF
+	IF l_msg IS NOT NULL AND l_msg != " " THEN
+		LET this.driver = l_msg
+	END IF
+	LET this.type = this.driver.subString(4, 6)
 
 	LET this.serial_emu =
 			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
 	LET this.serial_errd =
 			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
 
-	IF l_msg IS NOT NULL AND l_msg != " " THEN
-		LET this.driver = l_msg
-	END IF
-	LET this.type = this.driver.subString(4, 6)
 	LET this.connection = this.name
 
-	CALL this.getCustomDBUser() RETURNING l_dbUser, l_dbPass
+	CALL this.g2_getCustomDBInfo()
 	GL_DBGMSG(0, SFMT("Database: %1 Driver: %2 Type: %3 Source: %4 CFG: %5 Serial Emu: %6 Errd: %7", this.name, this.driver, this.type, this.source, this.db_cfg, this.serial_emu, this.serial_errd))
 
-
-	IF NOT l_fglprofile THEN -- no fglprofile setting to do it the long way.
+	IF NOT this.use_custom THEN
 		CASE this.type
 			WHEN "pgs"
 				IF this.source IS NOT NULL THEN
 					LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
 				END IF
 			WHEN "ifx"
-				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.source = fgl_getenv("INFORMIXSERVER")
 				LET this.connection = this.name
 				DISPLAY "INFORMIXDIR:", fgl_getenv("INFORMIXDIR")
@@ -177,45 +178,31 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END CASE
 
 	LET l_failed = FALSE
-	IF l_customConnect IS NULL THEN
-		TRY
-			GL_DBGMSG(0, SFMT("Connecting to %1 Using: %2 Source: %3 ...", this.connection, this.driver, this.source))
+	TRY
+		IF this.db_user IS NULL THEN
+			GL_DBGMSG(0, SFMT("Connection: %1 Using: %2 Source: %3 ...", this.connection, this.driver, this.source))
 			DATABASE this.connection
-			GL_DBGMSG(0, "Connected.")
-		CATCH
-			LET l_failed = TRUE
-			LET l_msg =
-					"Connection to database failed\nDB:",
-					this.name,
-					"\nSource:",
-					this.source,
-					"\nDriver:",
-					this.driver,
-					"\n",
-					"Status:",
-					sqlca.sqlcode,
-					"\n",
-					SQLERRMESSAGE
-		END TRY
-	ELSE
-		TRY
-			GL_DBGMSG(0, SFMT("Connecting to %1 User: %2 ...", l_customConnect, l_dbUser))
-			CONNECT TO l_customConnect USER l_dbUser USING l_dbPass
-			GL_DBGMSG(0, SFMT("Connected, Type: %1", this.type))
-		CATCH
-			LET l_failed = TRUE
-			LET l_msg =
-					"Connect to failed\nDB:",
-					l_customConnect,
-					"\nUser:",
-					l_dbUser,
-					"\nStatus:",
-					sqlca.sqlcode,
-					"\n",
-					SQLERRMESSAGE
-		END TRY
-	END IF
+		ELSE
+			GL_DBGMSG(0, SFMT("Connection: %1 As: %2 ...", this.connection, this.db_user))
+			CONNECT TO this.connection USER this.db_user USING this.db_passwd
+		END IF
+		GL_DBGMSG(0, "Connected.")
+	CATCH
+		LET l_failed = TRUE
+	END TRY
 	IF l_failed THEN
+		LET l_msg =
+				"Connection to database failed\nDB:",
+				this.name,
+				"\nSource:",
+				this.source,
+				"\nDriver:",
+				this.driver,
+				"\n",
+				"Status:",
+				sqlca.sqlcode,
+				"\n",
+				SQLERRMESSAGE
 		DISPLAY l_msg
 		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
@@ -391,14 +378,17 @@ END FUNCTION
 --------------------------------------------------------------------------------
 -- Get custom dbname and user from a json file outside of the deployment
 -- eg:
--- {
---   "dbname": "njm_demo310",
---   "username": "neilm",
---   "password": "12neilm"
--- }
+{
+  "name": "pitestdb",
+  "type": "pgs",
+  "driver": "dbmpgs",
+  "source": "pitestdb@pi3",
+  "username": "testuser",
+  "password": "12testuser",
+  "connection": "pitestdb+driver='dbmpgs',source='pitestdb@pi3'"
+}
 
-FUNCTION (this dbInfo) getCustomDBUser() 
-	RETURNS(STRING, STRING)
+FUNCTION (this dbInfo) g2_getCustomDBInfo() 
 	DEFINE l_path STRING = ".."
 	DEFINE l_fileName STRING = "custom_db.json"
 	DEFINE l_file STRING
@@ -449,6 +439,9 @@ FUNCTION (this dbInfo) getCustomDBUser()
 		LET this.name = db.name
 		LET this.source = db.source
 		LET this.connection = db.connection
+		LET this.db_user = db.username
+		LET this.db_passwd = db.password
+		LET this.use_custom = TRUE
 	END IF
 
 	IF this.create_db THEN -- do UI for database connection info
@@ -503,7 +496,7 @@ FUNCTION (this dbInfo) getCustomDBUser()
 		IF int_flag THEN
 			LET int_flag = FALSE
 			GL_DBGMSG(0, "getCustomDBUser: connection ui cancelled, using defaults.")
-			RETURN NULL, NULL
+			RETURN
 		END IF
 		LOCATE l_jsonText IN FILE l_file
 		LET l_jsonText = util.JSON.stringify(db)
@@ -515,8 +508,10 @@ FUNCTION (this dbInfo) getCustomDBUser()
 		LET this.name = db.name
 		LET this.source = db.source
 		LET this.connection = db.connection
+		LET this.db_user = db.username
+		LET this.db_passwd = db.password
+		LET this.use_custom = TRUE
 	END IF
-	RETURN db.username, db.password
 END FUNCTION
 
 
