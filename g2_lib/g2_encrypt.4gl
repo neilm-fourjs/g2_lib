@@ -155,7 +155,7 @@ FUNCTION (this encrypt) g2_encryptError(l_msg STRING)
 	CALL g2_init.g2_log.logIt(l_msg)
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING) RETURNS STRING
+FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING, l_pass CHAR(32)) RETURNS STRING
 	DEFINE
 		l_symkey     xml.CryptoKey,
 		l_enc_string STRING
@@ -170,7 +170,11 @@ FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING) RETURNS STRING
 		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
 		# Get the file password for the given salt
+        IF l_pass IS NULL THEN
 		CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
+        ELSE
+		CALL l_symkey.setKey(l_pass) # password of 128 bits
+        END IF
 
 		LET l_enc_string = XML.Encryption.EncryptString(l_symkey, l_string)
 	CATCH
@@ -181,36 +185,39 @@ FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING) RETURNS STRING
 	RETURN l_enc_string
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION (this encrypt) g2_dencStringPasswd(l_string STRING) RETURNS STRING
-    DEFINE
-    l_symkey              XML.CryptoKey,
-    l_ret      STRING
+FUNCTION (this encrypt) g2_decStringPasswd(l_string STRING, l_pass CHAR(32)) RETURNS STRING
+	DEFINE
+		l_symkey XML.CryptoKey,
+		l_ret    STRING
 
 	IF LENGTH(l_string) < 1 THEN
-		CALL this.g2_encryptError("g2_dencStringPasswd: no data to dencrypt!")
+		CALL this.g2_encryptError("g2_decStringPasswd: no data to dencrypt!")
 		RETURN NULL
 	END IF
 
-    TRY
-        # Create symmetric AES128 key for XML encryption purposes
-        LET l_symkey = XML.CryptoKey.CREATE(
-          "http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+	TRY
+		# Create symmetric AES128 key for XML encryption purposes
+		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
-        # Get the file password for the given salt
-        CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
+		# Get the file password for the given salt
+        IF l_pass IS NULL THEN
+		CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
+        ELSE
+		CALL l_symkey.setKey(l_pass) # password of 128 bits
+        END IF
 
-        LET l_ret = XML.Encryption.DecryptString(l_symkey, l_string)
-    CATCH
-		CALL this.g2_encryptError(SFMT("g2_encStringPasswd: %1 (%2)", STATUS, SQLCA.sqlerrm))
-        RETURN NULL
-    END TRY
+		LET l_ret = XML.Encryption.DecryptString(l_symkey, l_string)
+	CATCH
+		CALL this.g2_encryptError(SFMT("g2_decStringPasswd: %1 (%2)", STATUS, SQLCA.sqlerrm))
+		RETURN NULL
+	END TRY
 
-    RETURN l_ret
+	RETURN l_ret
 END FUNCTION
 --------------------------------------------------------------------------------
 PRIVATE FUNCTION g2_getEncPasswd() RETURNS CHAR(32)
 	DEFINE l_ret CHAR(32)
-    --DISPLAY "pass: ",os.Path.dirname((os.Path.pwd()))
-	LET l_ret = security.Base64.FromString(os.Path.dirname((os.Path.pwd())))
+	LET l_ret = security.Base64.FromString(os.Path.dirName(os.Path.pwd()))
+	--DISPLAY SFMT("password clear: '%1' base64: '%2' ",os.Path.dirName(os.Path.pwd()), l_ret)
 	RETURN l_ret
 END FUNCTION
