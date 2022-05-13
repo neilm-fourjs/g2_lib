@@ -2,21 +2,23 @@
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
 #+ Genero 4.00 and above
-#+  
+#+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
-#+  
+#+
 #+ No includes required.
 
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_debug
+IMPORT FGL g2_encrypt
 &else
 PACKAGE g2_lib
 --IMPORT FGL g2_lib.*
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_encrypt
 &endif
 
 IMPORT os
@@ -26,7 +28,7 @@ IMPORT util
 
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
-CONSTANT DEF_DBSPACE = "dbs1"
+CONSTANT DEF_DBSPACE  = "dbs1"
 
 # SQLServer
 #CONSTANT DEF_DBDRIVER="dbmsnc90"
@@ -39,50 +41,50 @@ CONSTANT DEF_DBSPACE = "dbs1"
 CONSTANT DEF_DBDIR = "../db"
 
 PUBLIC TYPE dbInfo RECORD
-	name STRING,
-	type STRING,
-	desc STRING,
-	source STRING,
-	driver STRING,
-	dir STRING,
-	dbspace STRING,
-	connection STRING,
-	db_user STRING,
-	db_passwd STRING,
-	create_db BOOLEAN,
-	serial_emu STRING,
+	name        STRING,
+	type        STRING,
+	desc        STRING,
+	source      STRING,
+	driver      STRING,
+	dir         STRING,
+	dbspace     STRING,
+	connection  STRING,
+	db_user     STRING,
+	db_passwd   STRING,
+	create_db   BOOLEAN,
+	serial_emu  STRING,
 	serial_errd BOOLEAN,
-	use_custom BOOLEAN, 
-	db_cfg STRING
+	use_custom  BOOLEAN,
+	db_cfg      STRING
 END RECORD
 
 PUBLIC DEFINE m_db dbInfo --should be used instead of defining this in the call module.
 
 FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
-	DEFINE l_msg STRING
+	DEFINE l_msg                              STRING
 	DEFINE l_lockMode, l_fglprofile, l_failed BOOLEAN
 
 	LET this.use_custom = FALSE
-	LET this.db_cfg = "local"
+	LET this.db_cfg     = "local"
 
 -- setup stuff from environment or defaults
-  IF l_dbName IS NULL OR l_dbName = " " THEN
-    LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
-  END IF
-  LET this.name = l_dbName
+	IF l_dbName IS NULL OR l_dbName = " " THEN
+		LET l_dbName = fgl_getenv("DBNAME") -- also see getCustomDBUser() !!
+	END IF
+	LET this.name   = l_dbName
 	LET this.source = NULL
-  IF this.dir IS NULL OR this.dir = " " THEN
-    LET this.dir = DEF_DBDIR
-  END IF
+	IF this.dir IS NULL OR this.dir = " " THEN
+		LET this.dir = DEF_DBDIR
+	END IF
 
-  IF this.dbspace IS NULL THEN
-    LET this.dbspace = fgl_getenv("DBSPACE")
-  END IF
-  IF  this.dbspace IS NULL OR this.dbspace = " " THEN
-    LET this.dbspace = DEF_DBSPACE
-  END IF
+	IF this.dbspace IS NULL THEN
+		LET this.dbspace = fgl_getenv("DBSPACE")
+	END IF
+	IF this.dbspace IS NULL OR this.dbspace = " " THEN
+		LET this.dbspace = DEF_DBSPACE
+	END IF
 
-  IF this.driver IS NULL THEN
+	IF this.driver IS NULL THEN
 		IF this.type IS NOT NULL THEN
 			LET this.driver = "dbm" || this.type
 		END IF
@@ -97,9 +99,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 -- setup stuff from fglprofile
 	LET l_msg = fgl_getresource("dbi.database." || this.name || ".source")
 	IF l_msg IS NOT NULL AND l_msg != " " THEN
-		LET this.source = l_msg
+		LET this.source  = l_msg
 		LET l_fglprofile = TRUE
-		LET this.db_cfg = SFMT("FglProfile: %1",fgl_getEnv("FGLPROFILE"))
+		LET this.db_cfg  = SFMT("FglProfile: %1", fgl_getEnv("FGLPROFILE"))
 	END IF
 	LET l_msg = fgl_getresource("dbi.database." || this.name || ".driver")
 	IF l_msg IS NULL OR l_msg = " " THEN
@@ -110,10 +112,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END IF
 	LET this.type = this.driver.subString(4, 6)
 
-	LET this.serial_emu =
-			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
-	LET this.serial_errd =
-			fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
+	LET this.serial_emu  = fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.emulation")
+	LET this.serial_errd = fgl_getresource("dbi.database." || this.name || ".ifxemul.datatype.serial.sqlerrd2")
 
 	LET this.connection = this.name
 
@@ -127,7 +127,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
 				END IF
 			WHEN "ifx"
-				LET this.source = fgl_getenv("INFORMIXSERVER")
+				LET this.source     = fgl_getenv("INFORMIXSERVER")
 				LET this.connection = this.name
 				DISPLAY "INFORMIXDIR:", fgl_getenv("INFORMIXDIR")
 				DISPLAY "INFORMIXSERVER:", fgl_getenv("INFORMIXSERVER")
@@ -136,9 +136,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				IF NOT os.Path.exists(this.dir) THEN
 					IF NOT os.Path.mkdir(this.dir) THEN
 						CALL g2_core.g2_winMessage(
-								"Error",
-								SFMT("Failed to create dbdir '%1' !\n%2", this.dir, err_get(status)),
-								"exclamation")
+								"Error", SFMT("Failed to create dbdir '%1' !\n%2", this.dir, err_get(status)), "exclamation")
 					END IF
 				END IF
 				LET this.source = fgl_getenv("SQLITEDB")
@@ -146,8 +144,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 					LET this.source = this.dir || "/" || this.name || ".db"
 				END IF
 				IF NOT os.Path.exists(this.source) THEN
-					CALL g2_core.g2_winMessage(
-							"Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
+					CALL g2_core.g2_winMessage("Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
 				ELSE
 					DISPLAY "Database file exists:", this.source
 				END IF
@@ -156,11 +153,11 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END IF
 
 	LET l_lockMode = FALSE
-	LET this.desc = SFMT("%1 %2", this.type, this.driver)
+	LET this.desc  = SFMT("%1 %2", this.type, this.driver)
 	CASE this.type
 		WHEN "ifx"
 			LET l_lockMode = TRUE
-			LET this.desc = SFMT("Informix %1", this.driver)
+			LET this.desc  = SFMT("Informix %1", this.driver)
 		WHEN "msc"
 			LET l_lockMode = TRUE
 		WHEN "sqt"
@@ -192,17 +189,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	END TRY
 	IF l_failed THEN
 		LET l_msg =
-				"Connection to database failed\nDB:",
-				this.name,
-				"\nSource:",
-				this.source,
-				"\nDriver:",
-				this.driver,
-				"\n",
-				"Status:",
-				sqlca.sqlcode,
-				"\n",
-				SQLERRMESSAGE
+				"Connection to database failed\nDB:", this.name, "\nSource:", this.source, "\nDriver:", this.driver, "\n",
+				"Status:", sqlca.sqlcode, "\n", SQLERRMESSAGE
 		DISPLAY l_msg
 		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
@@ -220,7 +208,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			RUN "echo $LD_LIBRARY_PATH;ldd $FGLDIR/dbdrivers/" || this.driver || ".so"
 		END IF
 		IF l_msg IS NOT NULL THEN
-			CALL g2_core.g2_errPopup(SFMT(% "Fatal Error %1", l_msg))
+			CALL g2_core.g2_errPopup(SFMT(%"Fatal Error %1", l_msg))
 			CALL g2_core.g2_exitProgram(1, l_msg)
 		END IF
 	END IF
@@ -263,8 +251,7 @@ END FUNCTION
 -- create file and folder for the empty sqlite db and then call the db_connect again
 FUNCTION (this dbInfo) g2_mdb_createdb() RETURNS()
 	DEFINE l_sql_stmt STRING
-	LET l_sql_stmt =
-			"CREATE DATABASE " || this.name || " default character set utf8mb4 collate utf8mb4_unicode_ci"
+	LET l_sql_stmt = "CREATE DATABASE " || this.name || " default character set utf8mb4 collate utf8mb4_unicode_ci"
 	TRY
 		EXECUTE IMMEDIATE l_sql_stmt
 	CATCH
@@ -356,7 +343,7 @@ END FUNCTION
 #+ @param l_isSerial Serials are primary key by default in MySQL
 FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING, l_isSerial BOOLEAN) RETURNS()
 	DEFINE l_sql_stmt STRING
-	DEFINE l_cmd STRING
+	DEFINE l_cmd      STRING
 	IF this.type = "sqt" THEN
 		RETURN
 	END IF -- can't add pk to sqlite!!
@@ -388,30 +375,32 @@ END FUNCTION
   "connection": "pitestdb+driver='dbmpgs',source='pitestdb@pi3'"
 }
 
-FUNCTION (this dbInfo) g2_getCustomDBInfo() 
-	DEFINE l_path STRING = ".."
-	DEFINE l_fileName STRING = "custom_db.json"
-	DEFINE l_file STRING
-	DEFINE l_info STRING
-	DEFINE l_tmp STRING
+FUNCTION (this dbInfo) g2_getCustomDBInfo()
+	DEFINE l_path     STRING = ".."
+	DEFINE l_fileName STRING = "custom_db_enc.json"
+	DEFINE l_file     STRING
+	DEFINE l_info     STRING
+	DEFINE l_tmp      STRING
 	DEFINE l_jsonText TEXT
+    DEFINE l_jsonStr  STRING
 	DEFINE db RECORD
-		name STRING,
-		type STRING,
-		driver STRING,
-		source STRING,
-		username STRING,
-		password STRING,
+		name       STRING,
+		type       STRING,
+		driver     STRING,
+		source     STRING,
+		username   STRING,
+		password   STRING,
 		connection STRING
 	END RECORD
+	DEFINE l_enc encrypt
 
-	LET db.name = this.name
+	LET db.name   = this.name
 	LET db.driver = this.driver
-	LET db.type = db.driver.subString(4,6)
+	LET db.type   = db.driver.subString(4, 6)
 	LET db.source = this.source
 
 	LET l_file = fgl_getenv("CUSTOM_DB")
-	IF l_file.getLength() < 1 THEN 
+	IF l_file.getLength() < 1 THEN
 		LET l_file = os.Path.join(l_path, l_fileName)
 		IF NOT os.Path.exists(l_file) THEN
 			LET l_path = os.Path.join("..", "..")
@@ -423,27 +412,34 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
 		LET l_info = SFMT("'%1' - No custom database configuration found.", l_file)
 	ELSE
+		LET this.use_custom = TRUE
 		TRY
-			LOCATE l_jsonText IN FILE l_file
-			CALL util.JSON.parse(l_jsonText, db)
-			LET l_info = SFMT("Custom database configuration found in '%1'", l_file)
+			LOCATE l_jsonText IN FILE l_file                       -- save db connection info
+			LET l_jsonStr = l_enc.g2_decStringPasswd(l_jsonText, NULL) -- decrypt it.
+			IF l_jsonStr IS NULL THEN
+				LET this.use_custom = FALSE
+				LET l_info          = l_enc.errorMessage
+			ELSE
+				CALL util.JSON.parse(l_jsonStr, db)
+				LET l_info = SFMT("Custom database configuration found in '%1'", l_file)
+			END IF
 		CATCH
 			GL_DBGMSG(0, SFMT("getCustomDBUser: Failed to use '%1' error: %2:%3 ", l_file, status, err_get(status)))
-			DISPLAY l_jsonText
-			LET db.connection = NULL
-			LET l_info = SFMT("Custom database configuration found in '%1' but was invalid JSON!", l_file)
+			DISPLAY l_jsonStr
+			LET db.connection   = NULL
+			LET this.use_custom = FALSE
+			LET l_info          = SFMT("Custom database configuration found in '%1' but was invalid JSON!", l_file)
 		END TRY
-		LET this.db_cfg = SFMT("From %1", l_file)
-		LET this.driver = db.driver
-		LET this.type =  db.type
-		LET this.name = db.name
-		LET this.source = db.source
+		LET this.db_cfg     = SFMT("From %1", l_file)
+		LET this.driver     = db.driver
+		LET this.type       = db.type
+		LET this.name       = db.name
+		LET this.source     = db.source
 		LET this.connection = db.connection
-		LET this.db_user = db.username
-		LET this.db_passwd = db.password
-		LET this.use_custom = TRUE
+		LET this.db_user    = db.username
+		LET this.db_passwd  = db.password
 	END IF
-
+	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
 	IF this.create_db THEN -- do UI for database connection info
 		LET int_flag = FALSE
 		OPEN WINDOW db_connection WITH FORM "g2_db_connection"
@@ -453,31 +449,37 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		INPUT BY NAME db.* ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
 			AFTER FIELD name
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
-				IF db.source IS NULL THEN LET db.source = db.name END IF
+				IF db.source IS NULL THEN
+					LET db.source = db.name
+				END IF
 
 			AFTER FIELD driver
-				IF db.driver.subString(1,3) != "dbm" THEN
+				IF db.driver.subString(1, 3) != "dbm" THEN
 					ERROR "Invalid driver name!"
 					NEXT FIELD driver
 				END IF
-				LET l_tmp =  os.Path.join( os.Path.join( fgl_getEnv("FGLDIR"), "dbdrivers" ), db.driver||".so")
-				IF NOT os.Path.exists( l_tmp ) THEN
+				LET l_tmp = os.Path.join(os.Path.join(fgl_getEnv("FGLDIR"), "dbdrivers"), db.driver || ".so")
+				IF NOT os.Path.exists(l_tmp) THEN
 					ERROR SFMT("Driver '%1' not found on server!", l_tmp)
 					NEXT FIELD driver
 				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
-				LET db.type = db.driver.subString(4,6)
+				LET db.type       = db.driver.subString(4, 6)
 
 			AFTER FIELD source
-				IF db.source IS NULL THEN LET db.source = db.name END IF
+				IF db.source IS NULL THEN
+					LET db.source = db.name
+				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 
-			ON ACTION test ATTRIBUTES(TEXT="Test", IMAGE="fa-magic")
-				IF db.source IS NULL THEN LET db.source = db.name END IF
+			ON ACTION test ATTRIBUTES(TEXT = "Test", IMAGE = "fa-magic")
+				IF db.source IS NULL THEN
+					LET db.source = db.name
+				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				TRY
 					IF db.username IS NOT NULL THEN
-						LET l_info = SFMT("Connect using '%1' ",db.username)
+						LET l_info = SFMT("Connect using '%1' ", db.username)
 						CONNECT TO db.connection USER db.username USING db.password
 					ELSE
 						LET l_info = "Connect using local user "
@@ -499,28 +501,22 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			RETURN
 		END IF
 		LOCATE l_jsonText IN FILE l_file
-		LET l_jsonText = util.JSON.stringify(db)
-		IF db.source IS NULL THEN LET db.source = db.name END IF
+		LET l_jsonText = l_enc.g2_encStringPasswd(util.JSON.stringify(db), NULL) -- save encrypted db connection info
+		IF db.source IS NULL THEN
+			LET db.source = db.name
+		END IF
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
-		LET this.db_cfg = SFMT("From %1", l_file)
-		LET this.driver = db.driver
-		LET this.type =  db.type
-		LET this.name = db.name
-		LET this.source = db.source
+		LET this.db_cfg     = SFMT("From %1", l_file)
+		LET this.driver     = db.driver
+		LET this.type       = db.type
+		LET this.name       = db.name
+		LET this.source     = db.source
 		LET this.connection = db.connection
-		LET this.db_user = db.username
-		LET this.db_passwd = db.password
+		LET this.db_user    = db.username
+		LET this.db_passwd  = db.password
 		LET this.use_custom = TRUE
 	END IF
 END FUNCTION
-
-
-
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 #+ Process the status after an SQL Statement.
@@ -533,7 +529,7 @@ END FUNCTION
 #+ @return a String containing a where clause
 FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS STRING
 	DEFINE l_where, l_stmt, l_cond STRING
-	DEFINE l_cnt INTEGER
+	DEFINE l_cnt                   INTEGER
 	IF l_search IS NULL OR l_tab IS NULL THEN
 		RETURN "1=1"
 	END IF
@@ -541,19 +537,19 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 	IF l_search.getIndexOf(";", 1) > 0 THEN
 		LET l_search = l_search.subString(1, l_cnt)
 	END IF
-	LET l_cond = "MATCHES"
+	LET l_cond  = "MATCHES"
 	LET l_where = SFMT("lower(%1) %2 '*%3*'", l_defcol, l_cond, l_search.toLowerCase())
 	DISPLAY "Search:", l_search
 	DISPLAY "       12345678901234567890"
 	CALL g2_findCondition(l_search) RETURNING l_cnt, l_cond
 	IF l_cnt = 1 THEN
 		LET l_search = l_search.subString(l_cond.getLength() + 1, l_search.getLength())
-		LET l_where = SFMT("lower(%1) %2 '%3'", l_defcol.trim(), l_cond, l_search.toLowerCase())
+		LET l_where  = SFMT("lower(%1) %2 '%3'", l_defcol.trim(), l_cond, l_search.toLowerCase())
 	END IF
 	IF l_cnt > 1 THEN
 		LET l_defcol = l_search.subString(1, l_cnt - 1)
 		LET l_search = l_search.subString(l_cnt + l_cond.getLength(), l_search.getLength())
-		LET l_where = SFMT("%1 %2 '%3'", l_defcol.trim(), l_cond, l_search.trim())
+		LET l_where  = SFMT("%1 %2 '%3'", l_defcol.trim(), l_cond, l_search.trim())
 	END IF
 	DISPLAY "X:", l_cnt, " Col:", l_defcol, " Condition:", l_cond, " Search:", l_search
 	LET l_stmt = "SELECT COUNT(*) FROM " || l_tab || " WHERE " || l_where
@@ -609,31 +605,16 @@ FUNCTION g2_sqlStatus(l_line INT, l_mod STRING, l_stmt STRING) RETURNS BOOLEAN
 	DEFINE l_stat INTEGER
 
 	LET l_stat = status
-	LET l_mod = l_mod || " Line:", (l_line USING "<<<<<<<")
+	LET l_mod  = l_mod || " Line:", (l_line USING "<<<<<<<")
 	IF l_stat = 0 THEN
 		RETURN TRUE
 	END IF
 	IF l_stmt IS NULL THEN
 		CALL g2_core.g2_errPopup(
-				% "Status:"
-						|| l_stat
-						|| "\nSqlState:"
-						|| SQLSTATE
-						|| "\n"
-						|| SQLERRMESSAGE
-						|| "\n"
-						|| l_mod)
+				%"Status:" || l_stat || "\nSqlState:" || SQLSTATE || "\n" || SQLERRMESSAGE || "\n" || l_mod)
 	ELSE
 		CALL g2_core.g2_errPopup(
-				l_stmt
-						|| "\nStatus:"
-						|| l_stat
-						|| "\nSqlState:"
-						|| SQLSTATE
-						|| "\n"
-						|| SQLERRMESSAGE
-						|| "\n"
-						|| l_mod)
+				l_stmt || "\nStatus:" || l_stat || "\nSqlState:" || SQLSTATE || "\n" || SQLERRMESSAGE || "\n" || l_mod)
 		GL_DBGMSG(0, "gl_sqlStatus: Stmt         ='" || l_stmt || "'")
 	END IF
 	GL_DBGMSG(0, "gl_sqlStatus: WHERE        :" || l_mod)
@@ -652,15 +633,15 @@ END FUNCTION
 #+ @param fixQuote Mask single quote with another single quote for GeneroDB!
 #+ @return SQL Statement
 FUNCTION g2_genInsert(tab STRING, rec_n om.DomNode, fixQuote BOOLEAN) RETURNS STRING
-	DEFINE n om.DomNode
-	DEFINE nl om.NodeList
+	DEFINE n           om.DomNode
+	DEFINE nl          om.NodeList
 	DEFINE l_stmt, val STRING
-	DEFINE x, len SMALLINT
-	DEFINE typ, comma CHAR(1)
+	DEFINE x, len      SMALLINT
+	DEFINE typ, comma  CHAR(1)
 --TODO: Check for duplicate
 	LET l_stmt = "INSERT INTO " || tab || " VALUES("
-	LET nl = rec_n.selectByTagName("Field")
-	LET comma = " "
+	LET nl     = rec_n.selectByTagName("Field")
+	LET comma  = " "
 	FOR x = 1 TO nl.getLength()
 		LET n = nl.item(x)
 		CALL g2_getColumnType(n.getAttribute("type")) RETURNING typ, len
@@ -693,18 +674,18 @@ END FUNCTION
 #+ @param fixQuote Mask single quote with another single quote for GeneroDB!
 #+ @return SQL Statement
 FUNCTION g2_genUpdate(tab, wher, rec_n, rec_o, ser_col, fixQuote)
-	DEFINE tab, wher STRING
-	DEFINE ser_col, fixQuote SMALLINT
-	DEFINE rec_n, rec_o, n, o om.DomNode
+	DEFINE tab, wher                          STRING
+	DEFINE ser_col, fixQuote                  SMALLINT
+	DEFINE rec_n, rec_o, n, o                 om.DomNode
 	DEFINE l_stmt, val, val_o, d_val, d_val_o STRING
-	DEFINE nl_n, nl_o om.NodeList
-	DEFINE x, len SMALLINT
-	DEFINE typ, comma CHAR(1)
+	DEFINE nl_n, nl_o                         om.NodeList
+	DEFINE x, len                             SMALLINT
+	DEFINE typ, comma                         CHAR(1)
 
 	LET l_stmt = "UPDATE " || tab || " SET "
-	LET nl_n = rec_n.selectByTagName("Field")
-	LET nl_o = rec_o.selectByTagName("Field")
-	LET comma = " "
+	LET nl_n   = rec_n.selectByTagName("Field")
+	LET nl_o   = rec_o.selectByTagName("Field")
+	LET comma  = " "
 	FOR x = 1 TO nl_n.getLength()
 		IF x = ser_col THEN
 			CONTINUE FOR
@@ -713,11 +694,11 @@ FUNCTION g2_genUpdate(tab, wher, rec_n, rec_o, ser_col, fixQuote)
 		LET o = nl_o.item(x)
 		CALL g2_getColumnType(n.getAttribute("type")) RETURNING typ, len
 		LET val_o = o.getAttribute("value")
-		LET val = n.getAttribute("value")
+		LET val   = n.getAttribute("value")
 		IF (val_o IS NULL AND val IS NULL) OR val_o = val THEN
 			CONTINUE FOR
 		END IF
-		LET d_val = val
+		LET d_val   = val
 		LET d_val_o = val_o
 		IF val IS NULL THEN
 			LET d_val = "(null)"
@@ -751,7 +732,7 @@ END FUNCTION
 #+ @param l_in String to be fixed
 #+ @returns fixed string
 FUNCTION g2_fixQuote(l_in STRING) RETURNS STRING
-	DEFINE y SMALLINT
+	DEFINE y  SMALLINT
 	DEFINE sb base.StringBuffer
 
 	LET y = l_in.getIndexOf("'", 1)
@@ -850,7 +831,7 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	DISPLAY "Key='", l_key, "'"
 
 	IF l_key IS NULL OR l_key = " " OR l_key.getLength() < 1 THEN
-		CALL g2_core.g2_warnPopup(% "You entered a NULL Key value!")
+		CALL g2_core.g2_warnPopup(%"You entered a NULL Key value!")
 		RETURN FALSE
 	END IF
 
@@ -865,12 +846,12 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	CLOSE g2_db_checkrec_cur
 	IF NOT l_exists THEN
 		IF l_ex THEN
-			CALL g2_core.g2_warnPopup(% "Record '" || l_key || "' doesn't Exist!")
+			CALL g2_core.g2_warnPopup(%"Record '" || l_key || "' doesn't Exist!")
 			RETURN FALSE
 		END IF
 	ELSE
 		IF NOT l_ex THEN
-			CALL g2_core.g2_warnPopup(% "Record '" || l_key || "' already Exists!")
+			CALL g2_core.g2_warnPopup(%"Record '" || l_key || "' already Exists!")
 			RETURN FALSE
 		END IF
 	END IF
