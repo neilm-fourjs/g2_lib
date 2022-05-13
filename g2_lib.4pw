@@ -133,6 +133,9 @@
     <Library binaryName="etc" id="-894407244" label="etc">
       <File filePath="etc/profile"/>
     </Library>
+    <Application binaryName="g2_exp_encStr" dependencies="14000" id="-2138370144" label="g2_exp_encStr">
+      <File filePath="src_expects/g2_exp_encStr.4gl"/>
+    </Application>
     <Application binaryName="g2_exp_lookup" dependencies="14000,-3234353" id="-615368558" label="g2_exp_lookup">
       <File filePath="src_expects/g2_exp_lookup.4gl"/>
     </Application>

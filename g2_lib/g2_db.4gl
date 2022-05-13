@@ -12,11 +12,13 @@
 &ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_debug
+IMPORT FGL g2_encrypt
 &else
 PACKAGE g2_lib
 --IMPORT FGL g2_lib.*
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_encrypt
 &endif
 
 IMPORT os
@@ -390,7 +392,7 @@ END FUNCTION
 
 FUNCTION (this dbInfo) g2_getCustomDBInfo() 
 	DEFINE l_path STRING = ".."
-	DEFINE l_fileName STRING = "custom_db.json"
+	DEFINE l_fileName STRING = "custom_db_enc.json"
 	DEFINE l_file STRING
 	DEFINE l_info STRING
 	DEFINE l_tmp STRING
@@ -404,6 +406,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		password STRING,
 		connection STRING
 	END RECORD
+    DEFINE l_enc encrypt
 
 	LET db.name = this.name
 	LET db.driver = this.driver
@@ -424,7 +427,8 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		LET l_info = SFMT("'%1' - No custom database configuration found.", l_file)
 	ELSE
 		TRY
-			LOCATE l_jsonText IN FILE l_file
+			LOCATE l_jsonText IN FILE l_file -- save db connection info
+            LET l_jsonText = l_enc.g2_dencStringPasswd( l_jsonText ) -- decrypt it.
 			CALL util.JSON.parse(l_jsonText, db)
 			LET l_info = SFMT("Custom database configuration found in '%1'", l_file)
 		CATCH
@@ -499,7 +503,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			RETURN
 		END IF
 		LOCATE l_jsonText IN FILE l_file
-		LET l_jsonText = util.JSON.stringify(db)
+		LET l_jsonText = l_enc.g2_encStringPasswd(util.JSON.stringify(db)) -- save encrypted db connection info
 		IF db.source IS NULL THEN LET db.source = db.name END IF
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
 		LET this.db_cfg = SFMT("From %1", l_file)
