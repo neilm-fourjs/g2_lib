@@ -170,11 +170,11 @@ FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING, l_pass CHAR(32)) RET
 		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
 		# Get the file password for the given salt
-        IF l_pass IS NULL THEN
-		CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
-        ELSE
-		CALL l_symkey.setKey(l_pass) # password of 128 bits
-        END IF
+		IF l_pass IS NULL THEN
+			CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
+		ELSE
+			CALL l_symkey.setKey(l_pass) # password of 128 bits
+		END IF
 
 		LET l_enc_string = XML.Encryption.EncryptString(l_symkey, l_string)
 	CATCH
@@ -200,11 +200,11 @@ FUNCTION (this encrypt) g2_decStringPasswd(l_string STRING, l_pass CHAR(32)) RET
 		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
 		# Get the file password for the given salt
-        IF l_pass IS NULL THEN
-		CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
-        ELSE
-		CALL l_symkey.setKey(l_pass) # password of 128 bits
-        END IF
+		IF l_pass IS NULL THEN
+			CALL l_symkey.setKey(g2_getEncPasswd()) # password of 128 bits
+		ELSE
+			CALL l_symkey.setKey(l_pass) # password of 128 bits
+		END IF
 
 		LET l_ret = XML.Encryption.DecryptString(l_symkey, l_string)
 	CATCH
@@ -218,6 +218,6 @@ END FUNCTION
 PRIVATE FUNCTION g2_getEncPasswd() RETURNS CHAR(32)
 	DEFINE l_ret CHAR(32)
 	LET l_ret = security.Base64.FromString(os.Path.dirName(os.Path.pwd()))
-	DISPLAY SFMT("password clear: '%1' base64: '%2' ",os.Path.dirName(os.Path.pwd()), l_ret)
+	--DISPLAY SFMT("password clear: '%1' base64: '%2' ",os.Path.dirName(os.Path.pwd()), l_ret)
 	RETURN l_ret
 END FUNCTION
