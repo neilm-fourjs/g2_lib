@@ -19,6 +19,7 @@ PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_encrypt
+IMPORT reflect
 &endif
 
 IMPORT os
@@ -276,7 +277,85 @@ FUNCTION (this dbInfo) g2_ifx_createdb() RETURNS()
 	LET this.create_db = FALSE -- avoid infintate loop!
 	CALL this.g2_connect(this.name)
 END FUNCTION
-
+--------------------------------------------------------------------------------
+-- Attempt to create a table based on a record
+FUNCTION (this dbInfo) g2_createTable(l_rec reflect.Value, l_nam STRING, l_priKey STRING, l_extra STRING) RETURNS BOOLEAN
+  DEFINE l_typ         reflect.Type
+  DEFINE l_fld         reflect.Type
+  DEFINE l_fldType     STRING
+  DEFINE i             SMALLINT
+  DEFINE l_at1, l_at2  STRING
+  DEFINE l_sql         STRING
+  LET l_typ = l_rec.getType()
+  LET l_sql = SFMT("CREATE TABLE %1 (", l_nam)
+  FOR i = 1 TO l_typ.getFieldCount()
+    LET l_fld     = l_typ.getFieldType(i)
+    LET l_fldType = l_fld.toString()
+    IF l_fld.hasAttribute("xmltype") THEN
+      LET l_fldType = l_fld.getAttribute("xmltype")
+			IF l_fldType = "SERIAL" THEN
+				LET l_priKey = l_typ.getFieldName(i)
+			END IF
+    END IF
+    LET l_at1 = NULL
+    LET l_at2 = NULL
+    IF NOT l_fld.hasAttribute("xmlnillable") THEN
+      LET l_at1 = " NOT NULL"
+    END IF
+    LET l_sql = l_sql.append(SFMT(" %1 %2 %3 %4", l_typ.getFieldName(i), l_fldType, l_at1, l_at2))
+    IF i < l_typ.getFieldCount() THEN
+      LET l_sql = l_sql.trim().append(",")
+    ELSE
+    END IF
+  END FOR
+	IF l_priKey IS NOT NULL THEN
+    LET l_sql = l_sql.trim().append(SFMT(", PRIMARY KEY( %1 )", l_priKey))
+	END IF
+	IF l_extra IS NOT NULL THEN
+    LET l_sql = l_sql.trim().append(SFMT(", %1", l_extra))
+	END IF
+  LET l_sql = l_sql.trim().append(" );")
+	TRY
+		EXECUTE IMMEDIATE l_sql
+	CATCH
+		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql) THEN
+		END IF
+		RETURN FALSE
+	END TRY
+	GL_DBGMSG(0, SFMT("g2_createTable: %1 - Using: %2", l_nam, l_sql))
+	{IF l_priKey IS NOT NULL THEN
+		CALL this.g2_addPrimaryKey(l_nam, l_priKey, TRUE)
+	END IF}
+	RETURN TRUE
+END FUNCTION
+--------------------------------------------------------------------------------
+#+ Add a primary key to a table
+#+
+#+ @param l_tab Table name
+#+ @param l_col Column(s)
+#+ @param l_isSerial Serials are primary key by default in MySQL
+FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING, l_isSerial BOOLEAN) RETURNS()
+	DEFINE l_sql_stmt STRING
+	DEFINE l_cmd      STRING
+	IF this.type = "sqt" THEN
+		RETURN
+	END IF -- can't add pk to sqlite!!
+	IF l_isSerial AND (this.type = "mys" OR this.type = "mdb") THEN
+		RETURN
+	END IF -- can't add pk for serial column in MySQL or MariaDB
+	LET l_cmd = "PRIMARY KEY"
+	IF this.type = "ifx" THEN
+		LET l_cmd = "CONSTRAINT UNIQUE"
+	END IF
+	LET l_sql_stmt = SFMT("ALTER TABLE %1 ADD %2 (%3)", l_tab, l_cmd, l_col)
+	GL_DBGMSG(0, SFMT("g2_addPrimaryKey: %1 - %2: %3", l_tab, l_col, l_sql_stmt))
+	TRY
+		EXECUTE IMMEDIATE l_sql_stmt
+	CATCH
+		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
+		END IF
+	END TRY
+END FUNCTION
 --------------------------------------------------------------------------------
 #+ Show Information for a Failed Connections. Debug.
 #+
@@ -334,33 +413,6 @@ FUNCTION (this dbInfo) g2_showInfo(stat INTEGER) RETURNS()
 	END MENU
 
 	CLOSE WINDOW info
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Add a primary key to a table
-#+
-#+ @param l_tab Table name
-#+ @param l_col Column(s)
-#+ @param l_isSerial Serials are primary key by default in MySQL
-FUNCTION (this dbInfo) g2_addPrimaryKey(l_tab STRING, l_col STRING, l_isSerial BOOLEAN) RETURNS()
-	DEFINE l_sql_stmt STRING
-	DEFINE l_cmd      STRING
-	IF this.type = "sqt" THEN
-		RETURN
-	END IF -- can't add pk to sqlite!!
-	IF l_isSerial AND (this.type = "mys" OR this.type = "mdb") THEN
-		RETURN
-	END IF -- can't add pk for serial column in MySQL or MariaDB
-	LET l_cmd = "PRIMARY KEY"
-	IF this.type = "ifx" THEN
-		LET l_cmd = "CONSTRAINT UNIQUE"
-	END IF
-	LET l_sql_stmt = SFMT("ALTER TABLE %1 ADD %2 (%3)", l_tab, l_cmd, l_col)
-	TRY
-		EXECUTE IMMEDIATE l_sql_stmt
-	CATCH
-		IF NOT g2_sqlStatus(__LINE__, "gl_db", l_sql_stmt) THEN
-		END IF
-	END TRY
 END FUNCTION
 --------------------------------------------------------------------------------
 -- Get custom dbname and user from a json file outside of the deployment

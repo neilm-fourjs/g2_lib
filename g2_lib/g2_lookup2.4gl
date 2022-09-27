@@ -91,12 +91,12 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 		RETURN NULL
 	END IF
 
-	GL_DBGMSG(2, SFMT("g2_lookup2: table = ", this.tableName))
-	GL_DBGMSG(2, SFMT("g2_lookup2: column	= ", this.columnList))
-	GL_DBGMSG(2, SFMT("g2_lookup2: titles	= ", this.columnTitles))
-	GL_DBGMSG(2, SFMT("g2_lookup2: where = ", this.whereClause))
-	GL_DBGMSG(2, SFMT("g2_lookup2: orderby = ", this.orderBy))
-	GL_DBGMSG(2, SFMT("g2_lookup2: maxColWidth = ", this.maxColWidth))
+	GL_DBGMSG(2, SFMT("g2_lookup2: table = %1", this.tableName))
+	GL_DBGMSG(2, SFMT("g2_lookup2: column	= %1", this.columnList))
+	GL_DBGMSG(2, SFMT("g2_lookup2: titles	= %1", this.columnTitles))
+	GL_DBGMSG(2, SFMT("g2_lookup2: where = %1", this.whereClause))
+	GL_DBGMSG(2, SFMT("g2_lookup2: orderby = %1", this.orderBy))
+	GL_DBGMSG(2, SFMT("g2_lookup2: maxColWidth = %1", this.maxColWidth))
 	GL_DBGMSG(2, "g2_lookup2: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
@@ -391,7 +391,9 @@ END FUNCTION
 ----------------------------------------------------------------------------------------------------
 FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
 	DEFINE i INT
-	LET this.sql_count = "SELECT COUNT(*) FROM " || this.tableName || " WHERE " || l_where
+	IF this.sql_count IS NULL THEN
+		LET this.sql_count = SFMT("SELECT COUNT(*) FROM %1 WHERE %2", this.tableName, l_where)
+	END IF
 	TRY
 		PREPARE listcntpre FROM this.sql_count
 	CATCH
@@ -445,10 +447,7 @@ PRIVATE FUNCTION (this lookup) checkLookupParams() RETURNS BOOLEAN
 	END WHILE
 
 	IF l_err IS NOT NULL THEN
-		CALL g2_core.g2_winMessage(
-				"Error",
-				SFMT(% "Lookup called by initiated correctly!\nThe following are not set:%1", l_err),
-				"exclamation")
+		CALL g2_core.g2_errPopup(SFMT(% "Lookup called by initiated correctly!\nThe following are not set:%1", l_err))
 		RETURN FALSE
 	END IF
 	RETURN TRUE
@@ -468,8 +467,7 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 			RETURN FALSE
 		CATCH
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
-			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed to delete!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
+			CALL g2_core.g2_errPopup(SFMT("Failed to delete!\n%1 %2", status, SQLERRMESSAGE))
 		END TRY
 	END IF
 	RETURN TRUE
@@ -513,8 +511,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 				IF l_key IS NULL AND NOT this.isKeySerial THEN
 					LET l_newKey = l_dia.getFieldValue(this.fields[1].name.trimRight())
 					IF this.countRows(SFMT("%1 = '%2'", this.fields[1].name, l_newKey)) > 0 THEN
-						CALL g2_core.g2_winMessage(
-								"Error", SFMT(% "Key '%1' already used!", l_newKey), "exclamation")
+						CALL g2_core.g2_errPopup(SFMT(% "Key '%1' already used!", l_newKey))
 						CALL l_dia.nextField(this.fields[1].name)
 					END IF
 				END IF
@@ -574,8 +571,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 		--DISPLAY "SQLCode:",sqlca.sqlcode, " SQLERRD2:",sqlca.sqlerrd[2], " sqlawarn:",sqlca.sqlawarn
 		IF sqlca.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
 			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
-			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
+			CALL g2_core.g2_errPopup(SFMT("Failed!\n%1 %2", status, SQLERRMESSAGE))
 			RETURN TRUE -- int_flag
 		END IF
 	END TRY

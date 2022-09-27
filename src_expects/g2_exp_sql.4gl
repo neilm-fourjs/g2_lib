@@ -1,5 +1,4 @@
 
-IMPORT util
 IMPORT FGL g2_lib.*
 
 IMPORT FGL lib_expect
