@@ -429,7 +429,7 @@ END FUNCTION
 
 FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	DEFINE l_path     STRING = ".."
-	DEFINE l_fileName STRING = "custom_db_enc.json"
+	DEFINE l_fileName STRING
 	DEFINE l_file     STRING
 	DEFINE l_info     STRING
 	DEFINE l_tmp      STRING
@@ -450,6 +450,11 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	LET db.driver = this.driver
 	LET db.type   = db.driver.subString(4, 6)
 	LET db.source = this.source
+
+	LET l_fileName = fgl_getenv("CUSTOM_DB_FILE")
+	IF l_fileName.getLength() < 1 THEN
+		LET l_fileName = "custom_db_enc.json"
+	END IF
 
 	LET l_file = fgl_getenv("CUSTOM_DB")
 	IF l_file.getLength() < 1 THEN
@@ -808,29 +813,22 @@ FUNCTION g2_getColumnType(l_typ STRING) RETURNS(STRING, STRING)
 	DEFINE l_len SMALLINT
 
 --TODO: Use I for smallint, integer, serial, N for numeric, decimal
-	LET l_len = 10
+	LET l_len = g2_getColumnLength(l_typ, 0)
 	CASE l_typ.subString(1, 3)
 		WHEN "SMA"
 			LET l_typ = "N"
-			LET l_len = 5
 		WHEN "INT"
 			LET l_typ = "N"
-			LET l_len = 10
 		WHEN "SER"
 			LET l_typ = "N"
-			LET l_len = 10
 		WHEN "DEC"
 			LET l_typ = "N"
-			LET l_len = 12
 		WHEN "DAT"
 			LET l_typ = "D"
-			LET l_len = 10
 		WHEN "CHA"
 			LET l_typ = "C"
-			LET l_len = g2_getColumnLength(l_typ, 0)
 		WHEN "VAR"
 			LET l_typ = "C"
-			LET l_len = g2_getColumnLength(l_typ, 0)
 	END CASE
 
 	RETURN l_typ, l_len
