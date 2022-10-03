@@ -842,17 +842,15 @@ END FUNCTION
 #+ @return Length from type or defaults to 10
 FUNCTION g2_getColumnLength(l_type STRING, l_max SMALLINT) RETURNS SMALLINT
 	DEFINE x, y, l_size SMALLINT
-	LET l_size = 1 -- default
 	CASE l_type
-		WHEN "SMALLINT"
-			LET l_size = 5
-		WHEN "SERIAL"
-			LET l_size = 10
-		WHEN "INTEGER"
-			LET l_size = 10
-		WHEN "FLOAT"
-			LET l_size = 12
-		WHEN "DATE"
+		WHEN "SMALLINT" LET l_size = 5
+		WHEN "DATETIME HOUR TO MINUTE" LET l_size = 5
+		WHEN "DATETIME YEAR TO MINUTE" LET l_size = 16 -- 1234/67/90 23:56
+		WHEN "DATETIME YEAR TO SECOND" LET l_size = 19 -- 1234/67/90 23:56:89
+		WHEN "DATETIME YEAR TO FRACTION(3)" LET l_size = 23 -- 1234/67/90 23:56:89.123
+		WHEN "DATETIME YEAR TO FRACTION(5)" LET l_size = 25 -- 1234/67/90 23:56:89.12345
+		WHEN "FLOAT" LET l_size = 12
+		OTHERWISE
 			LET l_size = 10
 	END CASE
 --TODO: Handle decimal, numeric ie values with , in.
