@@ -291,9 +291,7 @@ FUNCTION g2_showEnv() RETURNS()
 	LET env[env.getLength() + 1].nam = "INFORMIXSERVER"
 	LET env[env.getLength() + 1].nam = "INFORMIXSQLHOSTS"
 
-	LET env[env.getLength() + 1].nam = "ANTSHOME"
-	LET env[env.getLength() + 1].nam = "ANTS_DSN"
-
+	LET env[env.getLength() + 1].nam = "PWD"
 	LET env[env.getLength() + 1].nam = "PATH"
 	LET env[env.getLength() + 1].nam = "LD_LIBRARY_PATH"
 
@@ -386,11 +384,13 @@ FUNCTION g2_showEnv() RETURNS()
 	CALL tabc.setAttribute("text", "Name")
 	LET w = tabc.createChild('Edit')
 	CALL w.setAttribute("width", txt_w)
+	CALL w.setAttribute("height", 2)
 	LET tabc = tabl.createChild('TableColumn')
 	CALL tabc.setAttribute("colName", "val")
 	CALL tabc.setAttribute("text", "Value")
-	LET w = tabc.createChild('Edit')
-	CALL w.setAttribute("width", val_w)
+	LET w = tabc.createChild('TextEdit')
+	CALL w.setAttribute("height", 2)
+	CALL w.setAttribute("width", val_w/2)
 	DISPLAY ARRAY env TO showenv.* ATTRIBUTE(COUNT = env.getLength())
 		ON ACTION dumpenv
 			RUN "env | sort > env.txt"

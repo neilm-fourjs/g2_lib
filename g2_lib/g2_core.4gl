@@ -411,21 +411,22 @@ END FUNCTION
 #+ @return Nothing
 FUNCTION g2_error() RETURNS ()
 	DEFINE l_err, l_mod STRING
+	DEFINE l_st STRING
 	DEFINE l_stat INTEGER
 	DEFINE x, y SMALLINT
 
 	LET l_stat = status
 
-	LET l_mod = base.Application.getStackTrace()
-	LET x = l_mod.getIndexOf("#", 2) + 3
-	LET y = l_mod.getIndexOf("#", x + 1) - 1
-	LET l_mod = l_mod.subString(x, y)
+	LET l_st = base.Application.getStackTrace()
+	LET x = l_st.getIndexOf("#", 2) + 3
+	LET y = l_st.getIndexOf("#", x + 1) - 1
+	LET l_mod = l_st.subString(x, y)
 	IF y < 1 THEN
-		LET y = l_mod.getLength()
+		LET y = l_st.getLength()
+		LET l_mod = l_st.subString(x, y)
 	END IF
-	LET l_mod = l_mod.subString(x, y)
 	IF l_mod IS NULL THEN
-		GL_DBGMSG(0, "failed to get module from stackTrace!\n" || base.Application.getStackTrace())
+		GL_DBGMSG(0, SFMT("Failed to get module from stackTrace! x=%1 y%2 \n%3",x ,y, l_st))
 		LET l_mod = "(null module)"
 	END IF
 
