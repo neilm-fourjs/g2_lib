@@ -13,6 +13,7 @@
 IMPORT FGL g2_core
 &else
 PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_db
 IMPORT FGL g2_lib.g2_core
 &endif
 
@@ -129,39 +130,21 @@ END FUNCTION
 --
 -- @param l_colNo Column in the array
 FUNCTION (this sql) g2_SQLsetColumnProps(l_colNo SMALLINT)
-	DEFINE x, y SMALLINT
-	DEFINE l_typ, l_lenStr STRING
+	DEFINE l_typ STRING
 	LET l_typ = this.fields[l_colNo].colType
-	LET x = l_typ.getIndexOf("(", 1)
-	IF x > 0 THEN
-		LET l_lenStr = l_typ.subString(x + 1, l_typ.getLength() - 1)
-		LET y = l_lenStr.getIndexOf(",", 1)
-		IF y > 0 THEN
-			LET this.fields[l_colNo].colLength = l_lenStr.subString(1, y - 1)
-		ELSE
-			LET this.fields[l_colNo].colLength = l_lenStr
-		END IF
-		LET l_typ = l_typ.subString(1, x - 1)
-	END IF
 	LET this.fields[l_colNo].isNumeric = FALSE
+	LET this.fields[l_colNo].colLength = g2_db.g2_getColumnLength( l_typ, 0)
 	CASE l_typ
 		WHEN "INTEGER"
-			LET this.fields[l_colNo].colLength = 8
 			LET this.fields[l_colNo].isNumeric = TRUE
 		WHEN "SERIAL"
-			LET this.fields[l_colNo].colLength = 8
 			LET this.fields[l_colNo].isNumeric = TRUE
 		WHEN "SMALLINT"
-			LET this.fields[l_colNo].colLength = 4
 			LET this.fields[l_colNo].isNumeric = TRUE
 		WHEN "DECIMAL"
 			LET this.fields[l_colNo].isNumeric = TRUE
 		WHEN "MONEY"
 			LET this.fields[l_colNo].isNumeric = TRUE
-		WHEN "DATE"
-			LET this.fields[l_colNo].colLength = 10
-		WHEN "TIME"
-			LET this.fields[l_colNo].colLength = 10
 	END CASE
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
