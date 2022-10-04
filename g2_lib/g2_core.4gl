@@ -418,6 +418,7 @@ FUNCTION g2_error() RETURNS ()
 	LET l_stat = status
 
 	LET l_st = base.Application.getStackTrace()
+ -- try and get just the module and line that caused the problem
 	LET x = l_st.getIndexOf("#", 2) + 3
 	LET y = l_st.getIndexOf("#", x + 1) - 1
 	LET l_mod = l_st.subString(x, y)
@@ -430,14 +431,14 @@ FUNCTION g2_error() RETURNS ()
 		LET l_mod = "(null module)"
 	END IF
 
-	LET l_err = SQLERRMESSAGE || "\n"
+	LET l_err = SQLERRMESSAGE
 	IF l_err IS NULL THEN
 		LET l_err = err_get(l_stat)
 	END IF
 	IF l_err IS NULL THEN
 		LET l_err = "Unknown!"
 	END IF
-	LET l_err = l_stat || ":" || l_err || l_mod
+	LET l_err = SFMT("%1:%2:%3",l_mod, l_stat, l_err)
 --	CALL gl_logIt("Error:"||l_err)
 	IF l_stat != -6300 AND NOT m_isWS THEN
 		CALL g2_errPopup(l_err)
