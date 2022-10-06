@@ -151,7 +151,7 @@
     <Library binaryName="Expect Test" dependencies="14000" id="-3234353" label="Expect Test">
       <Configuration binaryName="g2_exp_encStr" id="840694160" label="g2_exp_encStr"/>
       <VirtualFolder label="etc">
-        <File filePath="src_expects/njm_demo310.4db"/>
+        <File filePath="src_expects/njm_demo400.4db"/>
         <File filePath="etc/profile"/>
       </VirtualFolder>
       <Configuration binaryName="g2_exp_lookup" id="-1343789213" label="g2_exp_lookup"/>
