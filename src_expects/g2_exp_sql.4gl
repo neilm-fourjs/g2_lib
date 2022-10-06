@@ -2,7 +2,7 @@
 IMPORT FGL g2_lib.*
 
 IMPORT FGL lib_expect
-SCHEMA njm_demo310
+SCHEMA njm_demo400
 
 MAIN
 	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
@@ -12,7 +12,7 @@ MAIN
 	DEFINE l_stk RECORD LIKE stock.*
 
   CALL g2_init.g2_init("S", NULL)
-  CALL l_db.g2_connect("njm_demo310")
+  CALL l_db.g2_connect("njm_demo400")
 
 -- attempt to get an invalid row
 	CALL l_sql.g2_SQLinit(l_table,"*",l_keyField, SFMT("%1 = '%2'",l_keyField,"dummy"))

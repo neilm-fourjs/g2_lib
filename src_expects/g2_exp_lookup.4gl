@@ -34,7 +34,7 @@ MAIN
 
 	CALL g2_init.g2_init("S",NULL)
 
-  CALL l_db.g2_connect("njm_demo310")
+  CALL l_db.g2_connect("njm_demo400")
 	
 	OPEN FORM f FROM "form"
 	DISPLAY FORM f
