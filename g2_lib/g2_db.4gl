@@ -27,6 +27,11 @@ IMPORT util
 
 &include "g2_debug.inc"
 
+&ifdef gen320
+CONSTANT  C_CUSTOM_DB_FILE = "custom_db_enc.json"
+&else
+CONSTANT  C_CUSTOM_DB_FILE = "custom_db_enc4.json"
+&endif
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
 CONSTANT DEF_DBSPACE  = "dbs1"
@@ -453,7 +458,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 
 	LET l_fileName = fgl_getenv("CUSTOM_DB_FILE")
 	IF l_fileName.getLength() < 1 THEN
-		LET l_fileName = "custom_db_enc.json"
+		LET l_fileName = C_CUSTOM_DB_FILE
 	END IF
 
 	LET l_file = fgl_getenv("CUSTOM_DB")
