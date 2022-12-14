@@ -30,7 +30,7 @@ IMPORT util
 &ifdef gen320
 CONSTANT  C_CUSTOM_DB_FILE = "custom_db_enc.json"
 &else
-CONSTANT  C_CUSTOM_DB_FILE = "custom_db_enc4.json"
+CONSTANT C_CUSTOM_DB_FILE = "custom_db_enc4.json"
 &endif
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
@@ -284,42 +284,43 @@ FUNCTION (this dbInfo) g2_ifx_createdb() RETURNS()
 END FUNCTION
 --------------------------------------------------------------------------------
 -- Attempt to create a table based on a record
-FUNCTION (this dbInfo) g2_createTable(l_rec reflect.Value, l_nam STRING, l_priKey STRING, l_extra STRING) RETURNS BOOLEAN
-  DEFINE l_typ         reflect.Type
-  DEFINE l_fld         reflect.Type
-  DEFINE l_fldType     STRING
-  DEFINE i             SMALLINT
-  DEFINE l_at1, l_at2  STRING
-  DEFINE l_sql         STRING
-  LET l_typ = l_rec.getType()
-  LET l_sql = SFMT("CREATE TABLE %1 (", l_nam)
-  FOR i = 1 TO l_typ.getFieldCount()
-    LET l_fld     = l_typ.getFieldType(i)
-    LET l_fldType = l_fld.toString()
-    IF l_fld.hasAttribute("xmltype") THEN
-      LET l_fldType = l_fld.getAttribute("xmltype")
+FUNCTION (this dbInfo) g2_createTable(l_rec reflect.Value, l_nam STRING, l_priKey STRING, l_extra STRING)
+		RETURNS BOOLEAN
+	DEFINE l_typ        reflect.Type
+	DEFINE l_fld        reflect.Type
+	DEFINE l_fldType    STRING
+	DEFINE i            SMALLINT
+	DEFINE l_at1, l_at2 STRING
+	DEFINE l_sql        STRING
+	LET l_typ = l_rec.getType()
+	LET l_sql = SFMT("CREATE TABLE %1 (", l_nam)
+	FOR i = 1 TO l_typ.getFieldCount()
+		LET l_fld     = l_typ.getFieldType(i)
+		LET l_fldType = l_fld.toString()
+		IF l_fld.hasAttribute("xmltype") THEN
+			LET l_fldType = l_fld.getAttribute("xmltype")
 			IF l_fldType = "SERIAL" THEN
 				LET l_priKey = l_typ.getFieldName(i)
 			END IF
-    END IF
-    LET l_at1 = NULL
-    LET l_at2 = NULL
-    IF NOT l_fld.hasAttribute("xmlnillable") THEN
-      LET l_at1 = " NOT NULL"
-    END IF
-    LET l_sql = l_sql.append(SFMT(" %1 %2 %3 %4", l_typ.getFieldName(i), l_fldType, l_at1, l_at2))
-    IF i < l_typ.getFieldCount() THEN
-      LET l_sql = l_sql.trim().append(",")
-    ELSE
-    END IF
-  END FOR
+		END IF
+		LET l_at1 = NULL
+		LET l_at2 = NULL
+		IF NOT l_fld.hasAttribute("xmlnillable") THEN
+			LET l_at1 = " NOT NULL"
+		END IF
+		LET l_sql = l_sql.append(SFMT(" %1 %2 %3 %4", l_typ.getFieldName(i), l_fldType, l_at1, l_at2))
+		IF i < l_typ.getFieldCount() THEN
+			LET l_sql = l_sql.trim().append(",")
+		ELSE
+		END IF
+	END FOR
 	IF l_priKey IS NOT NULL THEN
-    LET l_sql = l_sql.trim().append(SFMT(", PRIMARY KEY( %1 )", l_priKey))
+		LET l_sql = l_sql.trim().append(SFMT(", PRIMARY KEY( %1 )", l_priKey))
 	END IF
 	IF l_extra IS NOT NULL THEN
-    LET l_sql = l_sql.trim().append(SFMT(", %1", l_extra))
+		LET l_sql = l_sql.trim().append(SFMT(", %1", l_extra))
 	END IF
-  LET l_sql = l_sql.trim().append(" );")
+	LET l_sql = l_sql.trim().append(" );")
 	TRY
 		EXECUTE IMMEDIATE l_sql
 	CATCH
@@ -439,7 +440,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	DEFINE l_info     STRING
 	DEFINE l_tmp      STRING
 	DEFINE l_jsonText TEXT
-    DEFINE l_jsonStr  STRING
+	DEFINE l_jsonStr  STRING
 	DEFINE db RECORD
 		name       STRING,
 		type       STRING,
@@ -450,6 +451,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		connection STRING
 	END RECORD
 	DEFINE l_enc encrypt
+	DEFINE l_rds_cert STRING
 
 	LET db.name   = this.name
 	LET db.driver = this.driver
@@ -476,7 +478,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	ELSE
 		LET this.use_custom = TRUE
 		TRY
-			LOCATE l_jsonText IN FILE l_file                       -- save db connection info
+			LOCATE l_jsonText IN FILE l_file                           -- save db connection info
 			LET l_jsonStr = l_enc.g2_decStringPasswd(l_jsonText, NULL) -- decrypt it.
 			IF l_jsonStr IS NULL THEN
 				LET this.use_custom = FALSE
@@ -500,6 +502,26 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		LET this.connection = db.connection
 		LET this.db_user    = db.username
 		LET this.db_passwd  = db.password
+-- handle aws token for password
+		IF this.db_passwd = "TOKEN" THEN
+			LET this.db_passwd = g2_get_aws_token(db.source, db.username)
+			IF this.db_passwd IS NULL THEN
+				CALL g2_winMessage("Error", "Failed to get a token for the DB connection!", "exclamation")
+			END IF
+		END IF
+-- if HC_DBCERT is set then check it and add it to the connection string.
+		IF this.driver MATCHES ("*pgs*") THEN
+			LET l_rds_cert = fgl_getenv("HC_DBCERTS")
+			IF l_rds_cert IS NOT NULL THEN -- check the cert exists.
+				IF NOT os.Path.exists(l_rds_cert) THEN
+					CALL g2_winMessage("Error", SFMT("DB Certificate not found!\nFile: %1", l_rds_cert), "exclamation")
+					LET l_rds_cert = NULL
+				END IF
+				IF l_rds_cert IS NOT NULL THEN
+					LET this.connection = this.connection.append(SFMT("?sslmode=verify-full&sslrootcert=%1", l_rds_cert))
+				END IF
+			END IF
+		END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
 	IF this.create_db THEN -- do UI for database connection info
@@ -846,14 +868,22 @@ END FUNCTION
 FUNCTION g2_getColumnLength(l_type STRING, l_max SMALLINT) RETURNS SMALLINT
 	DEFINE x, y, l_size SMALLINT
 	CASE l_type
-		WHEN "SMALLINT" LET l_size = 5
-		WHEN "DATETIME HOUR TO MINUTE" LET l_size = 5
-		WHEN "DATETIME YEAR TO MINUTE" LET l_size = 16 -- 1234/67/90 23:56
-		WHEN "DATETIME YEAR TO SECOND" LET l_size = 19 -- 1234/67/90 23:56:89
-		WHEN "DATETIME YEAR TO FRACTION" LET l_size = 23 -- 1234/67/90 23:56:89.123
-		WHEN "DATETIME YEAR TO FRACTION(3)" LET l_size = 23 -- 1234/67/90 23:56:89.123
-		WHEN "DATETIME YEAR TO FRACTION(5)" LET l_size = 25 -- 1234/67/90 23:56:89.12345
-		WHEN "FLOAT" LET l_size = 12
+		WHEN "SMALLINT"
+			LET l_size = 5
+		WHEN "DATETIME HOUR TO MINUTE"
+			LET l_size = 5
+		WHEN "DATETIME YEAR TO MINUTE"
+			LET l_size = 16 -- 1234/67/90 23:56
+		WHEN "DATETIME YEAR TO SECOND"
+			LET l_size = 19 -- 1234/67/90 23:56:89
+		WHEN "DATETIME YEAR TO FRACTION"
+			LET l_size = 23 -- 1234/67/90 23:56:89.123
+		WHEN "DATETIME YEAR TO FRACTION(3)"
+			LET l_size = 23 -- 1234/67/90 23:56:89.123
+		WHEN "DATETIME YEAR TO FRACTION(5)"
+			LET l_size = 25 -- 1234/67/90 23:56:89.12345
+		WHEN "FLOAT"
+			LET l_size = 12
 		OTHERWISE
 			LET l_size = 10
 	END CASE
@@ -912,3 +942,57 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	RETURN TRUE
 END FUNCTION
 --------------------------------------------------------------------------------
+{
+aws rds generate-db-auth-token \
+    --hostname mydb.123456789012.us-east-1.rds.amazonaws.com \
+    --port 3306 \
+    --region us-east-1 \
+    --username db_user
+}
+FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
+	DEFINE c      base.Channel
+	DEFINE l_cmd  STRING
+	DEFINE l_tok  STRING
+	DEFINE l_host STRING
+	DEFINE l_port STRING
+	DEFINE l_reg  STRING
+	DEFINE x      SMALLINT
+
+-- get the region
+	LET l_reg = fgl_getenv("AWS_REGION")
+	IF l_reg.getLength() < 1 THEN
+		LET l_reg = fgl_getenv("AWS_DEFAULT_REGION")
+	END IF
+	IF l_reg.getLength() < 1 THEN
+		GL_DBGMSG(0, "g2_get_aws_token: no region !")
+		RETURN NULL
+	END IF
+
+-- get the host and port from the source
+	LET x = l_source.getIndexOf(":", 1)
+	IF x > 0 THEN
+		LET l_host = l_source.subString(1, x - 1)
+		LET l_port = l_source.subString(x + 1, l_source.getLength())
+	ELSE
+		LET l_host = l_source
+		LET l_port = 3306 -- should this port come from somewhere else? maybe an env var ?
+	END IF
+
+-- attempt to get the token
+	LET c = base.Channel.create()
+	LET l_cmd =
+			SFMT("sudo -E /usr/local/bin/aws rds generate-db-auth-token --hostname %1 --port %2 --region %3 --username %4",
+					l_host, l_port, l_reg, l_user)
+	GL_DBGMSG(0, SFMT("g2_get_aws_token: openpipe: %1", l_cmd))
+	CALL c.openPipe(l_cmd, "r")
+	WHILE NOT c.isEof()
+		LET l_tok = c.readLine()
+	END WHILE
+	CALL c.close()
+
+-- what would the return string look like if it failed for some reason ?
+
+	RETURN l_tok
+END FUNCTION
+--------------------------------------------------------------------------------
+
