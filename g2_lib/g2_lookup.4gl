@@ -53,11 +53,11 @@ FUNCTION g2_lookup(
 	DEFINE l_event STRING
 
 -- See "genero_lib.inc" for Macro definitions.
-	GL_DBGMSG(2, "g2_lookup: table(s)=" || tabnam)
-	GL_DBGMSG(2, "g2_lookup: cols    =" || cols)
-	GL_DBGMSG(2, "g2_lookup: titles  =" || colts)
-	GL_DBGMSG(2, "g2_lookup: where   =" || wher)
-	GL_DBGMSG(2, "g2_lookup: orderby =" || ordby)
+	GL_DBGMSG(2, SFMT("g2_lookup: table(s)= %1",tabnam))
+	GL_DBGMSG(2, SFMT("g2_lookup: cols    = %1",cols))
+	GL_DBGMSG(2, SFMT("g2_lookup: titles  = %1",colts))
+	GL_DBGMSG(2, SFMT("g2_lookup: where   = %1",wher))
+	GL_DBGMSG(2, SFMT("g2_lookup: orderby = %1",ordby))
 	GL_DBGMSG(2, "g2_lookup: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
@@ -77,7 +77,7 @@ FUNCTION g2_lookup(
 		CALL g2_core.g2_errPopup(% "No Records Found")
 		RETURN NULL
 	END IF
-	GL_DBGMSG(2, "g2_lookup: Counted:" || l_tot_recs)
+	GL_DBGMSG(2, SFMT("g2_lookup: Counted: %1", l_tot_recs))
 
 -- Build the SQL
 	LET l_sel_stmt = "SELECT " || cols CLIPPED || " FROM " || tabnam CLIPPED, " WHERE " || wher
@@ -99,7 +99,7 @@ FUNCTION g2_lookup(
 		LET l_fields[x].name = l_sql_handle.getResultName(x)
 		LET l_col_titles[x] = l_fields[x].name -- default column l_titles
 		LET l_fields[x].type = l_sql_handle.getResultType(x)
-		GL_DBGMSG(2, "g2_lookup:" || x || " Name:" || l_fields[x].name || " Type:" || l_fields[x].type)
+		GL_DBGMSG(2, SFMT("g2_lookup: %1 Name: %2 Type: %3", x, l_fields[x].name, l_fields[x].type))
 	END FOR
 	GL_DBGMSG(2, "g2_lookup: Cursor Okay.")
 
@@ -232,7 +232,7 @@ FUNCTION g2_lookup(
 				CALL l_curr.setAttribute(
 						"text", SFMT("%1 (%2)", x USING "<<<,##&", arr_curr() USING "<<<,##&"))
 			OTHERWISE
-				GL_DBGMSG(2, "g2_lookup: Unhandled Event:" || l_event)
+				GL_DBGMSG(2, SFMT("g2_lookup: Unhandled Event: %1", l_event))
 		END CASE
 	END WHILE
 	LET l_ret_key = l_dlg.getFieldValue(l_fields[1].name) -- get the selected row first field.
