@@ -154,4 +154,5 @@ FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value 
 	LET this.fields[x].value    = l_value
 	LET this.fields[x].formOnly = TRUE
 	LET this.fields[x].noEntry  = l_noEntry
+
 END FUNCTION

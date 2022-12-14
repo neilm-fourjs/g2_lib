@@ -217,7 +217,7 @@ END FUNCTION
 #+ @return string: Entered value.
 FUNCTION g2_winQuestion(
 		l_title STRING, l_message STRING, l_ans STRING, l_items STRING, l_icon STRING)
-		RETURNS STRING
+		RETURNS (STRING)
 	DEFINE l_result STRING
 	DEFINE l_toks base.StringTokenizer
 	DEFINE l_dum BOOLEAN

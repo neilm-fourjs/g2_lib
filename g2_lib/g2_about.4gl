@@ -114,6 +114,10 @@ FUNCTION g2_about()
 	CALL w.setAttribute("posX", 0)
 	CALL w.setAttribute("gridWidth", 25)
 
+	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Run Location") || ":", "right", "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, base.Application.getProgramDir(), NULL, "black")
+	LET y = y + 1
+
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Genero Runtime") || ":", "right", "black")
 	CALL g2_aui.g2_addLabel(g, 10, y, gver, NULL, "black")
 	LET y = y + 1

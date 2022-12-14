@@ -131,7 +131,7 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 		LET this.dsp_fields[x].name = "dsp_" || this.fields[x].name
 		LET this.dsp_fields[x].type = this.fields[x].type
 		LET this.dsp_fields[x].width = g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth)
-		GL_DBGMSG(2, "g2_lookup2:" || x || " Name:" || this.fields[x].name || " Type:" || this.fields[x].type)
+		GL_DBGMSG(2, SFMT("g2_lookup2: %1 Name: %2 Type: %3",x , this.fields[x].name, this.fields[x].type))
 	END FOR
 	LET this.totalFields = this.fields.getLength()
 	GL_DBGMSG(2, "g2_lookup2: Cursor Okay.")
@@ -403,7 +403,7 @@ FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
 	FETCH listcntcur INTO i
 	CLOSE listcntcur
 
-	GL_DBGMSG(2, "g2_lookup2: Counted:" || i)
+	GL_DBGMSG(2, SFMT("g2_lookup2: Counted: %1", i))
 	RETURN i
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
@@ -526,7 +526,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 				LET l_accept = TRUE
 				EXIT WHILE
 			OTHERWISE
-				GL_DBGMSG(2, "g2_lookup2: Unhandled Event:" || l_event)
+				GL_DBGMSG(2, SFMT("g2_lookup2: Unhandled Event: %1", l_event))
 		END CASE
 	END WHILE
 	CALL this.inputVBox.setAttribute("hidden", TRUE)
