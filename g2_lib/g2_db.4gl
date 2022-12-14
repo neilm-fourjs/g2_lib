@@ -382,7 +382,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	DEFINE l_info     STRING
 	DEFINE l_tmp      STRING
 	DEFINE l_jsonText TEXT
-    DEFINE l_jsonStr  STRING
+	DEFINE l_jsonStr  STRING
 	DEFINE db RECORD
 		name       STRING,
 		type       STRING,
@@ -414,7 +414,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	ELSE
 		LET this.use_custom = TRUE
 		TRY
-			LOCATE l_jsonText IN FILE l_file                       -- save db connection info
+			LOCATE l_jsonText IN FILE l_file                           -- save db connection info
 			LET l_jsonStr = l_enc.g2_decStringPasswd(l_jsonText, NULL) -- decrypt it.
 			IF l_jsonStr IS NULL THEN
 				LET this.use_custom = FALSE
@@ -438,6 +438,12 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		LET this.connection = db.connection
 		LET this.db_user    = db.username
 		LET this.db_passwd  = db.password
+		IF this.db_passwd = "TOKEN" THEN
+			LET this.db_passwd = g2_get_aws_token(db.source, db.username)
+			IF this.db_passwd IS NULL THEN
+				CALL g2_winMessage("Error", "Failed to get a token for the DB connection!", "exclamation")
+			END IF
+		END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
 	IF this.create_db THEN -- do UI for database connection info
@@ -856,5 +862,58 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 		END IF
 	END IF
 	RETURN TRUE
+END FUNCTION
+--------------------------------------------------------------------------------
+{
+aws rds generate-db-auth-token \
+    --hostname mydb.123456789012.us-east-1.rds.amazonaws.com \
+    --port 3306 \
+    --region us-east-1 \
+    --username db_user
+}
+FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
+	DEFINE c      base.Channel
+	DEFINE l_cmd  STRING
+	DEFINE l_tok  STRING
+	DEFINE l_host STRING
+	DEFINE l_port STRING
+	DEFINE l_reg  STRING
+	DEFINE x      SMALLINT
+
+-- get the region
+	LET l_reg = fgl_getEnv("AWS_REGION")
+	IF l_reg.getLength() < 1 THEN
+		LET l_reg = fgl_getEnv("AWS_DEFAULT_REGION")
+	END IF
+	IF l_reg.getLength() < 1 THEN
+		GL_DBGMSG(0, "g2_get_aws_token: no region !")
+		RETURN NULL
+	END IF
+
+-- get the host and port from the source
+	LET x = l_source.getIndexOf(":", 1)
+	IF x > 0 THEN
+		LET l_host = l_source.subString(1, x - 1)
+		LET l_port = l_source.subString(x + 1, l_source.getLength())
+	ELSE
+		LET l_host = l_source
+		LET l_port = 3306 -- should this port come from somewhere else? maybe an env var ?
+	END IF
+
+-- attempt to get the token
+	LET c = base.Channel.create()
+	LET l_cmd =
+			SFMT("sudo -E /usr/local/bin/aws rds generate-db-auth-token --hostname %1 --port %2 --region %3 --username %4",
+					l_host, l_port, l_reg, l_user)
+	GL_DBGMSG(0, SFMT("g2_get_aws_token: openpipe: %1", l_cmd))
+	CALL c.openPipe(l_cmd, "r")
+	WHILE NOT c.isEof()
+		LET l_tok = c.readLine()
+	END WHILE
+	CALL c.close()
+
+-- what would the return string look like if it failed for some reason ?
+
+	RETURN l_tok
 END FUNCTION
 --------------------------------------------------------------------------------
