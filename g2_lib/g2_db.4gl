@@ -393,6 +393,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		connection STRING
 	END RECORD
 	DEFINE l_enc encrypt
+    DEFINE l_rds_cert STRING
 
 	LET db.name   = this.name
 	LET db.driver = this.driver
@@ -438,12 +439,26 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		LET this.connection = db.connection
 		LET this.db_user    = db.username
 		LET this.db_passwd  = db.password
+-- handle aws token for password
 		IF this.db_passwd = "TOKEN" THEN
 			LET this.db_passwd = g2_get_aws_token(db.source, db.username)
 			IF this.db_passwd IS NULL THEN
 				CALL g2_winMessage("Error", "Failed to get a token for the DB connection!", "exclamation")
 			END IF
-		END IF
+        END IF
+-- if HC_DBCERT is set then check it and add it to the connection string.
+        IF this.driver MATCHES("*pgs*") THEN
+            LET l_rds_cert = fgl_getEnv("HC_DBCERTS")
+            IF l_rds_cert IS NOT NULL THEN -- check the cert exists.
+                IF NOT os.path.exists( l_rds_cert ) THEN
+                    CALL g2_winMessage("Error", SFMT("DB Certificate not found!\nFile: %1", l_rds_cert), "exclamation")
+                    LET l_rds_cert = NULL
+                END IF
+                IF l_rds_cert IS NOT NULL THEN
+                    LET this.connection = this.connection.append(SFMT("?sslmode=verify-full&sslrootcert=%1", l_rds_cert))
+                END IF
+            END IF
+        END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
 	IF this.create_db THEN -- do UI for database connection info
