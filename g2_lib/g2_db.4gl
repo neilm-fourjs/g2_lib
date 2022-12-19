@@ -452,6 +452,8 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	END RECORD
 	DEFINE l_enc encrypt
 	DEFINE l_rds_cert STRING
+	DEFINE l_test_con STRING
+	DEFINE l_test_pw  STRING
 
 	LET db.name   = this.name
 	LET db.driver = this.driver
@@ -560,19 +562,46 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				IF db.source IS NULL THEN
 					LET db.source = db.name
 				END IF
-				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+				LET l_test_con = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
+				LET l_test_pw = db.password
+        LET l_info = ""
+				IF l_test_pw = "TOKEN" THEN -- extra code for AWS Tokens
+					LET l_test_pw = g2_get_aws_token(db.source, db.username)
+					IF l_test_pw IS NULL THEN
+						CALL g2_winMessage("Error",
+                            SFMT("Failed to get a token for the DB connection!\nSource: %1\nUser:\%2", db.source, db.username)
+                            , "exclamation")
+						CONTINUE INPUT
+					END IF
+					LET l_info = l_info.append(SFMT("AWS Token: %1", l_test_pw))
+				END IF
+				IF this.driver MATCHES ("*pgs*") THEN -- extra code for PGS certificate
+					LET l_rds_cert = fgl_getenv("HC_DBCERTS")
+					IF l_rds_cert IS NULL THEN -- check the cert exists.
+							LET l_info = l_info.append("Certificate: HC_DBCERTS is not set\n")
+					ELSE
+						IF NOT os.Path.exists(l_rds_cert) THEN
+							CALL g2_winMessage("Error", SFMT("DB Certificate not found!\nFile: %1", l_rds_cert), "exclamation")
+							LET l_rds_cert = NULL
+						END IF
+						IF l_rds_cert IS NOT NULL THEN
+							LET l_test_con = l_test_con.append(SFMT("?sslmode=verify-full&sslrootcert=%1", l_rds_cert))
+							LET l_info = l_info.append(SFMT("Certificate: %1\n", l_rds_cert))
+						END IF
+					END IF
+				END IF
 				TRY
 					IF db.username IS NOT NULL THEN
-						LET l_info = SFMT("Connect using '%1' ", db.username)
-						CONNECT TO db.connection USER db.username USING db.password
+						LET l_info = l_info.append(SFMT("Connect as: %1", db.username))
+						CONNECT TO l_test_con USER db.username USING l_test_pw
 					ELSE
-						LET l_info = "Connect using local user "
-						CONNECT TO db.connection
+						LET l_info = l_info.append("Connect as local user")
+						CONNECT TO l_test_con
 					END IF
-					LET l_info = l_info.append("Okay")
+					LET l_info = l_info.append(" Okay")
 					DISCONNECT CURRENT
 				CATCH
-					LET l_info = l_info.append(SFMT("Failed!\n%1 - %2", STATUS, SQLERRMESSAGE))
+					LET l_info = l_info.append(SFMT(" Failed!\n%1 - %2", STATUS, SQLERRMESSAGE))
 				END TRY
 				DISPLAY l_info TO info
 			ON ACTION quit
@@ -969,6 +998,10 @@ FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
 	END IF
 
 -- get the host and port from the source
+	LET x = l_source.getIndexOf("@", 1)
+	IF x > 0 THEN -- remove the dbname
+		LET l_source = l_source.subString(x + 1, l_source.getLength())
+	END IF
 	LET x = l_source.getIndexOf(":", 1)
 	IF x > 0 THEN
 		LET l_host = l_source.subString(1, x - 1)
