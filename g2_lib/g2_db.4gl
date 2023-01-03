@@ -464,8 +464,20 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			END IF
 		    LET this.connection = this.connection.append("'")
 		END IF
+        IF fgl_getEnv("DBDEBUG") = "TRUE" THEN
+            DISPLAY SFMT("DB JSON File: %1", l_file)
+            DISPLAY SFMT("DB JSON: %1", l_jsonStr)
+            DISPLAY SFMT("HC_DBCERTS: %1", l_rds_cert)
+            DISPLAY SFMT("this.connection: %1", this.connection)
+            DISPLAY SFMT("this.type: %1", this.type)
+            DISPLAY SFMT("this.driver: %1", this.driver)
+            DISPLAY SFMT("this.source: %1", this.source)
+            DISPLAY SFMT("this.db_user: %1", this.db_user)
+            DISPLAY SFMT("this.db_passwd: %1", this.db_passwd)
+        END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
+
 	IF this.create_db THEN -- do UI for database connection info
 		LET int_flag = FALSE
 		OPEN WINDOW db_connection WITH FORM "g2_db_connection"
@@ -502,7 +514,6 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				IF db.source IS NULL THEN
 					LET db.source = db.name
 				END IF
-				LET l_test_con = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
 				LET l_test_pw = db.password
                 LET l_info = ""
 				IF l_test_pw = "TOKEN" THEN -- extra code for AWS Tokens
@@ -515,6 +526,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 					END IF
 					LET l_info = l_info.append(SFMT("AWS Token: %1", l_test_pw))
 				END IF
+				LET l_test_con = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
 				IF this.driver MATCHES ("*pgs*") THEN -- extra code for PGS certificate
 					LET l_rds_cert = fgl_getenv("HC_DBCERTS")
 					IF l_rds_cert IS NULL THEN -- check the cert exists.
@@ -556,19 +568,10 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		END IF
 		LOCATE l_jsonText IN FILE l_file
 		LET l_jsonText = l_enc.g2_encStringPasswd(util.JSON.stringify(db), NULL) -- save encrypted db connection info
-		IF db.source IS NULL THEN
-			LET db.source = db.name
-		END IF
-		GL_DBGMSG(0, SFMT("getCustomDBUser: Using '%1'", l_file))
-		LET this.db_cfg     = SFMT("From %1", l_file)
-		LET this.driver     = db.driver
-		LET this.type       = db.type
-		LET this.name       = db.name
-		LET this.source     = db.source
-		LET this.connection = db.connection
-		LET this.db_user    = db.username
-		LET this.db_passwd  = db.password
-		LET this.use_custom = TRUE
+        GL_DBGMSG(0,"getCustomDBUser: Saving JSON data")
+        LET this.create_db = FALSE
+        CALL this.g2_getCustomDBInfo() -- do setup from the file as would happen for a normal program connection.
+        LET this.create_db = TRUE
 	END IF
 END FUNCTION
 
