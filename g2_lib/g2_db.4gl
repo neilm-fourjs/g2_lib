@@ -956,7 +956,7 @@ FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
 	GL_DBGMSG(0, SFMT("g2_get_aws_token: openpipe: %1", l_cmd))
 	CALL c.openPipe(l_cmd, "r")
 	WHILE NOT c.isEof()
-		LET l_tok = c.readLine()
+		LET l_tok = l_tok.append( c.readLine().trim() )
 	END WHILE
 	CALL c.close()
 
