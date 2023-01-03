@@ -513,6 +513,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		END IF
 -- if HC_DBCERT is set then check it and add it to the connection string.
 		IF this.driver MATCHES ("*pgs*") THEN
+			LET this.connection = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
 			LET l_rds_cert = fgl_getenv("HC_DBCERTS")
 			IF l_rds_cert IS NOT NULL THEN -- check the cert exists.
 				IF NOT os.Path.exists(l_rds_cert) THEN
@@ -523,6 +524,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 					LET this.connection = this.connection.append(SFMT("?sslmode=verify-full&sslrootcert=%1", l_rds_cert))
 				END IF
 			END IF
+			LET this.connection = this.connection.append("'") -- close the source quote
 		END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
@@ -562,7 +564,6 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				IF db.source IS NULL THEN
 					LET db.source = db.name
 				END IF
-				LET l_test_con = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				LET l_test_pw = db.password
         LET l_info = ""
 				IF l_test_pw = "TOKEN" THEN -- extra code for AWS Tokens
@@ -575,6 +576,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 					END IF
 					LET l_info = l_info.append(SFMT("AWS Token: %1", l_test_pw))
 				END IF
+				LET l_test_con = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
 				IF this.driver MATCHES ("*pgs*") THEN -- extra code for PGS certificate
 					LET l_rds_cert = fgl_getenv("HC_DBCERTS")
 					IF l_rds_cert IS NULL THEN -- check the cert exists.
@@ -590,6 +592,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 						END IF
 					END IF
 				END IF
+				LET l_test_con = l_test_con.append("'") -- close the source quote
 				TRY
 					IF db.username IS NOT NULL THEN
 						LET l_info = l_info.append(SFMT("Connect as: %1", db.username))
