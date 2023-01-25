@@ -9,6 +9,9 @@
 #+
 #+ No includes required.
 
+IMPORT os
+IMPORT util
+
 &ifdef gen320
 IMPORT FGL g2_appInfo
 IMPORT FGL g2_core
@@ -25,30 +28,37 @@ IMPORT FGL g2_lib.g2_util
 IMPORT FGL g2_lib.g2_db
 &endif
 
-IMPORT os
 --------------------------------------------------------------------------------
 #+ Dynamic About Window
 #+
 #+ @param l_ver a version string
 #+ @return Nothing.
 FUNCTION g2_about()
-	DEFINE f, n, g, w      om.DomNode
-	DEFINE nl              om.NodeList
-	DEFINE gver, info, txt STRING
-	DEFINE y               SMALLINT
+	DEFINE f, n, g, w            om.DomNode
+	DEFINE nl                    om.NodeList
+	DEFINE l_info, l_txt, l_save STRING
+	DEFINE y                     SMALLINT
+	DEFINE l_json                TEXT
 
-	LET gver = "build ", fgl_getversion()
-
+	IF g2_core.m_appInfo.gver IS NULL THEN
+		LET g2_core.m_appInfo.gver = "build ", fgl_getversion()
+	END IF
 	IF g2_core.m_appInfo.fe_typ IS NULL THEN
 		CALL g2_core.m_appInfo.getClientInfo()
 	END IF
-
 	IF g2_core.m_appInfo.userName IS NULL THEN
 		CALL g2_core.m_appInfo.setUserName(NULL)
 	END IF
 	IF g2_core.m_appInfo.hostname IS NULL THEN
 		LET g2_core.m_appInfo.hostname = g2_util.g2_getHostname()
 	END IF
+	IF g2_core.m_appInfo.progDir IS NULL THEN
+		LET g2_core.m_appInfo.progDir = base.Application.getProgramDir()
+	END IF
+	LET g2_core.m_appInfo.db_date     = fgl_getenv("DBDATE")
+	LET g2_core.m_appInfo.db_name     = SFMT("%1 (from: %2)", g2_db.m_db.name, g2_db.m_db.db_cfg)
+	LET g2_core.m_appInfo.db_driver   = SFMT("%1 (source: %2)", g2_db.m_db.driver, g2_db.m_db.source)
+	LET g2_core.m_appInfo.server_time = TODAY || " " || TIME
 
 	OPEN WINDOW about AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "naked")
 	LET n = g2_aui.g2_getWinNode(NULL)
@@ -115,11 +125,11 @@ FUNCTION g2_about()
 	CALL w.setAttribute("gridWidth", 25)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Run Location") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, base.Application.getProgramDir(), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.progDir, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Genero Runtime") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, gver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.gver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server OS") || ":", "right", "black")
@@ -135,7 +145,7 @@ FUNCTION g2_about()
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Server Time:") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, TODAY || " " || TIME, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.server_time, NULL, "black")
 	LET y = y + 1
 
 	IF g2_db.m_db.name IS NULL THEN
@@ -144,15 +154,15 @@ FUNCTION g2_about()
 		LET y = y + 1
 	ELSE
 		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Name") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (from: %2)", g2_db.m_db.name, g2_db.m_db.db_cfg), NULL, "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.db_name, NULL, "black")
 		LET y = y + 1
 
 		CALL g2_aui.g2_addLabel(g, 0, y, LSTR("Database Driver") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, 10, y, SFMT("%1 (source: %2)", g2_db.m_db.driver, g2_db.m_db.source), NULL, "black")
+		CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.db_driver, NULL, "black")
 		LET y = y + 1
 	END IF
 	CALL g2_aui.g2_addLabel(g, 0, y, LSTR("DBDATE") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, 10, y, fgl_getenv("DBDATE"), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, 10, y, g2_core.m_appInfo.db_date, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -205,6 +215,10 @@ FUNCTION g2_about()
 	CALL w.setAttribute("name", "copyabout")
 	LET w = g.createChild("Button")
 	CALL w.setAttribute("posY", y)
+	CALL w.setAttribute("text", "Save as JSON")
+	CALL w.setAttribute("name", "jsonabout")
+	LET w = g.createChild("Button")
+	CALL w.setAttribute("posY", y)
 	CALL w.setAttribute("text", "Show Env")
 	CALL w.setAttribute("name", "showenv")
 	LET w = g.createChild("Button")
@@ -223,14 +237,14 @@ FUNCTION g2_about()
 
 	LET nl = f.selectByTagName("Label")
 	FOR y = 1 TO nl.getLength()
-		LET w   = nl.item(y)
-		LET txt = w.getAttribute("text")
-		IF txt IS NULL THEN
-			LET txt = "(null)"
+		LET w     = nl.item(y)
+		LET l_txt = w.getAttribute("text")
+		IF l_txt IS NULL THEN
+			LET l_txt = "(null)"
 		END IF
-		LET info = info.append(txt)
+		LET l_info = l_info.append(l_txt)
 		IF NOT y MOD 2 THEN
-			LET info = info.append("\n")
+			LET l_info = l_info.append("\n")
 		END IF
 	END FOR
 
@@ -246,7 +260,18 @@ FUNCTION g2_about()
 		ON ACTION showlicence
 			CALL g2_aui.g2_showLicence()
 		ON ACTION copyabout
-			CALL ui.Interface.frontCall("standard", "cbset", info, y)
+			CALL ui.Interface.frontCall("standard", "cbset", l_info, y)
+		ON ACTION jsonabout
+			LOCATE l_json IN FILE "about.json"
+			LET l_json = util.JSON.stringify(g2_core.m_appInfo)
+			IF g2_core.m_appInfo.fe_typ = "GDC" THEN
+				CALL ui.Interface.frontCall("standard", "savefile", [NULL, "about.json", "*.json", "Save About JSON"], l_save)
+			ELSE
+				LET l_save = "about.json"
+			END IF
+			IF l_save IS NOT NULL THEN
+				CALL fgl_putFile("about.json", l_save)
+			END IF
 	END MENU
 	CLOSE WINDOW about
 
