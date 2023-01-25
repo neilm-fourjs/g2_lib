@@ -6,7 +6,7 @@ GRID
 [lab2     |f002       ][lab2a|f2a]
 [lab3     |f003                                       ]
 [lab4     |f004           ]
-[lab5     |f005           ]
+[lab5     |f005           ][token     ]
 [""]
 [lab6     |f006                                       ]
 [""]
@@ -32,4 +32,5 @@ f2a = FORMONLY.type, NOENTRY;
 f003 = FORMONLY.source, SCROLL, PLACEHOLDER="njm_demo310@myserver:port";
 f004 = FORMONLY.username, SCROLL, PLACEHOLDER="fred";
 f005 = FORMONLY.password, SCROLL, PLACEHOLDER="9AssWord!", INVISIBLE;
+CHECKBOX token = FORMONLY.l_usetoken, VALUECHECKED=1, VALUEUNCHECKED=0, NOT NULL, TEXT="Use AWS Token";
 f006 = FORMONLY.connection, SCROLL, NOENTRY;

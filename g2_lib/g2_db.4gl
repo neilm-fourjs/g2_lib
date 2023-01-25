@@ -299,7 +299,7 @@ FUNCTION (this dbInfo) g2_createTable(l_rec reflect.Value, l_nam STRING, l_priKe
 		LET l_fldType = l_fld.toString()
 		IF l_fld.hasAttribute("xmltype") THEN
 			LET l_fldType = l_fld.getAttribute("xmltype")
-			IF l_fldType = "SERIAL" THEN
+			IF l_fldType = "SERIAL" AND this.type != "sqt" THEN
 				LET l_priKey = l_typ.getFieldName(i)
 			END IF
 		END IF
@@ -454,6 +454,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	DEFINE l_rds_cert STRING
 	DEFINE l_test_con STRING
 	DEFINE l_test_pw  STRING
+	DEFINE l_usetoken BOOLEAN
 
 	LET db.name   = this.name
 	LET db.driver = this.driver
@@ -545,7 +546,11 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		DISPLAY l_info TO info
 		LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 		OPTIONS INPUT WRAP
-		INPUT BY NAME db.* ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
+		LET l_usetoken = (db.password = "TOKEN")
+		INPUT BY NAME db.*, l_usetoken ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
+			BEFORE INPUT
+				CALL DIALOG.setFieldActive("l_usetoken", db.type="pgs")
+
 			AFTER FIELD name
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				IF db.source IS NULL THEN
@@ -564,6 +569,10 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				LET db.type       = db.driver.subString(4, 6)
+				CALL DIALOG.setFieldActive("l_usetoken", db.type="pgs")
+
+			ON CHANGE l_usetoken
+				LET db.password = IIF(l_usetoken, "TOKEN","")
 
 			AFTER FIELD source
 				IF db.source IS NULL THEN
