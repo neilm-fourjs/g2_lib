@@ -68,6 +68,7 @@ FUNCTION (this greRpt)
 	IF this.greServer.getLength() > 1 THEN
 		LET this.greDistributed = TRUE
 	END IF
+	DISPLAY SFMT("g2_grw: GRE Distr: %1 Server: %2 Port: %3 OutputDir: %4", IIF(this.greDistributed, "TRUE", "FALSE"), this.greServer, this.greServerPort, this.greOutputDir)
 	IF l_start THEN
 		RETURN this.start()
 	ELSE
@@ -142,7 +143,7 @@ FUNCTION (this greRpt) start() RETURNS BOOLEAN
 	END IF
 
 	IF this.greDistributed THEN
-		DISPLAY SFMT("g2_grw: Using distributed mode: %1 %2", this.greServer, this.greServerPort)
+		DISPLAY SFMT("g2_grw: Using distributed mode Server: %1 Port: %2", this.greServer, this.greServerPort)
 		CALL fgl_report_configureDistributedProcessing(this.greServer, this.greServerPort)
 		CALL fgl_report_configureDistributedEnvironment(NULL, NULL, NULL, NULL)
 	ELSE
