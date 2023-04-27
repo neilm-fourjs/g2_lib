@@ -135,9 +135,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			WHEN "ifx"
 				LET this.source     = fgl_getenv("INFORMIXSERVER")
 				LET this.connection = this.name
-				DISPLAY "INFORMIXDIR:", fgl_getenv("INFORMIXDIR")
-				DISPLAY "INFORMIXSERVER:", fgl_getenv("INFORMIXSERVER")
-				DISPLAY "INFORMIXSQLHOSTS:", fgl_getenv("INFORMIXSQLHOSTS")
+				GL_DBGMSG(0, SFMT("INFORMIXDIR: %1", fgl_getenv("INFORMIXDIR")))
+				GL_DBGMSG(0, SFMT("INFORMIXSERVER: %1", fgl_getenv("INFORMIXSERVER")))
+				GL_DBGMSG(0, SFMT("INFORMIXSQLHOSTS: %1", fgl_getenv("INFORMIXSQLHOSTS")))
 			WHEN "sqt"
 				IF NOT os.Path.exists(this.dir) THEN
 					IF NOT os.Path.mkdir(this.dir) THEN
@@ -152,7 +152,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 				IF NOT os.Path.exists(this.source) THEN
 					CALL g2_core.g2_winMessage("Error", SFMT("Database file is missing? '%1' !\n", this.source), "exclamation")
 				ELSE
-					DISPLAY "Database file exists:", this.source
+					GL_DBGMSG(0, SFMT("Database file exists: %1", this.source))
 				END IF
 				LET this.connection = SFMT("%1+driver='%2',source='%3'", this.name, this.driver, this.source)
 		END CASE
@@ -183,10 +183,10 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	LET l_failed = FALSE
 	TRY
 		IF this.db_user IS NULL THEN
-			GL_DBGMSG(0, SFMT("Connection: %1 Using: %2 Source: %3 ...", this.connection, this.driver, this.source))
+			GL_DBGMSG(0, SFMT("DATABASE %1 ( Using: %2 Source: %3 ) ...", this.connection, this.driver, this.source))
 			DATABASE this.connection
 		ELSE
-			GL_DBGMSG(0, SFMT("Connection: %1 As: %2 ...", this.connection, this.db_user))
+			GL_DBGMSG(0, SFMT("CONNECT TO %1 USER %2 USING xxx", this.connection, this.db_user))
 			CONNECT TO this.connection USER this.db_user USING this.db_passwd
 		END IF
 		GL_DBGMSG(0, "Connected.")
@@ -194,10 +194,8 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		LET l_failed = TRUE
 	END TRY
 	IF l_failed THEN
-		LET l_msg =
-				"Connection to database failed\nDB:", this.name, "\nSource:", this.source, "\nDriver:", this.driver, "\n",
-				"Status:", sqlca.sqlcode, "\n", SQLERRMESSAGE
-		DISPLAY l_msg
+		LET l_msg = SFMT("Connection Failed DB: %1 Source: %2 Driver: %3 Status: %4 %5", this.name, this.source, this.driver, sqlca.sqlcode, SQLERRMESSAGE)
+		GL_DBGMSG(0,  l_msg)
 		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
 			LET l_msg = NULL
@@ -379,18 +377,18 @@ FUNCTION (this dbInfo) g2_showInfo(stat INTEGER) RETURNS()
 	DISPLAY fgl_getenv("FGLPROFILE") TO fld3
 	DISPLAY "DBNAME" TO lab4
 	DISPLAY this.name TO fld4
-	DISPLAY "dbi.database." || this.name || ".source" TO lab5
+	DISPLAY SFMT("dbi.database.%1.source", this.name) TO lab5
 	DISPLAY this.source TO fld5
 
-	DISPLAY "dbi.database." || this.name || ".driver" TO lab6
+	DISPLAY SFMT("dbi.database.%1.driver", this.name) TO lab6
 	DISPLAY this.driver TO fld6
 
 	IF this.type IS NULL THEN
 		DISPLAY "No driver in FGLPROFILE!!!" TO lab7
 	ELSE
-		DISPLAY "dbi.database." || this.name || "." || this.type || ".schema" TO lab7
+		DISPLAY SFMT("dbi.database.%1.%2.schema", this.name, this.type) TO lab7
 	END IF
-	DISPLAY fgl_getresource("dbi.database." || this.name || "." || this.type || ".schema") TO fld7
+	DISPLAY fgl_getresource( SFMT("dbi.database.%1.%2.schema", this.name, this.type)) TO fld7
 
 	DISPLAY "dbsrc" TO lab8
 	DISPLAY this.source TO fld8
@@ -478,6 +476,21 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 	IF NOT os.Path.exists(l_file) THEN
 		GL_DBGMSG(0, SFMT("getCustomDBUser: Not using %1", l_file))
 		LET l_info = SFMT("'%1' - No custom database configuration found.", l_file)
+		IF fgl_getenv("HC_DBNAME") IS NOT NULL THEN
+			LET db.name = fgl_getenv("HC_DBNAME")
+		END IF
+		IF fgl_getenv("HC_DBSERVER") IS NOT NULL THEN
+			LET db.source = SFMT("%1@%2", db.name, fgl_getenv("HC_DBSERVER"))
+		ELSE
+			LET db.source = db.name
+		END IF
+		IF fgl_getenv("HC_DBUSER") IS NOT NULL THEN
+			LET db.username = fgl_getenv("HC_DBUSER")
+		END IF
+		IF fgl_getenv("HC_DBDRIVER") IS NOT NULL THEN
+			LET db.driver = fgl_getenv("HC_DBDRIVER")
+		END IF
+		LET db.type   = db.driver.subString(4, 6)
 	ELSE
 		LET this.use_custom = TRUE
 		TRY
@@ -528,15 +541,19 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			LET this.connection = this.connection.append("'") -- close the source quote
 		END IF
 		IF fgl_getEnv("DBDEBUG") = "TRUE" THEN
-			DISPLAY SFMT("DB JSON File: %1", l_file)
-			DISPLAY SFMT("DB JSON: %1", l_jsonStr)
-			DISPLAY SFMT("HC_DBCERTS: %1", l_rds_cert)
-			DISPLAY SFMT("this.connection: %1", this.connection)
-			DISPLAY SFMT("this.type: %1", this.type)
-			DISPLAY SFMT("this.driver: %1", this.driver)
-			DISPLAY SFMT("this.source: %1", this.source)
-			DISPLAY SFMT("this.db_user: %1", this.db_user)
-			DISPLAY SFMT("this.db_passwd: %1", this.db_passwd)
+			GL_DBGMSG(0,  SFMT("DB JSON File: %1", l_file))
+			GL_DBGMSG(0,  SFMT("DB JSON: %1", l_jsonStr))
+			GL_DBGMSG(0,  SFMT("HC_DBCERTS: %1", l_rds_cert))
+			GL_DBGMSG(0,  SFMT("HC_DBNAME: %1", fgl_getenv("HC_DBNAME")))
+			GL_DBGMSG(0,  SFMT("HC_DBDRIVER: %1", fgl_getenv("HC_DBDRIVER")))
+			GL_DBGMSG(0,  SFMT("HC_DBSERVER: %1", fgl_getenv("HC_DBSERVER")))
+			GL_DBGMSG(0,  SFMT("HC_DBUSER: %1", fgl_getenv("HC_DBUSER")))
+			GL_DBGMSG(0,  SFMT("this.connection: %1", this.connection))
+			GL_DBGMSG(0,  SFMT("this.type: %1", this.type))
+			GL_DBGMSG(0,  SFMT("this.driver: %1", this.driver))
+			GL_DBGMSG(0,  SFMT("this.source: %1", this.source))
+			GL_DBGMSG(0,  SFMT("this.db_user: %1", this.db_user))
+			GL_DBGMSG(0,  SFMT("this.db_passwd: %1", this.db_passwd))
 		END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
@@ -546,10 +563,18 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		DISPLAY l_info TO info
 		LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 		OPTIONS INPUT WRAP
-		LET l_usetoken = (db.password = "TOKEN")
+		IF db.password IS NOT NULL THEN
+			LET l_usetoken = (db.password = "TOKEN")
+		ELSE
+			LET l_usetoken = FALSE
+		END IF
 		INPUT BY NAME db.*, l_usetoken ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
 			BEFORE INPUT
-				CALL DIALOG.setFieldActive("l_usetoken", db.type="pgs")
+				IF db.type="pgs" OR db.type="mys" THEN
+					CALL DIALOG.setFieldActive("l_usetoken", TRUE)
+				ELSE
+					CALL DIALOG.setFieldActive("l_usetoken", FALSE)
+				END IF
 
 			AFTER FIELD name
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
@@ -569,7 +594,12 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				LET db.type       = db.driver.subString(4, 6)
-				CALL DIALOG.setFieldActive("l_usetoken", db.type="pgs")
+				IF db.type="pgs" OR db.type="mys" THEN
+					CALL DIALOG.setFieldActive("l_usetoken", TRUE)
+				ELSE
+					CALL DIALOG.setFieldActive("l_usetoken", FALSE)
+				END IF
+				DISPLAY "DBT:", db.type
 
 			ON CHANGE l_usetoken
 				LET db.password = IIF(l_usetoken, "TOKEN","")
@@ -588,13 +618,15 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
         LET l_info = ""
 				IF l_test_pw = "TOKEN" THEN -- extra code for AWS Tokens
 					LET l_test_pw = g2_get_aws_token(db.source, db.username)
+					LET l_info = ""
 					IF l_test_pw IS NULL THEN
+						LET l_info = SFMT("Failed to get a token for the DB connection!\nSource: %1\nUser:\%2", db.source, db.username)
 						CALL g2_winMessage("Error",
-                            SFMT("Failed to get a token for the DB connection!\nSource: %1\nUser:\%2", db.source, db.username)
+                            l_info
                             , "exclamation")
 						CONTINUE INPUT
 					END IF
-					LET l_info = l_info.append(SFMT("AWS Token: %1", l_test_pw))
+					LET l_info = l_info.append(SFMT("AWS Token: %1\n", l_test_pw))
 				END IF
 				LET l_test_con = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
 				IF this.driver MATCHES ("*pgs*") THEN -- extra code for PGS certificate
@@ -615,16 +647,22 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				LET l_test_con = l_test_con.append("'") -- close the source quote
 				TRY
 					IF db.username IS NOT NULL THEN
-						LET l_info = l_info.append(SFMT("Connect as: %1", db.username))
+						LET l_tmp = SFMT("CONNECT TO %1 USER %2 USING xxx\n", l_test_con, db.username)
+						LET l_info = l_info.append(SFMT("%1\n",l_tmp))
+						GL_DBGMSG(0, SFMT("g2_getCustomDBInfo: TEST: %1", l_tmp))
 						CONNECT TO l_test_con USER db.username USING l_test_pw
 					ELSE
-						LET l_info = l_info.append("Connect as local user")
+						LET l_info = l_info.append("Connect as local user\n")
+						GL_DBGMSG(0, SFMT("g2_getCustomDBInfo: TEST: CONNECT TO %1", l_test_con))
 						CONNECT TO l_test_con
 					END IF
-					LET l_info = l_info.append(" Okay")
+					LET l_info = l_info.append("Connected.")
+					GL_DBGMSG(0, "g2_getCustomDBInfo: TEST: Okay")
 					DISCONNECT CURRENT
 				CATCH
-					LET l_info = l_info.append(SFMT(" Failed!\n%1 - %2", STATUS, SQLERRMESSAGE))
+					LET l_tmp = SFMT("%1 - %2", STATUS, SQLERRMESSAGE)
+					GL_DBGMSG(0, SFMT("g2_getCustomDBInfo: TEST: Failed %1", l_tmp))
+					LET l_info = l_info.append(SFMT(" Failed!\n%1", l_tmp))
 				END TRY
 				DISPLAY l_info TO info
 			ON ACTION quit
@@ -666,8 +704,8 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 	END IF
 	LET l_cond  = "MATCHES"
 	LET l_where = SFMT("lower(%1) %2 '*%3*'", l_defcol, l_cond, l_search.toLowerCase())
-	DISPLAY "Search:", l_search
-	DISPLAY "       12345678901234567890"
+--	DISPLAY "Search:", l_search
+--	DISPLAY "       12345678901234567890"
 	CALL g2_findCondition(l_search) RETURNING l_cnt, l_cond
 	IF l_cnt = 1 THEN
 		LET l_search = l_search.subString(l_cond.getLength() + 1, l_search.getLength())
@@ -678,9 +716,8 @@ FUNCTION g2_chkSearch(l_tab STRING, l_defcol STRING, l_search STRING) RETURNS ST
 		LET l_search = l_search.subString(l_cnt + l_cond.getLength(), l_search.getLength())
 		LET l_where  = SFMT("%1 %2 '%3'", l_defcol.trim(), l_cond, l_search.trim())
 	END IF
-	DISPLAY "X:", l_cnt, " Col:", l_defcol, " Condition:", l_cond, " Search:", l_search
 	LET l_stmt = "SELECT COUNT(*) FROM " || l_tab || " WHERE " || l_where
-	DISPLAY l_stmt
+	--DISPLAY l_stmt
 	TRY
 		PREPARE pre_chk FROM l_stmt
 		EXECUTE pre_chk INTO l_cnt
@@ -955,7 +992,7 @@ FUNCTION g2_checkRec(l_ex BOOLEAN, l_key STRING, l_sql STRING) RETURNS BOOLEAN
 	DEFINE l_exists BOOLEAN
 
 	LET l_key = l_key.trim()
-	DISPLAY "Key='", l_key, "'"
+--	DISPLAY "Key='", l_key, "'"
 
 	IF l_key IS NULL OR l_key = " " OR l_key.getLength() < 1 THEN
 		CALL g2_core.g2_warnPopup(%"You entered a NULL Key value!")
