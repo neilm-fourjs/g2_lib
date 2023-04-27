@@ -9,8 +9,14 @@
 #+
 #+ Non GUI functions only
 
+&ifdef gen320
+IMPORT FGL g2_core
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_core
+&endif
+
 IMPORT os
---IMPORT FGL g2_core
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 
@@ -75,7 +81,7 @@ END FUNCTION
 #+ @param l_dir Directory to log to. If null then use $LOGDIR
 FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 
-	LET this.dirName = NVL(l_dir, fgl_getEnv("LOGDIR"))
+	LET this.dirName = NVL(l_dir, fgl_getenv("LOGDIR"))
 
 	IF this.dirName.getLength() < 1 THEN
 		LET this.dirName = "../logs" -- C_DEFAULT_LOGDIR
@@ -83,20 +89,20 @@ FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 
 	IF NOT os.Path.exists(this.dirName) THEN
 		IF NOT os.Path.mkdir(this.dirName) THEN
-			CALL g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
-			CALL g2_exitProgram(200, "log dir issues")
+			CALL g2_core.g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
+			CALL g2_core.g2_exitProgram(200, "log dir issues")
 		ELSE
 			IF os.Path.pathSeparator() = ":" THEN -- Linux/Unix/Mac/Android - ie not MSDOS!
 				IF NOT os.Path.chRwx(this.dirName, ((7 * 64) + (7 * 8) + 5)) THEN
-					CALL g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
-					CALL g2_exitProgram(201, "log permissions")
+					CALL g2_core.g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
+					CALL g2_core.g2_exitProgram(201, "log permissions")
 				END IF
 			END IF
 		END IF
 	END IF
 	IF NOT os.Path.isDirectory(this.dirName) THEN
-		CALL g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
-		CALL g2_exitProgram(202, "logdir not a dir")
+		CALL g2_core.g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
+		CALL g2_core.g2_exitProgram(202, "logdir not a dir")
 	END IF
 
 -- Make sure the logdir ends with a slash.
@@ -112,13 +118,13 @@ END FUNCTION
 #+ @param l_file File name for the logfile
 FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 	DEFINE l_user STRING
-	IF fgl_getEnv("LOGFILEDATE") = "false" THEN
+	IF fgl_getenv("LOGFILEDATE") = "false" THEN
 		LET this.useDate = FALSE
 	END IF
 	IF l_file IS NULL THEN
-		LET l_user = fgl_getEnv("LOGNAME") -- get OS user
+		LET l_user = fgl_getenv("LOGNAME") -- get OS user
 		IF l_user.getLength() < 2 THEN
-			LET l_user = fgl_getEnv("USERNAME") -- get OS user
+			LET l_user = fgl_getenv("USERNAME") -- get OS user
 		END IF
 		IF l_user.getLength() < 2 THEN
 			LET l_user = "unknown"
@@ -159,8 +165,8 @@ END FUNCTION
 FUNCTION (this logger) setUseDate(l_useDate STRING) RETURNS()
 	LET this.useDate = TRUE
 	IF l_useDate IS NULL THEN
-		IF LENGTH(fgl_getEnv("LOGFILEDATE")) > 1 THEN
-			LET l_useDate = fgl_getEnv("LOGFILEDATE")
+		IF length(fgl_getenv("LOGFILEDATE")) > 1 THEN
+			LET l_useDate = fgl_getenv("LOGFILEDATE")
 		END IF
 	END IF
 	IF l_useDate.toUpperCase() = "FALSE" THEN

@@ -1,8 +1,13 @@
 
 IMPORT util
-IMPORT FGL g2_core
+
+&ifdef gen320
+IMPORT FGL g2_init
 IMPORT FGL g2_db
 IMPORT FGL g2_sql
+&else
+IMPORT FGL g2_lib.*
+&endif
 
 IMPORT FGL lib_expect
 SCHEMA njm_demo310
@@ -14,12 +19,12 @@ MAIN
 	DEFINE l_keyField STRING = "stock_code"
 	DEFINE l_stk RECORD LIKE stock.*
 
-  CALL g2_core.g2_init("S", NULL)
+  CALL g2_init.g2_init("S", NULL)
   CALL l_db.g2_connect("njm_demo310")
 
 -- attempt to get an invalid row
 	CALL l_sql.g2_SQLinit(l_table,"*",l_keyField, SFMT("%1 = '%2'",l_keyField,"dummy"))
-	CALL l_Sql.g2_SQLgetRow(1,TRUE)
+	CALL l_sql.g2_SQLgetRow(1,TRUE)
 	IF l_sql.rows_count != 0 THEN
 		CALL lib_expect.failed( SFMT(" row count = ", l_sql.rows_count))
 	ELSE
@@ -28,7 +33,7 @@ MAIN
 
 -- Fetch a row
 	CALL l_sql.g2_SQLinit(l_table,"*",l_keyField, SFMT("%1 = '%2'",l_keyField,"FR01"))
-	CALL l_Sql.g2_SQLgetRow(1,TRUE)
+	CALL l_sql.g2_SQLgetRow(1,TRUE)
 	IF l_sql.rows_count != 1 THEN
 		CALL lib_expect.failed( SFMT(" row count = ", l_sql.rows_count))
 	ELSE

@@ -1,0 +1,34 @@
+
+LAYOUT (TEXT="DB Connection Configuration", STYLE="dialog")
+GRID
+{
+[lab1     |f001           ]
+[lab2     |f002       ][lab2a|f2a]
+[lab3     |f003                                       ]
+[lab4     |f004           ]
+[lab5     |f005           ]
+[""]
+[lab6     |f006                                       ]
+[""]
+[info                                                 ]
+[                                                     ]
+}
+END -- GRID
+
+ATTRIBUTES
+TEXTEDIT info = FORMONLY.info, STRETCH=BOTH, NOENTRY;
+LABEL lab1 : lab1, TEXT="Name:", JUSTIFY=RIGHT;
+LABEL lab2 : lab2, TEXT="Driver:", JUSTIFY=RIGHT;
+LABEL lab2a : lab2a, TEXT="Type:", JUSTIFY=RIGHT;
+LABEL lab3 : lab3, TEXT="Source:", JUSTIFY=RIGHT;
+LABEL lab4 : lab4, TEXT="Username:", JUSTIFY=RIGHT;
+LABEL lab5 : lab5, TEXT="Password:", JUSTIFY=RIGHT;
+LABEL lab6 : lab6, TEXT="Connection:", JUSTIFY=RIGHT;
+
+f001 = FORMONLY.name, PLACEHOLDER="njm_demo310";
+f002 = FORMONLY.driver, PLACEHOLDER="dbmpgs";
+f2a = FORMONLY.type, NOENTRY;
+f003 = FORMONLY.source, SCROLL, PLACEHOLDER="njm_demo310@myserver:port";
+f004 = FORMONLY.username, SCROLL, PLACEHOLDER="fred";
+f005 = FORMONLY.password, SCROLL, PLACEHOLDER="9AssWord!", INVISIBLE;
+f006 = FORMONLY.connection, SCROLL, NOENTRY;

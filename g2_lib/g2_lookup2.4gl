@@ -31,9 +31,19 @@
 --	DISPLAY "Selected value:", l_lookup.g2_lookup2()
 --
 
+&ifdef gen320
 IMPORT FGL g2_core
-IMPORT FGL g2_db
+IMPORT FGL g2_debug
 IMPORT FGL g2_aui
+IMPORT FGL g2_db
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_db
+&endif
+
 &include "g2_debug.inc"
 
 PUBLIC TYPE lookup RECORD
@@ -121,21 +131,22 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 		LET this.dsp_fields[x].name = "dsp_" || this.fields[x].name
 		LET this.dsp_fields[x].type = this.fields[x].type
 		LET this.dsp_fields[x].width = g2_db.g2_getColumnLength(this.fields[x].type, this.maxColWidth)
-		GL_DBGMSG(2, "g2_lookup2:" || x || " Name:" || this.fields[x].name || " Type:" || this.fields[x].type)
+		GL_DBGMSG(2, SFMT("g2_lookup2: %1 Name: %2 Type: %3",x , this.fields[x].name, this.fields[x].type))
 	END FOR
 	LET this.totalFields = this.fields.getLength()
 	GL_DBGMSG(2, "g2_lookup2: Cursor Okay.")
 
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup2: Opening Window.")
-	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
-	CALL fgl_setTitle(this.windowTitle)
+	OPEN WINDOW listv AT 1, 1 WITH 15 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
+	CALL fgl_settitle(this.windowTitle)
 	LET l_frm = g2_aui.g2_genForm(this.formName) -- ensures form name is specific for this lookup
 	CALL l_frm.setAttribute("width", 100)
 
 	LET l_grid = l_frm.createChild('Grid')
 	CALL l_grid.setAttribute("width", 100)
 	CALL l_grid.setAttribute("gridWidth", 100)
+{
 -- Create a centered window l_title.
 	LET l_hbx = l_grid.createChild('HBox')
 	CALL l_hbx.setAttribute("posY", "0")
@@ -146,15 +157,15 @@ PUBLIC FUNCTION (this lookup) g2_lookup2() RETURNS STRING
 	CALL l_titl.setAttribute("text", this.windowTitle)
 	CALL l_titl.setAttribute("style", "tabtitl")
 	LET l_sp = l_hbx.createChild('SpacerItem')
-
+}
 	GL_DBGMSG(2, "g2_lookup2: Generating Table...")
 -- Create the table
 	LET l_tabl = l_grid.createChild('Table')
 	CALL l_tabl.setAttribute("width", 100)
 	CALL l_tabl.setAttribute("gridWidth", 100)
 	CALL l_tabl.setAttribute("tabName", "tablistv")
-	CALL l_tabl.setAttribute("height", "20")
-	CALL l_tabl.setAttribute("pageSize", "20")
+	CALL l_tabl.setAttribute("height", "10")
+	CALL l_tabl.setAttribute("pageSize", "10")
 	CALL l_tabl.setAttribute("posY", "1")
 	CALL l_tabl.setAttribute("doubleClick", "accept")
 
@@ -343,7 +354,7 @@ FUNCTION (this lookup) refrestData()
 -- Fetch the data
 	CALL this.sqlQueryHandle.fetchFirst()
 	LET x = 0
-	WHILE SQLCA.sqlcode = 0
+	WHILE sqlca.sqlcode = 0
 		LET x = x + 1
 		-- must set the current row before setting values
 		CALL this.theDialog.setCurrentRow("tablistv", x)
@@ -392,7 +403,7 @@ FUNCTION (this lookup) countRows(l_where STRING) RETURNS INT
 	FETCH listcntcur INTO i
 	CLOSE listcntcur
 
-	GL_DBGMSG(2, "g2_lookup2: Counted:" || i)
+	GL_DBGMSG(2, SFMT("g2_lookup2: Counted: %1", i))
 	RETURN i
 END FUNCTION
 ----------------------------------------------------------------------------------------------------
@@ -456,9 +467,9 @@ PRIVATE FUNCTION (this lookup) delete(l_key STRING) RETURNS BOOLEAN
 			EXECUTE IMMEDIATE l_sql
 			RETURN FALSE
 		CATCH
-			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed to delete!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+					"Error", SFMT("Failed to delete!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
 		END TRY
 	END IF
 	RETURN TRUE
@@ -515,7 +526,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 				LET l_accept = TRUE
 				EXIT WHILE
 			OTHERWISE
-				GL_DBGMSG(2, "g2_lookup2: Unhandled Event:" || l_event)
+				GL_DBGMSG(2, SFMT("g2_lookup2: Unhandled Event: %1", l_event))
 		END CASE
 	END WHILE
 	CALL this.inputVBox.setAttribute("hidden", TRUE)
@@ -560,11 +571,11 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 	TRY
 		EXECUTE IMMEDIATE l_sql
 	CATCH
-		--DISPLAY "SQLCode:",SQLCA.sqlcode, " SQLERRD2:",SQLCA.sqlerrd[2], " sqlawarn:",SQLCA.sqlawarn
-		IF SQLCA.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
-			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", STATUS, SQLERRMESSAGE))
+		--DISPLAY "SQLCode:",sqlca.sqlcode, " SQLERRD2:",sqlca.sqlerrd[2], " sqlawarn:",sqlca.sqlawarn
+		IF sqlca.sqlerrd[2] != -1 THEN -- probably really 55000 so ignore ( PGS serial retrieve fail ! )
+			GL_DBGMSG(0, SFMT("SQL Failed:%1 %2", status, SQLERRMESSAGE))
 			CALL g2_core.g2_winMessage(
-					"Error", SFMT("Failed!\n%1 %2", STATUS, SQLERRMESSAGE), "exclamation")
+					"Error", SFMT("Failed!\n%1 %2", status, SQLERRMESSAGE), "exclamation")
 			RETURN TRUE -- int_flag
 		END IF
 	END TRY
@@ -574,7 +585,7 @@ PRIVATE FUNCTION (this lookup) update(l_key STRING) RETURNS BOOLEAN
 	ELSE
 		LET this.totalRecords = this.totalRecords + 1
 		CALL this.theDialog.setCurrentRow("tablistv", this.totalRecords)
-		CALL l_dia.setFieldValue(this.fields[1].name, SQLCA.sqlerrd[2])
+		CALL l_dia.setFieldValue(this.fields[1].name, sqlca.sqlerrd[2])
 	END IF
 	FOR x = 1 TO this.totalFields
 		DISPLAY SFMT("Updating Row %1 field %2 to %3",

@@ -12,8 +12,16 @@
 #+  
 #+ No includes required.
 
-IMPORT FGL g2_core
+&ifdef gen320
+IMPORT FGL g2_debug
 IMPORT FGL g2_aui
+IMPORT FGL g2_db
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_db
+&endif
 
 &include "g2_debug.inc"
 PUBLIC TYPE simpleLookup RECORD
@@ -34,7 +42,7 @@ PUBLIC FUNCTION (this simpleLookup) g2_simpleLookup() RETURNS STRING
 
 	GL_DBGMSG(2, "g2_lookup: Opening Window.")
 	OPEN WINDOW simplelookup AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
-	CALL fgl_setTitle(this.title)
+	CALL fgl_settitle(this.title)
 	LET l_frm =
 			g2_aui.g2_genForm("g2_" || this.name.trim()) -- ensures form name is specific for this lookup
 	CALL l_frm.setAttribute("style","naked")

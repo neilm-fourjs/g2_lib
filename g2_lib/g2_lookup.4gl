@@ -8,9 +8,19 @@
 #+ from the use of this software rests entirely with the user.
 --------------------------------------------------------------------------------
 
+&ifdef gen320
 IMPORT FGL g2_core
+IMPORT FGL g2_debug
 IMPORT FGL g2_aui
 IMPORT FGL g2_db
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_debug
+IMPORT FGL g2_lib.g2_aui
+IMPORT FGL g2_lib.g2_db
+&endif
+
 &include "g2_debug.inc"
 CONSTANT MAXCOLWIDTH = 40
 --------------------------------------------------------------------------------
@@ -43,11 +53,11 @@ FUNCTION g2_lookup(
 	DEFINE l_event STRING
 
 -- See "genero_lib.inc" for Macro definitions.
-	GL_DBGMSG(2, "g2_lookup: table(s)=" || tabnam)
-	GL_DBGMSG(2, "g2_lookup: cols    =" || cols)
-	GL_DBGMSG(2, "g2_lookup: titles  =" || colts)
-	GL_DBGMSG(2, "g2_lookup: where   =" || wher)
-	GL_DBGMSG(2, "g2_lookup: orderby =" || ordby)
+	GL_DBGMSG(2, SFMT("g2_lookup: table(s)= %1",tabnam))
+	GL_DBGMSG(2, SFMT("g2_lookup: cols    = %1",cols))
+	GL_DBGMSG(2, SFMT("g2_lookup: titles  = %1",colts))
+	GL_DBGMSG(2, SFMT("g2_lookup: where   = %1",wher))
+	GL_DBGMSG(2, SFMT("g2_lookup: orderby = %1",ordby))
 	GL_DBGMSG(2, "g2_lookup: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
@@ -67,7 +77,7 @@ FUNCTION g2_lookup(
 		CALL g2_core.g2_errPopup(% "No Records Found")
 		RETURN NULL
 	END IF
-	GL_DBGMSG(2, "g2_lookup: Counted:" || l_tot_recs)
+	GL_DBGMSG(2, SFMT("g2_lookup: Counted: %1", l_tot_recs))
 
 -- Build the SQL
 	LET l_sel_stmt = "SELECT " || cols CLIPPED || " FROM " || tabnam CLIPPED, " WHERE " || wher
@@ -89,18 +99,19 @@ FUNCTION g2_lookup(
 		LET l_fields[x].name = l_sql_handle.getResultName(x)
 		LET l_col_titles[x] = l_fields[x].name -- default column l_titles
 		LET l_fields[x].type = l_sql_handle.getResultType(x)
-		GL_DBGMSG(2, "g2_lookup:" || x || " Name:" || l_fields[x].name || " Type:" || l_fields[x].type)
+		GL_DBGMSG(2, SFMT("g2_lookup: %1 Name: %2 Type: %3", x, l_fields[x].name, l_fields[x].type))
 	END FOR
 	GL_DBGMSG(2, "g2_lookup: Cursor Okay.")
 
 -- Open the window and define a table.
 	GL_DBGMSG(2, "g2_lookup: Opening Window.")
-	OPEN WINDOW listv AT 1, 1 WITH 20 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
-	CALL fgl_setTitle("Listing from " || tabnam)
+	OPEN WINDOW listv AT 1, 1 WITH 15 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
+	CALL fgl_settitle("Listing from " || tabnam)
 	LET l_frm =
 			g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
 	LET l_grid = l_frm.createChild('Grid')
+{
 -- Create a centered window l_title.
 	LET l_hbx = l_grid.createChild('HBox')
 	CALL l_hbx.setAttribute("posY", "0")
@@ -109,13 +120,13 @@ FUNCTION g2_lookup(
 	CALL l_titl.setAttribute("text", "Listing from " || tabnam CLIPPED)
 	CALL l_titl.setAttribute("style", "tabtitl")
 	LET l_sp = l_hbx.createChild('SpacerItem')
-
+}
 	GL_DBGMSG(2, "g2_lookup: Generating Table...")
 -- Create the table
 	LET l_tabl = l_grid.createChild('Table')
 	CALL l_tabl.setAttribute("tabName", "tablistv")
-	CALL l_tabl.setAttribute("height", "20")
-	CALL l_tabl.setAttribute("pageSize", "20")
+	CALL l_tabl.setAttribute("height", "10")
+	CALL l_tabl.setAttribute("pageSize", "10")
 	CALL l_tabl.setAttribute("posY", "1")
 	CALL l_tabl.setAttribute("doubleClick", "accept")
 
@@ -185,7 +196,7 @@ FUNCTION g2_lookup(
 -- Fetch the data
 	CALL l_sql_handle.fetchFirst()
 	LET x = 0
-	WHILE SQLCA.sqlcode = 0
+	WHILE sqlca.sqlcode = 0
 		LET x = x + 1
 		CALL l_dlg.setCurrentRow("tablistv", x) -- must set the current row before setting values
 		FOR i = 1 TO l_sql_handle.getResultCount()
@@ -221,7 +232,7 @@ FUNCTION g2_lookup(
 				CALL l_curr.setAttribute(
 						"text", SFMT("%1 (%2)", x USING "<<<,##&", arr_curr() USING "<<<,##&"))
 			OTHERWISE
-				GL_DBGMSG(2, "g2_lookup: Unhandled Event:" || l_event)
+				GL_DBGMSG(2, SFMT("g2_lookup: Unhandled Event: %1", l_event))
 		END CASE
 	END WHILE
 	LET l_ret_key = l_dlg.getFieldValue(l_fields[1].name) -- get the selected row first field.

@@ -12,9 +12,16 @@
 #+  
 #+ No includes required.
 
+&ifdef gen320
+IMPORT FGL g2_core
+IMPORT FGL g2_debug
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.*
+&endif
+
 IMPORT os
 
-IMPORT FGL g2_core
 &include "g2_debug.inc"
 
 TYPE t_myReply RECORD
@@ -42,7 +49,7 @@ FUNCTION g2_validGDCUpdateDir() RETURNS BOOLEAN
 		CALL g2_setReply(206, % "ERR", SFMT(% "GDCUPDATEDIR '%1' Doesn't Exist", m_gdcUpdateDir))
 		RETURN FALSE
 	END IF
-	DISPLAY base.application.getProgramName(), ":GDC Update Dir:", m_gdcUpdateDir
+	DISPLAY base.Application.getProgramName(), ":GDC Update Dir:", m_gdcUpdateDir
 	RETURN TRUE
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -52,7 +59,7 @@ FUNCTION g2_getCurrentGDC() RETURNS(STRING, STRING)
 	DEFINE l_current STRING
 	DEFINE l_gdcVer, l_gdcBuild STRING
 
-	LET l_current = os.path.join(m_gdcUpdateDir, "current.txt")
+	LET l_current = os.Path.join(m_gdcUpdateDir, "current.txt")
 	IF NOT os.Path.exists(l_current) THEN
 		CALL g2_setReply(207, % "ERR", SFMT(% "'%1' Doesn't Exist", l_current))
 		RETURN NULL, NULL
@@ -66,7 +73,7 @@ FUNCTION g2_getCurrentGDC() RETURNS(STRING, STRING)
 		LET l_gdcBuild = c.readLine()
 		CALL c.close()
 	CATCH
-		CALL g2_setReply(208, % "ERR", SFMT(% "Failed to read '%1' '%2'", l_current, err_get(STATUS)))
+		CALL g2_setReply(208, % "ERR", SFMT(% "Failed to read '%1' '%2'", l_current, err_get(status)))
 		RETURN NULL, NULL
 	END TRY
 	IF l_gdcVer.getLength() < 2 THEN
@@ -122,13 +129,13 @@ END FUNCTION
 FUNCTION g2_getUpdateFileName(l_newGDC STRING, l_gdcBuild STRING, l_gdcos STRING) RETURNS BOOLEAN
 	DEFINE l_updFile STRING
 	LET l_updFile = "fjs-gdc-" || l_newGDC || "-" || l_gdcBuild || "-" || l_gdcos || "-autoupdate.zip"
-	IF NOT os.path.exists(os.path.join(m_gdcUpdateDir, l_updFile)) THEN
+	IF NOT os.Path.exists(os.Path.join(m_gdcUpdateDir, l_updFile)) THEN
 		CALL g2_setReply(214, % "ERR", SFMT(% "GDC Update File '%1' is Missing!", l_updFile))
 		RETURN FALSE
 	END IF
-	DISPLAY base.application.getProgramName(),
+	DISPLAY base.Application.getProgramName(),
 			":GDC Update file exists:",
-			os.path.join(m_gdcUpdateDir, l_updFile)
+			os.Path.join(m_gdcUpdateDir, l_updFile)
 	LET m_ret.upd_file = l_updFile
 	RETURN TRUE
 END FUNCTION
@@ -138,5 +145,5 @@ FUNCTION g2_setReply(l_stat INT, l_txt STRING, l_msg STRING)
 	LET m_ret.stat = l_stat
 	LET m_ret.stat_txt = l_txt
 	LET m_ret.reply = l_msg
-	DISPLAY base.application.getProgramName(), ":Set Reply:", l_stat, ":", l_txt, ":", l_msg
+	DISPLAY base.Application.getProgramName(), ":Set Reply:", l_stat, ":", l_txt, ":", l_msg
 END FUNCTION

@@ -9,11 +9,19 @@
 #+
 #+ No includes required.
 #+
-#+ Non GUI functions onlyb
+#+ Non GUI functions only
 
 IMPORT os
 IMPORT util
+
+&ifdef gen320
 IMPORT FGL g2_core
+IMPORT FGL g2_debug
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.*
+&endif
+
 &include "g2_debug.inc"
 
 DEFINE m_gl_winInfo BOOLEAN
@@ -133,7 +141,7 @@ FUNCTION g2_notify(l_msg STRING) RETURNS()
 	CALL g.setAttribute("height", "4")
 	CALL g.setAttribute("width", l_msg.getLength() + 1)
 	CALL g.setAttribute("gridWidth", l_msg.getLength() + 1)
-	CALL g2_addLabel(g, 1, 2, l_msg, NULL, "big")
+	CALL g2_addLabel(g, 1, 2, 0, l_msg, NULL, "big")
 	GL_DBGMSG(1, "g2_notify" || l_msg)
 	CALL ui.Interface.refresh()
 
@@ -168,7 +176,7 @@ FUNCTION g2_showLicence() RETURNS()
 
 	LET c = base.Channel.create()
 	CALL c.openPipe("fglWrt -a info 2>&1", "r")
-	DISPLAY "Status:", STATUS
+	DISPLAY "Status:", status
 	LET licString = "fglWrt -a info:\n"
 	WHILE NOT c.isEof()
 		LET licString = licString.append(c.readLine() || "\n")
@@ -211,7 +219,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	TRY
 		CALL c.openFile(txt, "r")
 	CATCH
-		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(STATUS)), "information")
+		CALL g2_winMessage("ReadMe", SFMT(%"Open '%1' failed\n%2.", txt, err_get(status)), "information")
 		RETURN
 	END TRY
 
@@ -425,7 +433,7 @@ FUNCTION g2_progBar(l_meth SMALLINT, l_curval INT, l_txt STRING) RETURNS()
 		CALL l_pbar.setAttribute("valueMax", l_curval)
 		CALL l_pbar.setAttribute("valueMin", 1)
 
-		CALL g2_addLabel(l_grid, 0, 2, l_txt, NULL, NULL)
+		CALL g2_addLabel(l_grid, 0, 2, 0, l_txt, NULL, NULL)
 		IF l_meth = 0 THEN
 			LET l_grid = l_grid.createChild('HBox')
 			CALL l_grid.setAttribute("posY", 3)
@@ -560,15 +568,18 @@ END FUNCTION
 #+ @param l Node of the Grid or Group
 #+ @param x X position
 #+ @param y Y Position
+#+ @param w Width = 0 = txt.length
 #+ @param txt Text for label
 #+ @param j Justify : NULL, center or right
 #+ @param s Style.
 #+ @return nothing
-FUNCTION g2_addLabel(l om.DomNode, x SMALLINT, y SMALLINT, txt STRING, j STRING, s STRING) RETURNS()
+FUNCTION g2_addLabel(l om.DomNode, x SMALLINT, y SMALLINT, w SMALLINT, txt STRING, j STRING, s STRING) RETURNS()
 
 	LET l = l.createChild("Label")
 	CALL l.setAttribute("posX", x)
 	CALL l.setAttribute("posY", y)
+	IF w = 0 THEN LET w = txt.trim().getLength() END IF
+	CALL l.setAttribute("gridWidth", w)
 	CALL l.setAttribute("text", txt)
 	IF j IS NOT NULL THEN
 		CALL l.setAttribute("justify", j)

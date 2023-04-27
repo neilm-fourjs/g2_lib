@@ -1,5 +1,12 @@
 IMPORT util
+
+&ifdef gen320
+IMPORT FGL g2_init
 IMPORT FGL g2_ws
+&else
+IMPORT FGL g2_lib.*
+&endif
+
 IMPORT FGL lib_expect
 
 TYPE t_rec  RECORD

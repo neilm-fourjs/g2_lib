@@ -1,18 +1,18 @@
 
-IMPORT FGL g2_core
+&ifdef gen320
+IMPORT FGL g2_init
 IMPORT FGL g2_db
 IMPORT FGL g2_lookup
 IMPORT FGL g2_lookup2
-IMPORT FGL g2_about
-IMPORT FGL g2_appInfo
+&else
+IMPORT FGL g2_lib.*
+&endif
 IMPORT FGL lib_expect
 
 MAIN
 	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
-	DEFINE l_appInfo g2_appInfo.appInfo
 
---	CALL l_appInfo.progInfo( "Expect test for lookups", "Neil Martin", "1.1", NULL )
-	CALL g2_core.g2_init("S",NULL)
+	CALL g2_init.g2_init("S",NULL)
 
   CALL l_db.g2_connect("njm_demo310")
 	
@@ -25,7 +25,6 @@ MAIN
 		COMMAND "Lookup 2 - Colours" CALL colours2()
 		COMMAND "Lookup 2 - Countries" CALL countries2()
 		COMMAND "Lookup 2 - Customers" CALL customers2()
-		COMMAND "Abort" CALL g2_about.g2_about(l_appInfo)
 		COMMAND "Quit" EXIT MENU
 		ON ACTION CLOSE EXIT MENU
 	END MENU

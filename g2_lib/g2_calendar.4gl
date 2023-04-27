@@ -12,6 +12,11 @@
 #+  
 #+ No includes required.
 
+&ifdef gen320
+&else
+PACKAGE g2_lib
+&endif
+
 IMPORT util
 
 PUBLIC CONSTANT C_MONTHS_IS

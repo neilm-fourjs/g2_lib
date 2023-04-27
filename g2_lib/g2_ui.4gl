@@ -2,33 +2,37 @@
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
 #+ Genero 4.00 and above
-#+  
+#+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 
+&ifdef gen320
 IMPORT FGL g2_core
 IMPORT FGL g2_sql
+&else
+PACKAGE g2_lib
+IMPORT FGL g2_lib.g2_core
+IMPORT FGL g2_lib.g2_sql
+&endif
 
-PUBLIC TYPE t_init_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
-PUBLIC TYPE t_before_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS()
-PUBLIC TYPE t_after_inp_func FUNCTION(l_new BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
+PUBLIC TYPE t_init_inp_func FUNCTION(l_new      BOOLEAN, l_d ui.Dialog) RETURNS()
+PUBLIC TYPE t_before_inp_func FUNCTION(l_new    BOOLEAN, l_d ui.Dialog) RETURNS()
+PUBLIC TYPE t_after_inp_func FUNCTION(l_new     BOOLEAN, l_d ui.Dialog) RETURNS BOOLEAN
 PUBLIC TYPE t_after_fld_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS()
-PUBLIC TYPE t_onChange_func FUNCTION(l_fldName STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS()
+PUBLIC TYPE t_onChange_func FUNCTION(l_fldName  STRING, l_fldValue STRING, l_d ui.Dialog) RETURNS()
 PUBLIC TYPE g2_ui RECORD
-	dia ui.Dialog,
-	init_inp_func t_init_inp_func,
+	dia             ui.Dialog,
+	init_inp_func   t_init_inp_func,
 	before_inp_func t_before_inp_func,
-	after_inp_func t_after_inp_func,
-	after_fld_func t_after_fld_func,
-	onChange_func t_onChange_func,
-	fields DYNAMIC ARRAY OF g2_sql.t_fields
+	after_inp_func  t_after_inp_func,
+	after_fld_func  t_after_fld_func,
+	onChange_func   t_onChange_func,
+	fields          DYNAMIC ARRAY OF g2_sql.t_fields
 END RECORD
 --------------------------------------------------------------------------------
-FUNCTION (this g2_ui)
-		g2_UIinput(
-		l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
-	DEFINE x SMALLINT
+FUNCTION (this g2_ui) g2_UIinput(l_new BOOLEAN, l_sql g2_sql.sql, l_acceptAction STRING, l_exitOnAccept BOOLEAN)
+	DEFINE x            SMALLINT
 	DEFINE l_evt, l_fld STRING
 
 	LET this.fields = l_sql.fields
@@ -141,15 +145,14 @@ FUNCTION (this g2_ui)
 
 END FUNCTION
 --------------------------------------------------------------------------------
-FUNCTION (this g2_ui)
-		g2_addFormOnlyField(
-		l_name STRING, l_type STRING, l_value STRING, l_noEntry BOOLEAN)
+FUNCTION (this g2_ui) g2_addFormOnlyField(l_name STRING, l_type STRING, l_value STRING, l_noEntry BOOLEAN)
 	DEFINE x SMALLINT
 	CALL this.fields.appendElement()
-	LET x = this.fields.getLength()
-	LET this.fields[x].colName = l_name
-	LET this.fields[x].colType = l_type
-	LET this.fields[x].value = l_value
+	LET x                       = this.fields.getLength()
+	LET this.fields[x].colName  = l_name
+	LET this.fields[x].colType  = l_type
+	LET this.fields[x].value    = l_value
 	LET this.fields[x].formOnly = TRUE
-	LET this.fields[x].noEntry = l_noEntry
+	LET this.fields[x].noEntry  = l_noEntry
+
 END FUNCTION
