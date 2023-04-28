@@ -112,10 +112,6 @@
   </LanguageList>
   <PlatformList version="1.0"/>
   <Group environment="value:GENVER=401" id="75644415" label="g2_lib" language="Genero (no link)" targetDirectory="$(ProjectDir)/../njm_app_bin401">
-    <Library binaryName="g2_gdcUpdate" id="-985216769" label="g2_gdcUpdate">
-      <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
-      <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
-    </Library>
     <Library binaryName="g2_lib" cwd="$(ProjectDir)" dependencies="1986" id="14000" label="g2_lib">
       <VirtualFolder label="forms">
         <File filePath="g2_lib/gl_grwCfg.per"/>
@@ -124,11 +120,11 @@
         <File filePath="g2_lib/g2_debug.inc"/>
         <File filePath="g2_lib/g2_import_all.inc"/>
       </VirtualFolder>
+      <File filePath="g2_lib/g2_core.4gl"/>
       <File filePath="g2_lib/g2_about.4gl"/>
       <File filePath="g2_lib/g2_appInfo.4gl"/>
       <File filePath="g2_lib/g2_aui.4gl"/>
       <File filePath="g2_lib/g2_calendar.4gl"/>
-      <File filePath="g2_lib/g2_core.4gl"/>
       <File filePath="g2_lib/g2_db.4gl"/>
       <File filePath="g2_lib/g2_db_connection.per"/>
       <File filePath="g2_lib/g2_debug.4gl"/>
@@ -146,9 +142,13 @@
       <File filePath="g2_lib/g2_util.4gl"/>
       <File filePath="g2_lib/g2_ws.4gl"/>
     </Library>
+    <Library binaryName="g2_gdcUpdate" id="-985216769" label="g2_gdcUpdate">
+      <File filePath="g2_lib/g2_gdcUpdate.4gl"/>
+      <File filePath="g2_lib/g2_gdcUpdateCommon.4gl"/>
+    </Library>
   </Group>
   <Group environment="value:GENVER=401,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects401">
-    <Library binaryName="Expect Test" dependencies="14000" id="-3234353" label="Expect Test">
+    <Library binaryName="Expect Test" dependencies="14000,-985216769" id="-3234353" label="Expect Test">
       <Configuration binaryName="g2_exp_encStr" id="840694160" label="g2_exp_encStr"/>
       <VirtualFolder label="etc">
         <File filePath="src_expects/njm_demo400.4db"/>
