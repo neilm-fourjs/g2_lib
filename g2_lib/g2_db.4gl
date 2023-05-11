@@ -107,7 +107,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 	IF l_msg IS NOT NULL AND l_msg != " " THEN
 		LET this.source  = l_msg
 		LET l_fglprofile = TRUE
-		LET this.db_cfg  = SFMT("FglProfile: %1", fgl_getEnv("FGLPROFILE"))
+		LET this.db_cfg  = SFMT("FglProfile: %1", fgl_getenv("FGLPROFILE"))
 	END IF
 	LET l_msg = fgl_getresource("dbi.database." || this.name || ".driver")
 	IF l_msg IS NULL OR l_msg = " " THEN
@@ -540,7 +540,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			END IF
 			LET this.connection = this.connection.append("'") -- close the source quote
 		END IF
-		IF fgl_getEnv("DBDEBUG") = "TRUE" THEN
+		IF fgl_getenv("DBDEBUG") = "TRUE" THEN
 			GL_DBGMSG(0,  SFMT("DB JSON File: %1", l_file))
 			GL_DBGMSG(0,  SFMT("DB JSON: %1", l_jsonStr))
 			GL_DBGMSG(0,  SFMT("HC_DBCERTS: %1", l_rds_cert))
@@ -587,7 +587,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 					ERROR "Invalid driver name!"
 					NEXT FIELD driver
 				END IF
-				LET l_tmp = os.Path.join(os.Path.join(fgl_getEnv("FGLDIR"), "dbdrivers"), db.driver || ".so")
+				LET l_tmp = os.Path.join(os.Path.join(base.Application.getFglDir(), "dbdrivers"), db.driver || ".so")
 				IF NOT os.Path.exists(l_tmp) THEN
 					ERROR SFMT("Driver '%1' not found on server!", l_tmp)
 					NEXT FIELD driver

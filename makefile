@@ -1,5 +1,5 @@
 
-export GENVER=400
+export GENVER=401
 export BIN=../njm_app_bin$(GENVER)
 
 export PROJBASE=$(PWD)

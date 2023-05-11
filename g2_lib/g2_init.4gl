@@ -20,14 +20,14 @@ IMPORT FGL g2_lib.g2_debug
 IMPORT os
 &include "g2_debug.inc"
 
+PUBLIC DEFINE g2_isParent BOOLEAN = FALSE
 PUBLIC DEFINE g2_log g2_logging.logger
 PUBLIC DEFINE g2_err g2_logging.logger
-
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	DEFINE l_gbc, l_fe STRING
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
-	CALL startlog(g2_err.fullLogPath)
+	CALL startlog(g2_err.logFullPath)
 	LET gl_dbgLev = fgl_getenv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
 	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
 	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
@@ -58,8 +58,14 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	IF m_appInfo.progDesc IS NOT NULL THEN
 		CALL ui.Interface.setText(m_appInfo.progDesc)
 	END IF
-	CALL g2_loadStyles(l_cfgname)
-	CALL g2_loadToolBar(l_cfgname)
-	CALL g2_loadActions(l_cfgname)
-	CALL g2_mdisdi(l_mdi)
+	IF g2_isParent THEN
+		CALL fgl_setenv("G2_PARENTPID", fgl_getpid())
+	ELSE
+		CALL g2_log.logProgramRun(g2_isParent, NULL, NULL)
+	END IF
+	LET g2_core.m_log = g2_log
+	CALL g2_core.g2_loadStyles(l_cfgname)
+	CALL g2_core.g2_loadToolBar(l_cfgname)
+	CALL g2_core.g2_loadActions(l_cfgname)
+	CALL g2_core.g2_mdisdi(l_mdi)
 END FUNCTION

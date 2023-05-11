@@ -24,7 +24,8 @@ PUBLIC TYPE logger RECORD
 	dirName STRING,
 	fileName STRING,
 	fileExt STRING,
-	fullLogPath STRING,
+	logFullPath STRING,
+	runLogFullPath STRING,
 	useDate BOOLEAN
 END RECORD
 
@@ -39,6 +40,7 @@ FUNCTION (this logger) init(l_dir STRING, l_name STRING, l_ext STRING, l_useDate
 	CALL this.setLogExt(l_ext)
 	CALL this.setUseDate(l_useDate)
 	CALL this.setLogName(l_name)
+	LET this.runLogFullPath = os.Path.join(this.dirName,SFMT("%1_runlog%2",(TODAY USING "YYYYMMDD"),this.fileExt))
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Write a message to an audit file.
@@ -48,7 +50,7 @@ FUNCTION (this logger) logIt(l_mess STRING) --{{{
 	DEFINE c base.Channel
 	DEFINE l_module STRING
 	LET c = base.Channel.create()
-	IF this.fullLogPath IS NULL THEN
+	IF this.logFullPath IS NULL THEN
 		IF this.dirName IS NULL THEN
 			CALL this.setLogDir(NULL)
 		END IF
@@ -60,7 +62,7 @@ FUNCTION (this logger) logIt(l_mess STRING) --{{{
 		END IF
 	END IF
 
-	CALL c.openFile(this.fullLogPath, "a")
+	CALL c.openFile(this.logFullPath, "a")
 
 	LET l_module = getCallingModuleName()
 	IF l_module MATCHES "cloud_gl_lib.gl_dbgMsg:*" THEN
@@ -84,7 +86,7 @@ FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 	LET this.dirName = NVL(l_dir, fgl_getenv("LOGDIR"))
 
 	IF this.dirName.getLength() < 1 THEN
-		LET this.dirName = "../logs" -- C_DEFAULT_LOGDIR
+		LET this.dirName = C_DEFAULT_LOGDIR
 	END IF
 
 	IF NOT os.Path.exists(this.dirName) THEN
@@ -131,19 +133,19 @@ FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 		END IF
 		--LET this.fileName = (TODAY USING "YYYYMMDD")||"-"||base.application.getProgramName()
 		IF this.useDate THEN
-			LET this.fileName =
-					base.Application.getProgramName() || "-" || (TODAY USING "YYYYMMDD") || "-" || l_user
+			LET this.fileName = SFMT("%1_%2_%3", (TODAY USING "YYYYMMDD"), 
+					base.Application.getProgramName(), l_user)
 		ELSE
 			LET this.fileName = base.Application.getProgramName()
 		END IF
 	ELSE
 		LET this.fileName = l_file
 	END IF
-	LET this.fullLogPath = this.dirName || this.fileName || this.fileExt
+	LET this.logFullPath = os.Path.join(this.dirName, SFMT("%1%2", this.fileName, this.fileExt))
 -- if we have a dirName / fileName / and Ext then try and create an empty log file.
-	IF this.fullLogPath IS NOT NULL THEN
-		IF NOT os.Path.exists(this.fullLogPath) THEN
-			CALL this.logIt(SFMT("Log Started to %1", this.fullLogPath))
+	IF this.logFullPath IS NOT NULL THEN
+		IF NOT os.Path.exists(this.logFullPath) THEN
+			CALL this.logIt(SFMT("Log Started to %1", this.logFullPath))
 		END IF
 	END IF
 END FUNCTION
@@ -224,4 +226,28 @@ FUNCTION getCallingModuleName() RETURNS STRING
 
 	LET l_fil = NVL(l_fil, "FILE?") || "." || NVL(l_mod, "MOD?") || ":" || NVL(l_lin, "LINE?")
 	RETURN l_fil
+END FUNCTION
+--------------------------------------------------------------------------------
+#+ Log Program Run
+FUNCTION (this logger) logProgramRun(l_isParent BOOLEAN, l_user STRING, l_msg STRING) RETURNS ()
+	DEFINE c base.Channel
+	DEFINE l_line STRING
+	DEFINE l_time STRING
+	LET l_time = TIME
+	LET c = base.Channel.create()
+	CALL c.openFile(this.runLogFullPath, "a")
+	IF l_user IS NULL THEN LET l_user = fgl_getenv("G2_USER") END IF
+	LET l_line = SFMT("%1|%2|%3|%4|", l_time, l_user, base.Application.getProgramName(),fgl_getenv("G2_PARENTPID"))
+	IF l_isParent THEN
+		LET l_line = l_line.append("Parent")
+		CALL fgl_setenv("G2_USER", l_user)
+	ELSE
+		LET l_line = l_line.append(fgl_getpid())
+	END IF
+	LET l_line = l_line.append("|")
+	IF l_msg IS NOT NULL THEN
+		LET l_line = l_line.append(l_msg)
+	END IF
+	CALL c.writeLine(l_line)
+	CALL c.close()
 END FUNCTION

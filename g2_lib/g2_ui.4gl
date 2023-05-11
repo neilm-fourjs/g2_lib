@@ -12,7 +12,6 @@ IMPORT FGL g2_core
 IMPORT FGL g2_sql
 &else
 PACKAGE g2_lib
-IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_sql
 &endif
 

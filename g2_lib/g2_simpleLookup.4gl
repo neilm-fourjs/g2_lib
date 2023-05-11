@@ -20,7 +20,6 @@ IMPORT FGL g2_db
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_aui
-IMPORT FGL g2_lib.g2_db
 &endif
 
 &include "g2_debug.inc"

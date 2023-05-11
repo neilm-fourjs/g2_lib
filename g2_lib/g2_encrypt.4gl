@@ -160,14 +160,14 @@ FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING, l_pass CHAR(32)) RET
 		l_symkey     xml.CryptoKey,
 		l_enc_string STRING
 
-	IF LENGTH(l_string) < 1 THEN
+	IF l_string.getLength() < 1 THEN
 		CALL this.g2_encryptError("g2_encStringPasswd: no string data to encrypt!")
 		RETURN NULL
 	END IF
 
 	TRY
 		# Create symmetric AES128 key for XML encryption purposes
-		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+		LET l_symkey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
 		# Get the file password for the given salt
 		IF l_pass IS NULL THEN
@@ -176,7 +176,7 @@ FUNCTION (this encrypt) g2_encStringPasswd(l_string STRING, l_pass CHAR(32)) RET
 			CALL l_symkey.setKey(l_pass) # password of 128 bits
 		END IF
 
-		LET l_enc_string = XML.Encryption.EncryptString(l_symkey, l_string)
+		LET l_enc_string = xml.Encryption.EncryptString(l_symkey, l_string)
 	CATCH
 		CALL this.g2_encryptError(SFMT("g2_encStringPasswd: %1 (%2)", STATUS, SQLCA.sqlerrm))
 		RETURN NULL
@@ -187,17 +187,17 @@ END FUNCTION
 --------------------------------------------------------------------------------
 FUNCTION (this encrypt) g2_decStringPasswd(l_string STRING, l_pass CHAR(32)) RETURNS STRING
 	DEFINE
-		l_symkey XML.CryptoKey,
+		l_symkey xml.CryptoKey,
 		l_ret    STRING
 
-	IF LENGTH(l_string) < 1 THEN
+	IF l_string.getLength() < 1 THEN
 		CALL this.g2_encryptError("g2_decStringPasswd: no data to dencrypt!")
 		RETURN NULL
 	END IF
 
 	TRY
 		# Create symmetric AES128 key for XML encryption purposes
-		LET l_symkey = XML.CryptoKey.CREATE("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
+		LET l_symkey = xml.CryptoKey.Create("http://www.w3.org/2001/04/xmlenc#aes256-cbc")
 
 		# Get the file password for the given salt
 		IF l_pass IS NULL THEN
@@ -206,7 +206,7 @@ FUNCTION (this encrypt) g2_decStringPasswd(l_string STRING, l_pass CHAR(32)) RET
 			CALL l_symkey.setKey(l_pass) # password of 128 bits
 		END IF
 
-		LET l_ret = XML.Encryption.DecryptString(l_symkey, l_string)
+		LET l_ret = xml.Encryption.DecryptString(l_symkey, l_string)
 	CATCH
 		CALL this.g2_encryptError(SFMT("g2_decStringPasswd: %1 (%2)", STATUS, SQLCA.sqlerrm))
 		RETURN NULL

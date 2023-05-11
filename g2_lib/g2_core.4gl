@@ -14,15 +14,12 @@ IMPORT FGL g2_debug
 IMPORT FGL g2_logging
 &else
 PACKAGE g2_lib
---IMPORT FGL g2_lib.*
---&include "g2_import_all.inc"
 IMPORT FGL g2_lib.g2_appInfo
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_logging
 &endif
 
 IMPORT os
-IMPORT util
 
 &include "g2_debug.inc"
 
@@ -31,6 +28,7 @@ PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
 PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
 PUBLIC DEFINE m_isWS BOOLEAN = FALSE
 PUBLIC DEFINE m_appInfo appInfo
+PUBLIC DEFINE m_log g2_logging.logger
 
 --------------------------------------------------------------------------------
 #+ Set MDI or not
@@ -337,6 +335,7 @@ END FUNCTION
 #+ @return none
 FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS ()
 	GL_DBGMSG(0, SFMT("g2_exitProgram: stat=%1 reason:%2", l_stat, l_reason))
+	CALL m_log.logProgramRun(FALSE, NULL, l_reason)
 	EXIT PROGRAM l_stat
 END FUNCTION
 --------------------------------------------------------------------------------

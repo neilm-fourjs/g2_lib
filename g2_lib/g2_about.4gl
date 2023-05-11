@@ -273,7 +273,7 @@ FUNCTION g2_about()
 				LET l_save = "about.json"
 			END IF
 			IF l_save IS NOT NULL THEN
-				CALL fgl_putFile("about.json", l_save)
+				CALL fgl_putfile("about.json", l_save)
 			END IF
 	END MENU
 	CLOSE WINDOW about
