@@ -53,16 +53,16 @@ FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1)) RETURNS ()
 	END IF
 	CASE m_mdi
 		WHEN "C" -- Child
-			GL_DBGMSG(2, "gl_init: Child")
+			GL_DBGMSG(2, "g2_mdisdi: Child")
 			CALL ui.Interface.setType("child")
 			CALL ui.Interface.setContainer(l_container)
 		WHEN "M" -- MDI Container
-			GL_DBGMSG(2, "gl_init: Container:" || l_container)
+			GL_DBGMSG(2, "g2_mdisdi: Container:" || l_container)
 			CALL ui.Interface.setText(l_desc)
 			CALL ui.Interface.setType("container")
 			CALL ui.Interface.setName(l_container)
 		OTHERWISE
-			GL_DBGMSG(2, "gl_init: Not MDI")
+			GL_DBGMSG(2, "g2_mdisdi: Not MDI")
 	END CASE
 END FUNCTION
 --------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS(
 		ERROR ""
 	END IF -- Beep
 
-	GL_DBGMSG(2, "gl_winMessage: " || NVL(l_message, "gl_winMessage passed NULL!"))
+	GL_DBGMSG(2, "g2_winMessage: " || NVL(l_message, "gl_winMessage passed NULL!"))
 	MENU l_title ATTRIBUTES(STYLE = "dialog", COMMENT = l_message, IMAGE = l_icon)
 		COMMAND "Okay"
 			EXIT MENU
@@ -326,33 +326,6 @@ FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING) RETURNS ()
 		DISPLAY l_fil.trim(), ":", l_lno, ": ", l_err.trim()
 		CALL errorlog(l_fil.trim() || ":" || l_lno || ": " || l_err)
 	END IF
-END FUNCTION
---------------------------------------------------------------------------------
-#+ Cleanly exit program, setting exit status.
-#+
-#+ @param stat Exit status 0 or -1 normally.
-#+ @param reason For Exit, clean, crash, closed, terminated etc
-#+ @return none
-FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS ()
-	GL_DBGMSG(0, SFMT("g2_exitProgram: stat=%1 reason:%2", l_stat, l_reason))
-	CALL m_log.logProgramRun(FALSE, NULL, l_reason)
-	EXIT PROGRAM l_stat
-END FUNCTION
---------------------------------------------------------------------------------
-#+ On Application Close
-FUNCTION g2_appClose() RETURNS ()
-	GL_DBGMSG(1, "g2_appClose")
-	CALL g2_exitProgram(0, "Closed")
-END FUNCTION
---------------------------------------------------------------------------------
-#+ On Application Terminalate ( kill -15 )
-FUNCTION g2_appTerm() RETURNS ()
-	GL_DBGMSG(1, "g2_appTerm")
-	TRY
-		ROLLBACK WORK
-	CATCH
-	END TRY
-	CALL g2_exitProgram(0, "Terminated")
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Check the client for it's vesion
@@ -510,4 +483,15 @@ FUNCTION g2_getImagePath() RETURNS STRING
 		LET l_imgPath = l_imgPath.subString(1,x-1)
 	END IF
 	RETURN l_imgPath
+END FUNCTION
+--------------------------------------------------------------------------------
+#+ Cleanly exit program, setting exit status.
+#+
+#+ @param stat Exit status 0 or -1 normally.
+#+ @param reason For Exit, clean, crash, closed, terminated etc
+#+ @return none
+FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS ()
+	GL_DBGMSG(0, SFMT("g2_exitProgram: stat=%1 reason:%2", l_stat, l_reason))
+	CALL m_log.logProgramRun(FALSE, NULL, l_reason)
+	EXIT PROGRAM l_stat
 END FUNCTION

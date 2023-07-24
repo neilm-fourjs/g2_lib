@@ -28,34 +28,33 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
 	CALL startlog(g2_err.logFullPath)
+
+	OPTIONS ON CLOSE APPLICATION CALL g2_appClose
+	OPTIONS ON TERMINATE SIGNAL CALL g2_appTerm
+
 	LET gl_dbgLev = fgl_getenv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
-	GL_DBGMSG(0, SFMT("g2_core: Program: %1 pwd: %2", base.Application.getProgramName(), os.Path.pwd() ))
-	GL_DBGMSG(1, SFMT("g2_core: debug level = %1", gl_dbgLev))
-	GL_DBGMSG(1, SFMT("g2_core: FGLDIR=%1", fgl_getenv("FGLDIR")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLSERVER=%1", fgl_getenv("FGLSERVER")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLIMAGEPATH=%1", fgl_getenv("FGLIMAGEPATH")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLGBCDIR=%1", fgl_getenv("FGLGBCDIR")))
-	GL_DBGMSG(1, SFMT("g2_core: FGLRESOURCEPATH=%1", fgl_getenv("FGLRESOURCEPATH")))
+	GL_DBGMSG(0, SFMT("g2_init: Program: %1 pwd: %2 Sess: %3", base.Application.getProgramName(), os.Path.pwd(), fgl_getenv("FGL_VMPROXY_SESSION_ID") ))
+	GL_DBGMSG(1, SFMT("g2_init: debug level = %1", gl_dbgLev))
+	GL_DBGMSG(1, SFMT("g2_init: FGLDIR=%1", fgl_getenv("FGLDIR")))
+	GL_DBGMSG(1, SFMT("g2_init: FGLSERVER=%1", fgl_getenv("FGLSERVER")))
+	GL_DBGMSG(1, SFMT("g2_init: FGLIMAGEPATH=%1", fgl_getenv("FGLIMAGEPATH")))
+	GL_DBGMSG(1, SFMT("g2_init: FGLGBCDIR=%1", fgl_getenv("FGLGBCDIR")))
+	GL_DBGMSG(1, SFMT("g2_init: FGLRESOURCEPATH=%1", fgl_getenv("FGLRESOURCEPATH")))
 
 	WHENEVER ANY ERROR CALL g2_error
 
--- Try and figure out what the client is capable of GDC(Native/UR) / GBC
-	LET l_gbc = ui.Interface.getUniversalClientName()
+	LET l_gbc =ui.Interface.getUniversalClientVersion()
 	LET l_fe = ui.Interface.getFrontEndName()
-	GL_DBGMSG(1, SFMT("g2_core: getUniversalClientName = %1 FrontEnd = %2", l_gbc, l_fe))
-	IF l_gbc.getLength() < 3 THEN
-		LET l_gbc = "?"
-	END IF
-	IF l_fe = "GBC" THEN
-		LET l_gbc = "GBC"
-	END IF
 	IF l_fe = "GDC" THEN
-		LET m_isGDC = TRUE
+		LET g2_core.m_isGDC = TRUE
+	ELSE
+		LET l_gbc = ui.Interface.getFrontEndVersion()
 	END IF
-	IF l_gbc != "GBC" THEN
-		LET m_isUniversal = FALSE
+	IF l_gbc IS NULL THEN
+		LET g2_core.m_isUniversal = FALSE
 	END IF
-	IF m_appInfo.progDesc IS NOT NULL THEN
+	GL_DBGMSG(1, SFMT("g2_init: FE: %1 GBCVer: %2 Renderer: %3", l_fe, l_gbc, IIF(g2_core.m_isUniversal,"GBC","Native")))
+	IF g2_core.m_appInfo.progDesc IS NOT NULL THEN
 		CALL ui.Interface.setText(m_appInfo.progDesc)
 	END IF
 	IF g2_isParent THEN
@@ -68,4 +67,19 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	CALL g2_core.g2_loadToolBar(l_cfgname)
 	CALL g2_core.g2_loadActions(l_cfgname)
 	CALL g2_core.g2_mdisdi(l_mdi)
+END FUNCTION
+--------------------------------------------------------------------------------
+#+ On Application Close
+FUNCTION g2_appClose() RETURNS ()
+	CALL g2_core.g2_exitProgram(0, "Closed by FE.")
+END FUNCTION
+--------------------------------------------------------------------------------
+#+ On Application Terminalate ( kill -15 )
+FUNCTION g2_appTerm() RETURNS ()
+	GL_DBGMSG(1, "g2_appTerm: attempt rollback")
+	TRY
+		ROLLBACK WORK
+	CATCH
+	END TRY
+	CALL g2_core.g2_exitProgram(0, "Terminated by backend.")
 END FUNCTION
