@@ -40,6 +40,7 @@ FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	GL_DBGMSG(1, SFMT("g2_init: FGLIMAGEPATH=%1", fgl_getenv("FGLIMAGEPATH")))
 	GL_DBGMSG(1, SFMT("g2_init: FGLGBCDIR=%1", fgl_getenv("FGLGBCDIR")))
 	GL_DBGMSG(1, SFMT("g2_init: FGLRESOURCEPATH=%1", fgl_getenv("FGLRESOURCEPATH")))
+	GL_DBGMSG(1, SFMT("g2_init: LANG=%1", fgl_getenv("LANG")))
 
 	WHENEVER ANY ERROR CALL g2_error
 

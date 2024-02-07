@@ -30,7 +30,7 @@ IMPORT FGL g2_lib.g2_ws
 IMPORT FGL lib_expect
 
 MAIN
-	DEFINE l_db g2_db.dbInfo = ( type: "pgs" )
+	DEFINE l_db g2_db.dbInfo = ( type: "ifx" )
 
 	CALL g2_init.g2_init("S",NULL)
 

@@ -135,9 +135,7 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 			WHEN "ifx"
 				LET this.source     = fgl_getenv("INFORMIXSERVER")
 				LET this.connection = this.name
-				GL_DBGMSG(0, SFMT("INFORMIXDIR: %1", fgl_getenv("INFORMIXDIR")))
-				GL_DBGMSG(0, SFMT("INFORMIXSERVER: %1", fgl_getenv("INFORMIXSERVER")))
-				GL_DBGMSG(0, SFMT("INFORMIXSQLHOSTS: %1", fgl_getenv("INFORMIXSQLHOSTS")))
+
 			WHEN "sqt"
 				IF NOT os.Path.exists(this.dir) THEN
 					IF NOT os.Path.mkdir(this.dir) THEN
@@ -164,6 +162,12 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		WHEN "ifx"
 			LET l_lockMode = TRUE
 			LET this.desc  = SFMT("Informix %1", this.driver)
+			GL_DBGMSG(0, SFMT("INFORMIXDIR: %1", fgl_getenv("INFORMIXDIR")))
+			GL_DBGMSG(0, SFMT("INFORMIXSERVER: %1", fgl_getenv("INFORMIXSERVER")))
+			GL_DBGMSG(0, SFMT("INFORMIXSQLHOSTS: %1", fgl_getenv("INFORMIXSQLHOSTS")))
+			GL_DBGMSG(0, SFMT("DB_LOCALE: %1", fgl_getenv("DB_LOCALE")))
+			GL_DBGMSG(0, SFMT("CLIENT_LOCALE: %1", fgl_getenv("CLIENT_LOCALE")))
+			GL_DBGMSG(0, SFMT("LD_LIBRARY_PATH: %1", fgl_getenv("LD_LIBRARY_PATH")))
 		WHEN "msc"
 			LET l_lockMode = TRUE
 		WHEN "sqt"
@@ -199,6 +203,9 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
 			LET l_msg = NULL
+		END IF
+		IF sqlca.sqlcode != -329 AND this.type = "ifx" THEN
+			GL_DBGMSG(0, SFMT("LANG: %1 CLIENT_LOCALE: %2 DB_LOCALE: %3", fgl_getEnv("LANG"), fgl_getEnv("CLIENT_LOCALE"), fgl_getEnv("DB_LOCALE")))
 		END IF
 		IF this.create_db AND sqlca.sqlcode = -6372 AND (this.type = "mdb" OR this.type = "mys") THEN
 			CALL this.g2_mdb_createdb()

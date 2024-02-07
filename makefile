@@ -1,5 +1,8 @@
 
+ifndef GENVER
 export GENVER=401
+endif
+
 export BIN=../njm_app_bin$(GENVER)
 
 export PROJBASE=$(PWD)
@@ -18,4 +21,3 @@ clean:
 	find . -name \*.42? -delete
 	find . -name \*.zip -delete
 	find . -name \*.4pdb -delete
-	gsmake -c g2_lib$(GENVER).4pw
