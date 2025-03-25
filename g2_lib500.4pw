@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Project defaultApplication="-1343789213" gstVersion="50000" version="3.6">
+<Project defaultApplication="-1343789213" gstVersion="50002" version="3.6">
   <Settings>
     <DynamicProperties version="4">
       <DynamicProperty initialValue="false" isDefaultInherited="false" isHidden="false" label="Firebase-analytics" name="firebase" readOnly="false" type="BOOLEAN"/>
       <DynamicProperty description="Accent color (Android 5.0 and later)" initialValue="#9575CD" isDefaultInherited="false" isHidden="false" label="Accent color" name="gma-accent-color" readOnly="false" type="COLOR"/>
       <DynamicProperty description="Action bar text color (Android 5.0 and later)" initialValue="#EBEBEB" isDefaultInherited="false" isHidden="false" label="Action bar text color" name="gma-actionbar-color" readOnly="false" type="COLOR"/>
+      <DynamicProperty initialValue="" isDefaultInherited="false" isHidden="false" label="Background explanation" name="gma-background-explanation" readOnly="false" type="TEXT"/>
       <DynamicProperty description="Cordova plugins" editorInfo="isDynamic:true;title:Cordova;description:Cordova plugins;icon:checkbox_checked" initialValue="" isDefaultInherited="false" isHidden="false" label="Cordova Plugins" name="gma-cordova" readOnly="false" type="MULTIPLEBOOLEAN"/>
       <DynamicProperty description="Navigation bar background color (Android 5.0 and later)" initialValue="#5E35B1" isDefaultInherited="false" isHidden="false" label="Navigation bar background color" name="gma-navigationBarBackground-color" readOnly="false" type="COLOR"/>
       <DynamicProperty description="Primary color (Android 5.0 and later)" initialValue="#5E35B1" isDefaultInherited="false" isHidden="false" label="Primary color" name="gma-primary-color" readOnly="false" type="COLOR"/>
       <DynamicProperty description="Primary dark color (Android 5.0 and later)" initialValue="#5E35B1" isDefaultInherited="false" isHidden="false" label="Primary dark color" name="gma-primary-dark-color" readOnly="false" type="COLOR"/>
       <DynamicProperty description="Primary text color (Android 5.0 and later)" initialValue="#000000" isDefaultInherited="false" isHidden="false" label="Primary text color" name="gma-primaryText-color" readOnly="false" type="COLOR"/>
+      <DynamicProperty initialValue="false" isDefaultInherited="false" isHidden="false" label="Short background lifetime" name="gma-short-background-lifetime" readOnly="false" type="BOOLEAN"/>
       <DynamicProperty description="Window backround color (Android 5.0 and later)" initialValue="#ffffff" isDefaultInherited="false" isHidden="false" label="Window background color" name="gma-windowBackground-color" readOnly="false" type="COLOR"/>
       <DynamicProperty description="Cordova plugins" editorInfo="isDynamic:true;title:Cordova;description:Cordova plugins;icon:checkbox_checked" initialValue="" isDefaultInherited="false" isHidden="false" label="Cordova Plugins" name="gmi-cordova" readOnly="false" type="MULTIPLEBOOLEAN"/>
       <DynamicProperty description="High-DPI Icon (72x72 px) path" editorInfo="filters:*.png;openDirDialog:true;replaceDocPath:$(ProjectDir)" initialValue="" isDefaultInherited="false" isHidden="false" label="Icon-hdpi (72x72 px)" name="icon-hdpi" readOnly="false" type="FILE"/>
@@ -57,13 +59,13 @@
       <DynamicProperty description="High-DPI Status Icon (36x36 px) path" editorInfo="filters:*.png;openDirDialog:true;replaceDocPath:$(ProjectDir)" initialValue="" isDefaultInherited="false" isHidden="false" label="Status Icon-hdpi (36x36 px)" name="status-icon-hdpi" readOnly="false" type="FILE"/>
       <DynamicProperty description="Medium-DPI Status Icon (24x24 px) path" editorInfo="filters:*.png;openDirDialog:true;replaceDocPath:$(ProjectDir)" initialValue="" isDefaultInherited="false" isHidden="false" label="Status Icon-mdpi (24x24 px)" name="status-icon-mdpi" readOnly="false" type="FILE"/>
       <DynamicProperty description="Extra High-DPI Status Icon (48x48 px) path" editorInfo="filters:*.png;openDirDialog:true;replaceDocPath:$(ProjectDir)" initialValue="" isDefaultInherited="false" isHidden="false" label="Status Icon-xhdpi (48x48 px)" name="status-icon-xhdpi" readOnly="false" type="FILE"/>
-      <DynamicPropertyGroup collapsed="false" description="Android" label="Android" name="AndroidGroup" properties="packageVersionName;gma-primary-color;gma-primary-dark-color;gma-accent-color;gma-actionbar-color;gma-primaryText-color;gma-windowBackground-color;gma-navigationBarBackground-color;icon-ldpi;icon-mdpi;icon-hdpi;icon-xhdpi;icon-xxhdpi;status-icon-mdpi;status-icon-hdpi;status-icon-xhdpi;permissions;firebase;gma-cordova"/>
+      <DynamicPropertyGroup collapsed="false" description="Android" label="Android" name="AndroidGroup" properties="packageVersionName;gma-primary-color;gma-primary-dark-color;gma-accent-color;gma-actionbar-color;gma-primaryText-color;gma-windowBackground-color;gma-navigationBarBackground-color;icon-ldpi;icon-mdpi;icon-hdpi;icon-xhdpi;icon-xxhdpi;status-icon-mdpi;status-icon-hdpi;status-icon-xhdpi;permissions;gma-short-background-lifetime;gma-background-explanation;firebase;gma-cordova"/>
       <DynamicPropertyGroup collapsed="false" description="Genero Archive" label="GAR" name="GARGroup" properties="resources"/>
       <DynamicPropertyGroup collapsed="false" description="Package" label="Package" name="PackageGroup" properties="packageId;packageLabel;packageVersion;mainModule"/>
       <DynamicPropertyGroup collapsed="false" description="iOS" label="iOS" name="iOSGroup" properties="launchScreen;launchScreen1136x640;launchScreen750x1334;launchScreen1334x750;launchScreen1242x2208;launchScreen2208x1242;launchScreen1125x2436;launchScreen2436x1125;launchScreen768x1024;launchScreen1024x768;launchScreen1536x2048;launchScreen2048x1536;launchScreen2224x1668;launchScreen1668x2224;launchScreen2048x2732;launchScreen2732x2048;launchScreenXib;icon29x29;icon40x40;icon58x58;icon60x60;icon76x76;icon80x80;icon87x87;icon120x120;icon152x152;icon167x167;icon180x180;icon1024x1024;required;gmi-cordova"/>
     </DynamicProperties>
     <NodeInfos version="1">
-      <NodeInfo mimeType="pm/package" properties="packageId;packageLabel;packageVersion;mainModule;packageVersionName;resources;launchScreen;launchScreen1136x640;launchScreen750x1334;launchScreen1334x750;launchScreen1242x2208;launchScreen2208x1242;launchScreen1125x2436;launchScreen2436x1125;launchScreen768x1024;launchScreen1024x768;launchScreen1536x2048;launchScreen2048x1536;launchScreen2224x1668;launchScreen1668x2224;launchScreen2048x2732;launchScreen2732x2048;launchScreenXib;icon29x29;icon40x40;icon58x58;icon60x60;icon76x76;icon80x80;icon87x87;icon120x120;icon152x152;icon167x167;icon180x180;icon1024x1024;gma-primary-color;gma-primary-dark-color;gma-accent-color;gma-actionbar-color;gma-primaryText-color;gma-windowBackground-color;gma-navigationBarBackground-color;icon-ldpi;icon-mdpi;icon-hdpi;icon-xhdpi;icon-xxhdpi;status-icon-mdpi;status-icon-hdpi;status-icon-xhdpi;permissions;required;firebase;gma-cordova;gmi-cordova"/>
+      <NodeInfo mimeType="pm/package" properties="packageId;packageLabel;packageVersion;mainModule;packageVersionName;resources;launchScreen;launchScreen1136x640;launchScreen750x1334;launchScreen1334x750;launchScreen1242x2208;launchScreen2208x1242;launchScreen1125x2436;launchScreen2436x1125;launchScreen768x1024;launchScreen1024x768;launchScreen1536x2048;launchScreen2048x1536;launchScreen2224x1668;launchScreen1668x2224;launchScreen2048x2732;launchScreen2732x2048;launchScreenXib;icon29x29;icon40x40;icon58x58;icon60x60;icon76x76;icon80x80;icon87x87;icon120x120;icon152x152;icon167x167;icon180x180;icon1024x1024;gma-primary-color;gma-primary-dark-color;gma-accent-color;gma-actionbar-color;gma-primaryText-color;gma-windowBackground-color;gma-navigationBarBackground-color;icon-ldpi;icon-mdpi;icon-hdpi;icon-xhdpi;icon-xxhdpi;status-icon-mdpi;status-icon-hdpi;status-icon-xhdpi;permissions;required;gma-short-background-lifetime;gma-background-explanation;firebase;gma-cordova;gmi-cordova"/>
     </NodeInfos>
   </Settings>
   <LanguageList version="1.0"/>
@@ -92,6 +94,7 @@
       <File filePath="g2_lib/g2_logging.4gl"/>
       <File filePath="g2_lib/g2_lookup.4gl"/>
       <File filePath="g2_lib/g2_lookup2.4gl"/>
+      <File filePath="g2_lib/g2_merge4st.4gl"/>
       <File filePath="g2_lib/g2_secure.4gl"/>
       <File filePath="g2_lib/g2_simpleLookup.4gl"/>
       <File filePath="g2_lib/g2_sql.4gl"/>
@@ -105,18 +108,20 @@
     </Library>
   </Group>
   <Group environment="value:GENVER=500,value:FJS_GL_DBGLEV=3" id="-957368485" label="g2_lib_expects" language="Genero (no link)" targetDirectory="$(ProjectDir)/bin_expects500">
-    <Library binaryName="Expect Test" dependencies="14000,-985216769" id="-3234353" label="Expect Test">
+    <Library binaryName="Expect Test" dependencies="14000,-985216769" environment="value:FGLRESOURCEPATH=$(ProjectDir)/etc" id="-3234353" label="Expect Test">
       <Configuration binaryName="g2_exp_encStr" id="840694160" label="g2_exp_encStr"/>
       <VirtualFolder label="etc">
         <File filePath="src_expects/njm_demo400.4db"/>
         <File filePath="etc/profile"/>
       </VirtualFolder>
       <Configuration binaryName="g2_exp_lookup" id="-1343789213" label="g2_exp_lookup"/>
+      <Configuration binaryName="g2_exp_merge4st" id="-1401897610" label="g2_exp_merge4st"/>
       <Configuration binaryName="g2_exp_sql" id="1040204014" label="g2_exp_sql"/>
       <Configuration binaryName="g2_exp_ws" id="1896123809" label="g2_ext_ws"/>
       <File filePath="src_expects/form.per"/>
       <File filePath="src_expects/g2_exp_encStr.4gl"/>
       <File filePath="src_expects/g2_exp_lookup.4gl"/>
+      <File filePath="src_expects/g2_exp_merge4st.4gl"/>
       <File filePath="src_expects/g2_exp_sql.4gl"/>
       <File filePath="src_expects/g2_exp_ws.4gl"/>
       <File filePath="src_expects/lib_expect.4gl"/>

@@ -189,7 +189,7 @@ FUNCTION g2_winMessage(l_title STRING, l_message STRING, l_icon STRING) RETURNS(
 
 	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN -- Needs a current window or dialog doesn't work!!
-		OPEN WINDOW dummy AT 1, 1 WITH 1 ROWS, 1 COLUMNS
+		OPEN WINDOW dummy AT 1, 1 WITH 3 ROWS, 100 COLUMNS
 		-- clear default window title to avoid 'dummy' showing in gbc.
 		CALL ui.Window.getCurrent().setText(" ")
 	END IF

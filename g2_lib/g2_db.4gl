@@ -34,7 +34,7 @@ CONSTANT C_CUSTOM_DB_FILE = "custom_db_enc4.json"
 &endif
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
-CONSTANT DEF_DBSPACE  = "dbs1"
+CONSTANT DEF_DBSPACE  = "rootdbs"
 
 # SQLServer
 #CONSTANT DEF_DBDRIVER="dbmsnc90"

@@ -1,0 +1,8 @@
+<StyleList>
+	<Style name="Window">
+		<StyleAttribute name="backgroundColor" value="red"/>
+	</Style>
+	<Style name="Window.test">
+		<StyleAttribute name="backgroundColor" value="yellow"/>
+	</Style>
+</StyleList>
