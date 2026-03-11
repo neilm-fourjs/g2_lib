@@ -6,15 +6,12 @@
 #+
 #+ No includes required.
 
-&ifdef gen320
-IMPORT FGL g2_core
-IMPORT FGL g2_logging
-IMPORT FGL g2_debug
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_logging
 IMPORT FGL g2_lib.g2_debug
+&ifdef gen600
+IMPORT prometheus
 &endif
 
 IMPORT os
@@ -25,13 +22,19 @@ PUBLIC DEFINE g2_log g2_logging.logger
 PUBLIC DEFINE g2_err g2_logging.logger
 FUNCTION g2_init(l_mdi CHAR(1), l_cfgname STRING) RETURNS ()
 	DEFINE l_gbc, l_fe STRING
+&ifdef gen600
+	DEFINE l_counter prometheus.Counter
+&endif
 	CALL g2_log.init(NULL, NULL, "log", "TRUE")
 	CALL g2_err.init(NULL, NULL, "err", "TRUE")
 	CALL startlog(g2_err.logFullPath)
 
 	OPTIONS ON CLOSE APPLICATION CALL g2_appClose
 	OPTIONS ON TERMINATE SIGNAL CALL g2_appTerm
-
+&ifdef gen600
+	LET l_counter = prometheus.Counter.create("counter_init_use", "count use of init", ["init_cnt"])
+	CALL l_counter.add(1,"init_cnt")
+&endif
 	LET gl_dbgLev = fgl_getenv("FJS_GL_DBGLEV") -- 0=None, 1=General, 2=All
 	GL_DBGMSG(0, SFMT("g2_init: Program: %1 pwd: %2 Sess: %3", base.Application.getProgramName(), os.Path.pwd(), fgl_getenv("FGL_VMPROXY_SESSION_ID") ))
 	GL_DBGMSG(1, SFMT("g2_init: debug level = %1", gl_dbgLev))
