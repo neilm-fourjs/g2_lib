@@ -1,3 +1,4 @@
+PACKAGE g2_lib
 IMPORT os
 FUNCTION g2_merge4st(l_file STRING)
 	DEFINE l_sl, l_old_s, l_new_s om.DomNode
