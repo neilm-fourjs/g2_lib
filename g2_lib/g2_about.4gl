@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero About Window - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -9,13 +9,6 @@
 #+
 #+ No includes required.
 
-&ifdef gen320
-IMPORT FGL g2_appInfo
-IMPORT FGL g2_core
-IMPORT FGL g2_aui
-IMPORT FGL g2_util
-IMPORT FGL g2_db
-&else
 PACKAGE g2_lib
 -- IMPORT FGL g2_lib.* -- failed in GST?
 IMPORT FGL g2_lib.g2_appInfo
@@ -23,7 +16,6 @@ IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_aui
 IMPORT FGL g2_lib.g2_util
 IMPORT FGL g2_lib.g2_db
-&endif
 
 IMPORT util
 
@@ -33,13 +25,13 @@ IMPORT util
 #+ @param l_ver a version string
 #+ @return Nothing.
 FUNCTION g2_about()
-	DEFINE f, n, g, w            om.DomNode
-	DEFINE nl                    om.NodeList
+	DEFINE f, n, g, w    om.DomNode
+	DEFINE nl            om.NodeList
 	DEFINE l_info, l_txt STRING
-	DEFINE l_save STRING
-	DEFINE y, l_width SMALLINT
-	DEFINE l_labWidth SMALLINT = 10
-	DEFINE l_json TEXT
+	DEFINE l_save        STRING
+	DEFINE y, l_width    SMALLINT
+	DEFINE l_labWidth    SMALLINT = 10
+	DEFINE l_json        TEXT
 
 	IF g2_core.m_appInfo.gver IS NULL THEN
 		LET g2_core.m_appInfo.gver = "build ", fgl_getversion()
@@ -56,7 +48,7 @@ FUNCTION g2_about()
 	IF g2_core.m_appInfo.progDir IS NULL THEN
 		LET g2_core.m_appInfo.progDir = base.Application.getProgramDir()
 	END IF
-	LET l_width =  l_labWidth + g2_core.m_appInfo.progDir.getLength()
+	LET l_width                       = l_labWidth + g2_core.m_appInfo.progDir.getLength()
 	LET g2_core.m_appInfo.db_date     = fgl_getenv("DBDATE")
 	LET g2_core.m_appInfo.db_name     = SFMT("%1 (from: %2)", g2_db.m_db.name, g2_db.m_db.db_cfg)
 	LET g2_core.m_appInfo.db_driver   = SFMT("%1 (source: %2)", g2_db.m_db.driver, g2_db.m_db.source)
@@ -105,20 +97,22 @@ FUNCTION g2_about()
 
 	IF g2_core.m_appInfo.appBuild IS NOT NULL THEN
 		CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Application"), "right", "black")
-		CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.appName || " - " || g2_core.m_appInfo.appBuild, NULL, NULL)
+		CALL g2_aui.g2_addLabel(
+				g, l_labWidth + 1, y, 0, g2_core.m_appInfo.appName || " - " || g2_core.m_appInfo.appBuild, NULL, NULL)
 		LET y = y + 1
 	END IF
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Program") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.progName || " - " || g2_core.m_appInfo.progVersion, NULL, "black")
+	CALL g2_aui.g2_addLabel(
+			g, l_labWidth + 1, y, 0, g2_core.m_appInfo.progName || " - " || g2_core.m_appInfo.progVersion, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Description") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.progDesc, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.progDesc, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Author") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.progAuth, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.progAuth, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -128,44 +122,44 @@ FUNCTION g2_about()
 	CALL w.setAttribute("gridWidth", l_width)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Run Location") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.progDir, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.progDir, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Genero Runtime") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.gver, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.gver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Server OS") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.os, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.os, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Server Name") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.hostname, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.hostname, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Application User") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.userName, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.userName, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Server Time:") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.server_time, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.server_time, NULL, "black")
 	LET y = y + 1
 
 	IF g2_db.m_db.name IS NULL THEN
 		CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Database Name") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, "No Database", NULL, NULL)
+		CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, "No Database", NULL, NULL)
 		LET y = y + 1
 	ELSE
 		CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Database Name") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.db_name, NULL, "black")
+		CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.db_name, NULL, "black")
 		LET y = y + 1
 
 		CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Database Driver") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.db_driver, NULL, "black")
+		CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.db_driver, NULL, "black")
 		LET y = y + 1
 	END IF
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("DBDATE") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.db_date, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.db_date, NULL, "black")
 	LET y = y + 1
 
 	LET w = g.createChild("HLine")
@@ -175,11 +169,12 @@ FUNCTION g2_about()
 	CALL w.setAttribute("gridWidth", l_width)
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Client OS") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.cli_os || " / " || g2_core.m_appInfo.cli_osver, NULL, "black")
+	CALL g2_aui.g2_addLabel(
+			g, l_labWidth + 1, y, 0, g2_core.m_appInfo.cli_os || " / " || g2_core.m_appInfo.cli_osver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Clint OS User") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, NVL(g2_core.m_appInfo.cli_un, "Unknown"), NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, NVL(g2_core.m_appInfo.cli_un, "Unknown"), NULL, "black")
 	LET y = y + 1
 
 	{IF m_user_agent.getLength() > 1 THEN
@@ -188,24 +183,27 @@ FUNCTION g2_about()
 		END IF}
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("FrontEnd Version") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(
+			g, l_labWidth + 1, y, 0, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Universal Renderer") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.uni_typ || " " || g2_core.m_appInfo.uni_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(
+			g, l_labWidth + 1, y, 0, g2_core.m_appInfo.uni_typ || " " || g2_core.m_appInfo.uni_ver, NULL, "black")
 	LET y = y + 1
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("FrontEnd Version-FEinfo") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
+	CALL g2_aui.g2_addLabel(
+			g, l_labWidth + 1, y, 0, g2_core.m_appInfo.fe_typ || " " || g2_core.m_appInfo.fe_ver, NULL, "black")
 	LET y = y + 1
 
 	IF g2_core.m_appInfo.cli_dir.getLength() > 1 THEN
 		CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Client Directory") || ":", "right", "black")
-		CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.cli_dir, NULL, "black")
+		CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.cli_dir, NULL, "black")
 		LET y = y + 1
 	END IF
 
 	CALL g2_aui.g2_addLabel(g, 0, y, l_labWidth, LSTR("Screen Resolution") || ":", "right", "black")
-	CALL g2_aui.g2_addLabel(g, l_labWidth+1, y, 0, g2_core.m_appInfo.cli_res, NULL, "black")
+	CALL g2_aui.g2_addLabel(g, l_labWidth + 1, y, 0, g2_core.m_appInfo.cli_res, NULL, "black")
 	LET y = y + 1
 
 	LET g = g.createChild("HBox")

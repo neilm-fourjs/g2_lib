@@ -4,7 +4,7 @@
 #+ Library to encrypt a String with a cert and private key.
 #+
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -12,15 +12,10 @@
 #+
 #+ No includes required.
 
-&ifdef gen320
-IMPORT FGL g2_init
-IMPORT FGL g2_logging
-&else
 PACKAGE g2_lib
 --IMPORT FGL g2_lib.*
 IMPORT FGL g2_lib.g2_init
 IMPORT FGL g2_lib.g2_logging
-&endif
 
 IMPORT os
 IMPORT xml

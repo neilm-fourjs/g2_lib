@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero AUI Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -11,15 +11,10 @@
 #+
 #+ Non GUI functions only
 
-&ifdef gen320
-IMPORT FGL g2_core
-IMPORT FGL g2_debug
-&else
 PACKAGE g2_lib
 --IMPORT FGL g2_lib.*
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
-&endif
 
 IMPORT os
 
@@ -55,8 +50,8 @@ END FUNCTION
 #+ @return Node.
 FUNCTION g2_getFormNode(l_nam STRING) RETURNS om.DomNode
 	DEFINE l_frm ui.Form
-	DEFINE nl om.NodeList
-	DEFINE n om.DomNode
+	DEFINE nl    om.NodeList
+	DEFINE n     om.DomNode
 
 	LET l_frm = g2_getForm(NULL)
 	IF l_nam IS NULL THEN
@@ -65,7 +60,7 @@ FUNCTION g2_getFormNode(l_nam STRING) RETURNS om.DomNode
 		END IF
 		LET n = l_frm.getNode()
 	ELSE
-		LET n = ui.Interface.getRootNode()
+		LET n  = ui.Interface.getRootNode()
 		LET nl = n.selectByPath("//Form[@name='" || l_nam.trim() || "']")
 		IF nl.getLength() < 1 THEN
 			CALL g2_errMsg(__FILE__, __LINE__, "g2_getFormNode: Form not found '" || l_nam.trim() || "'!")
@@ -103,7 +98,7 @@ END FUNCTION
 FUNCTION g2_genForm(l_nam STRING) RETURNS om.DomNode
 	DEFINE l_win ui.Window
 	DEFINE l_frm ui.Form
-	DEFINE l_n om.DomNode
+	DEFINE l_n   om.DomNode
 
 	LET l_win = ui.Window.getCurrent()
 	IF l_win IS NULL THEN
@@ -151,9 +146,9 @@ END FUNCTION
 #+ Show the Genero & GRE license
 #+
 FUNCTION g2_showLicence() RETURNS()
-	DEFINE licString STRING
+	DEFINE licString                   STRING
 	DEFINE winnode, frm, g, frmf, txte om.DomNode
-	DEFINE c base.Channel
+	DEFINE c                           base.Channel
 
 	OPEN WINDOW lic WITH 1 ROWS, 1 COLUMNS
 	LET winnode = g2_getWinNode(NULL)
@@ -209,10 +204,10 @@ END FUNCTION
 #+ @return none
 FUNCTION g2_showReadMe() RETURNS()
 	DEFINE vb, frm, g, ff, t om.DomNode
-	DEFINE txt STRING
-	DEFINE c base.Channel
+	DEFINE txt               STRING
+	DEFINE c                 base.Channel
 
-	LET c = base.Channel.create()
+	LET c   = base.Channel.create()
 	LET txt = fgl_getenv("README")
 	IF txt IS NULL THEN
 		LET txt = "readme.txt"
@@ -234,7 +229,7 @@ FUNCTION g2_showReadMe() RETURNS()
 	LET frm = g2_genForm("showRM")
 	CALL ui.Window.getCurrent().setText("Read Me")
 	LET vb = frm.createChild("VBox")
-	LET g = vb.createChild("Grid")
+	LET g  = vb.createChild("Grid")
 	LET ff = g.createChild("FormField")
 	CALL ff.setAttribute("colName", "txt")
 	LET t = ff.createChild("TextEdit")
@@ -258,13 +253,13 @@ END FUNCTION
 #+ @return none
 FUNCTION g2_showEnv() RETURNS()
 	DEFINE vb, frm, w, tabl, tabc om.DomNode
-	DEFINE x, val_w, txt_w SMALLINT
+	DEFINE x, val_w, txt_w        SMALLINT
 	DEFINE env DYNAMIC ARRAY OF RECORD
 		nam STRING,
 		val STRING
 	END RECORD
 	DEFINE l_envlistFile, l_line STRING
-	DEFINE c base.Channel
+	DEFINE c                     base.Channel
 --TODO: maybe read list of environment variables from a file?
 	LET env[env.getLength() + 1].nam = "FGLDIR"
 	LET env[env.getLength() + 1].nam = "FGLASDIR"
@@ -346,7 +341,7 @@ FUNCTION g2_showEnv() RETURNS()
 			CALL c.openFile(l_envlistFile, "r")
 			WHILE NOT c.isEof()
 				LET l_line = c.readLine().trim()
-				LET x = l_line.getIndexOf(" ", x)
+				LET x      = l_line.getIndexOf(" ", x)
 				IF x > 1 THEN
 					LET l_line = l_line.subString(1, x)
 				END IF
@@ -372,7 +367,7 @@ FUNCTION g2_showEnv() RETURNS()
 	OPEN WINDOW showEnv AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTES(STYLE = "naked")
 	LET frm = g2_genForm("showEnv")
 	CALL ui.Window.getCurrent().setText("Current Environment")
-	LET vb = frm.createChild("VBox")
+	LET vb   = frm.createChild("VBox")
 	LET tabl = vb.createChild("Table")
 	CALL tabl.setAttribute("tabName", "showenv")
 	CALL tabl.setAttribute("height", env.getLength() + 1)
@@ -390,7 +385,7 @@ FUNCTION g2_showEnv() RETURNS()
 	CALL tabc.setAttribute("text", "Value")
 	LET w = tabc.createChild('TextEdit')
 	CALL w.setAttribute("height", 2)
-	CALL w.setAttribute("width", val_w/2)
+	CALL w.setAttribute("width", val_w / 2)
 	DISPLAY ARRAY env TO showenv.* ATTRIBUTE(COUNT = env.getLength())
 		ON ACTION dumpenv
 			RUN "env | sort > env.txt"
@@ -471,7 +466,7 @@ END FUNCTION
 #+ @return Nothing.
 FUNCTION g2_winInfo(l_meth SMALLINT, l_txt STRING, l_icon STRING) RETURNS()
 	DEFINE l_win, l_frm, l_grid, l_frmf, l_msg om.DomNode
-	DEFINE l_len SMALLINT
+	DEFINE l_len                               SMALLINT
 -- open window and create form
 	IF l_meth = 1 AND NOT m_gl_winInfo THEN
 		OPEN WINDOW gl_winInfo WITH 1 ROWS, 50 COLUMNS
@@ -536,8 +531,7 @@ END FUNCTION
 #+ @param s Style.
 #+ @return nothing
 FUNCTION g2_addField(
-		f om.DomNode, x SMALLINT, y SMALLINT, wgt STRING, fld STRING, w SMALLINT, com STRING, j STRING, s STRING)
-		RETURNS()
+		f om.DomNode, x SMALLINT, y SMALLINT, wgt STRING, fld STRING, w SMALLINT, com STRING, j STRING, s STRING) RETURNS()
 	DEFINE n om.DomNode
 	DEFINE h SMALLINT
 
@@ -580,7 +574,9 @@ FUNCTION g2_addLabel(l om.DomNode, x SMALLINT, y SMALLINT, w SMALLINT, txt STRIN
 	LET l = l.createChild("Label")
 	CALL l.setAttribute("posX", x)
 	CALL l.setAttribute("posY", y)
-	IF w = 0 THEN LET w = txt.trim().getLength() END IF
+	IF w = 0 THEN
+		LET w = txt.trim().getLength()
+	END IF
 	CALL l.setAttribute("gridWidth", w)
 	CALL l.setAttribute("text", txt)
 	IF j IS NOT NULL THEN

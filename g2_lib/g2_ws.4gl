@@ -1,29 +1,25 @@
 --------------------------------------------------------------------------------
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
-#+  
+#+ Genero 4.01 and above
+#+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 
-&ifdef gen320
-IMPORT FGL g2_logging
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_logging
-&endif
 
 IMPORT com
 IMPORT util
 
 PUBLIC DEFINE m_server STRING
 PUBLIC TYPE t_response RECORD
-	server STRING,
-	status INTEGER,
-	timestamp STRING,
+	server      STRING,
+	status      INTEGER,
+	timestamp   STRING,
 	description STRING,
-	data util.JSONObject
+	data        util.JSONObject
 END RECORD
 PUBLIC DEFINE ws_response t_response
 ----------------------------------------------------------------------------------------------------
@@ -66,7 +62,7 @@ PUBLIC FUNCTION start(l_module STRING, l_basePath STRING, g2_log g2_logging.logg
 				EXIT WHILE
 		END CASE
 		IF int_flag != 0 THEN
-			LET l_msg = "Interrupted."
+			LET l_msg    = "Interrupted."
 			LET int_flag = 0
 			EXIT WHILE
 		END IF
@@ -79,14 +75,14 @@ PUBLIC FUNCTION service_reply(l_stat INT, l_reply STRING) RETURNS STRING
 	IF l_reply.getCharAt(1) = "{" THEN -- assume it's JSON
 		TRY
 			LET ws_response.data = util.JSONObject.parse(l_reply)
-			LET l_reply = "JSON"
+			LET l_reply          = "JSON"
 		CATCH
 			LET ws_response.data = util.JSONObject.parse("{\"Error\": \"invalid JSON!\"}")
 		END TRY
 	END IF
 	LET ws_response.description = l_reply
-	LET ws_response.server = m_server
-	LET ws_response.timestamp = CURRENT
-	LET ws_response.status = l_stat
+	LET ws_response.server      = m_server
+	LET ws_response.timestamp   = CURRENT
+	LET ws_response.status      = l_stat
 	RETURN util.JSON.stringify(ws_response)
 END FUNCTION

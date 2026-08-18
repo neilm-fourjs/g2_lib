@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -9,29 +9,19 @@
 #+
 #+ No includes required.
 
-&ifdef gen320
-IMPORT FGL g2_core
-IMPORT FGL g2_debug
-IMPORT FGL g2_encrypt
-&else
 PACKAGE g2_lib
 --IMPORT FGL g2_lib.*
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_encrypt
 IMPORT reflect
-&endif
 
 IMPORT os
 IMPORT util
 
 &include "g2_debug.inc"
 
-&ifdef gen320
-CONSTANT  C_CUSTOM_DB_FILE = "custom_db_enc.json"
-&else
 CONSTANT C_CUSTOM_DB_FILE = "custom_db_enc4.json"
-&endif
 # Informix
 CONSTANT DEF_DBDRIVER = "dbmifx9x"
 CONSTANT DEF_DBSPACE  = "rootdbs"
@@ -198,8 +188,10 @@ FUNCTION (this dbInfo) g2_connect(l_dbName STRING) RETURNS()
 		LET l_failed = TRUE
 	END TRY
 	IF l_failed THEN
-		LET l_msg = SFMT("Connection Failed DB: %1 Source: %2 Driver: %3 Status: %4 %5", this.name, this.source, this.driver, sqlca.sqlcode, SQLERRMESSAGE)
-		GL_DBGMSG(0,  l_msg)
+		LET l_msg =
+				SFMT("Connection Failed DB: %1 Source: %2 Driver: %3 Status: %4 %5",
+						this.name, this.source, this.driver, sqlca.sqlcode, SQLERRMESSAGE)
+		GL_DBGMSG(0, l_msg)
 		IF this.create_db AND sqlca.sqlcode = -329 AND this.type = "ifx" THEN
 			CALL this.g2_ifx_createdb()
 			LET l_msg = NULL
@@ -395,7 +387,7 @@ FUNCTION (this dbInfo) g2_showInfo(stat INTEGER) RETURNS()
 	ELSE
 		DISPLAY SFMT("dbi.database.%1.%2.schema", this.name, this.type) TO lab7
 	END IF
-	DISPLAY fgl_getresource( SFMT("dbi.database.%1.%2.schema", this.name, this.type)) TO fld7
+	DISPLAY fgl_getresource(SFMT("dbi.database.%1.%2.schema", this.name, this.type)) TO fld7
 
 	DISPLAY "dbsrc" TO lab8
 	DISPLAY this.source TO fld8
@@ -455,7 +447,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		password   STRING,
 		connection STRING
 	END RECORD
-	DEFINE l_enc encrypt
+	DEFINE l_enc      encrypt
 	DEFINE l_rds_cert STRING
 	DEFINE l_test_con STRING
 	DEFINE l_test_pw  STRING
@@ -497,7 +489,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		IF fgl_getenv("HC_DBDRIVER") IS NOT NULL THEN
 			LET db.driver = fgl_getenv("HC_DBDRIVER")
 		END IF
-		LET db.type   = db.driver.subString(4, 6)
+		LET db.type = db.driver.subString(4, 6)
 	ELSE
 		LET this.use_custom = TRUE
 		TRY
@@ -535,7 +527,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 -- if HC_DBCERT is set then check it and add it to the connection string.
 		IF this.driver MATCHES ("*pgs*") THEN
 			LET this.connection = SFMT("%1+driver='%2',source='%3", db.name, db.driver, db.source)
-			LET l_rds_cert = fgl_getenv("HC_DBCERTS")
+			LET l_rds_cert      = fgl_getenv("HC_DBCERTS")
 			IF l_rds_cert IS NOT NULL THEN -- check the cert exists.
 				IF NOT os.Path.exists(l_rds_cert) THEN
 					CALL g2_winMessage("Error", SFMT("DB Certificate not found!\nFile: %1", l_rds_cert), "exclamation")
@@ -548,19 +540,19 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 			LET this.connection = this.connection.append("'") -- close the source quote
 		END IF
 		IF fgl_getenv("DBDEBUG") = "TRUE" THEN
-			GL_DBGMSG(0,  SFMT("DB JSON File: %1", l_file))
-			GL_DBGMSG(0,  SFMT("DB JSON: %1", l_jsonStr))
-			GL_DBGMSG(0,  SFMT("HC_DBCERTS: %1", l_rds_cert))
-			GL_DBGMSG(0,  SFMT("HC_DBNAME: %1", fgl_getenv("HC_DBNAME")))
-			GL_DBGMSG(0,  SFMT("HC_DBDRIVER: %1", fgl_getenv("HC_DBDRIVER")))
-			GL_DBGMSG(0,  SFMT("HC_DBSERVER: %1", fgl_getenv("HC_DBSERVER")))
-			GL_DBGMSG(0,  SFMT("HC_DBUSER: %1", fgl_getenv("HC_DBUSER")))
-			GL_DBGMSG(0,  SFMT("this.connection: %1", this.connection))
-			GL_DBGMSG(0,  SFMT("this.type: %1", this.type))
-			GL_DBGMSG(0,  SFMT("this.driver: %1", this.driver))
-			GL_DBGMSG(0,  SFMT("this.source: %1", this.source))
-			GL_DBGMSG(0,  SFMT("this.db_user: %1", this.db_user))
-			GL_DBGMSG(0,  SFMT("this.db_passwd: %1", this.db_passwd))
+			GL_DBGMSG(0, SFMT("DB JSON File: %1", l_file))
+			GL_DBGMSG(0, SFMT("DB JSON: %1", l_jsonStr))
+			GL_DBGMSG(0, SFMT("HC_DBCERTS: %1", l_rds_cert))
+			GL_DBGMSG(0, SFMT("HC_DBNAME: %1", fgl_getenv("HC_DBNAME")))
+			GL_DBGMSG(0, SFMT("HC_DBDRIVER: %1", fgl_getenv("HC_DBDRIVER")))
+			GL_DBGMSG(0, SFMT("HC_DBSERVER: %1", fgl_getenv("HC_DBSERVER")))
+			GL_DBGMSG(0, SFMT("HC_DBUSER: %1", fgl_getenv("HC_DBUSER")))
+			GL_DBGMSG(0, SFMT("this.connection: %1", this.connection))
+			GL_DBGMSG(0, SFMT("this.type: %1", this.type))
+			GL_DBGMSG(0, SFMT("this.driver: %1", this.driver))
+			GL_DBGMSG(0, SFMT("this.source: %1", this.source))
+			GL_DBGMSG(0, SFMT("this.db_user: %1", this.db_user))
+			GL_DBGMSG(0, SFMT("this.db_passwd: %1", this.db_passwd))
 		END IF
 	END IF
 	GL_DBGMSG(0, SFMT("getCustomDBUser: %1", l_info))
@@ -577,7 +569,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		END IF
 		INPUT BY NAME db.*, l_usetoken ATTRIBUTES(UNBUFFERED, WITHOUT DEFAULTS)
 			BEFORE INPUT
-				IF db.type="pgs" OR db.type="mys" THEN
+				IF db.type = "pgs" OR db.type = "mys" THEN
 					CALL DIALOG.setFieldActive("l_usetoken", TRUE)
 				ELSE
 					CALL DIALOG.setFieldActive("l_usetoken", FALSE)
@@ -601,7 +593,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				END IF
 				LET db.connection = SFMT("%1+driver='%2',source='%3'", db.name, db.driver, db.source)
 				LET db.type       = db.driver.subString(4, 6)
-				IF db.type="pgs" OR db.type="mys" THEN
+				IF db.type = "pgs" OR db.type = "mys" THEN
 					CALL DIALOG.setFieldActive("l_usetoken", TRUE)
 				ELSE
 					CALL DIALOG.setFieldActive("l_usetoken", FALSE)
@@ -609,7 +601,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				DISPLAY "DBT:", db.type
 
 			ON CHANGE l_usetoken
-				LET db.password = IIF(l_usetoken, "TOKEN","")
+				LET db.password = IIF(l_usetoken, "TOKEN", "")
 
 			AFTER FIELD source
 				IF db.source IS NULL THEN
@@ -622,15 +614,14 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 					LET db.source = db.name
 				END IF
 				LET l_test_pw = db.password
-        LET l_info = ""
+				LET l_info    = ""
 				IF l_test_pw = "TOKEN" THEN -- extra code for AWS Tokens
 					LET l_test_pw = g2_get_aws_token(db.source, db.username)
-					LET l_info = ""
+					LET l_info    = ""
 					IF l_test_pw IS NULL THEN
-						LET l_info = SFMT("Failed to get a token for the DB connection!\nSource: %1\nUser:\%2", db.source, db.username)
-						CALL g2_winMessage("Error",
-                            l_info
-                            , "exclamation")
+						LET l_info =
+								SFMT("Failed to get a token for the DB connection!\nSource: %1\nUser:\%2", db.source, db.username)
+						CALL g2_winMessage("Error", l_info, "exclamation")
 						CONTINUE INPUT
 					END IF
 					LET l_info = l_info.append(SFMT("AWS Token: %1\n", l_test_pw))
@@ -639,7 +630,7 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 				IF this.driver MATCHES ("*pgs*") THEN -- extra code for PGS certificate
 					LET l_rds_cert = fgl_getenv("HC_DBCERTS")
 					IF l_rds_cert IS NULL THEN -- check the cert exists.
-							LET l_info = l_info.append("Certificate: HC_DBCERTS is not set\n")
+						LET l_info = l_info.append("Certificate: HC_DBCERTS is not set\n")
 					ELSE
 						IF NOT os.Path.exists(l_rds_cert) THEN
 							CALL g2_winMessage("Error", SFMT("DB Certificate not found!\nFile: %1", l_rds_cert), "exclamation")
@@ -647,15 +638,15 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 						END IF
 						IF l_rds_cert IS NOT NULL THEN
 							LET l_test_con = l_test_con.append(SFMT("?sslmode=verify-full&sslrootcert=%1", l_rds_cert))
-							LET l_info = l_info.append(SFMT("Certificate: %1\n", l_rds_cert))
+							LET l_info     = l_info.append(SFMT("Certificate: %1\n", l_rds_cert))
 						END IF
 					END IF
 				END IF
 				LET l_test_con = l_test_con.append("'") -- close the source quote
 				TRY
 					IF db.username IS NOT NULL THEN
-						LET l_tmp = SFMT("CONNECT TO %1 USER %2 USING xxx\n", l_test_con, db.username)
-						LET l_info = l_info.append(SFMT("%1\n",l_tmp))
+						LET l_tmp  = SFMT("CONNECT TO %1 USER %2 USING xxx\n", l_test_con, db.username)
+						LET l_info = l_info.append(SFMT("%1\n", l_tmp))
 						GL_DBGMSG(0, SFMT("g2_getCustomDBInfo: TEST: %1", l_tmp))
 						CONNECT TO l_test_con USER db.username USING l_test_pw
 					ELSE
@@ -683,11 +674,11 @@ FUNCTION (this dbInfo) g2_getCustomDBInfo()
 		END IF
 		LOCATE l_jsonText IN FILE l_file
 		LET l_jsonText = l_enc.g2_encStringPasswd(util.JSON.stringify(db), NULL) -- save encrypted db connection info
-		GL_DBGMSG(0,"getCustomDBUser: Saving JSON data")
+		GL_DBGMSG(0, "getCustomDBUser: Saving JSON data")
 		LET this.create_db = FALSE
 		CALL this.g2_getCustomDBInfo() -- do setup from the file as would happen for a normal program connection.
 		LET this.create_db = TRUE
-  END IF
+	END IF
 END FUNCTION
 
 --------------------------------------------------------------------------------
@@ -1077,7 +1068,7 @@ FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
 	GL_DBGMSG(0, SFMT("g2_get_aws_token: openpipe: %1", l_cmd))
 	CALL c.openPipe(l_cmd, "r")
 	WHILE NOT c.isEof()
-		LET l_tok = l_tok.append( c.readLine().trim() )
+		LET l_tok = l_tok.append(c.readLine().trim())
 	END WHILE
 	CALL c.close()
 
@@ -1086,4 +1077,3 @@ FUNCTION g2_get_aws_token(l_source STRING, l_user STRING) RETURNS(STRING)
 	RETURN l_tok
 END FUNCTION
 --------------------------------------------------------------------------------
-

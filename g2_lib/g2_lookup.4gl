@@ -1,25 +1,18 @@
 --------------------------------------------------------------------------------
 #+ Dynamic Lookup - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 >
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 --------------------------------------------------------------------------------
 
-&ifdef gen320
-IMPORT FGL g2_core
-IMPORT FGL g2_debug
-IMPORT FGL g2_aui
-IMPORT FGL g2_db
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_core
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_aui
 IMPORT FGL g2_lib.g2_db
-&endif
 
 &include "g2_debug.inc"
 CONSTANT MAXCOLWIDTH = 40
@@ -34,30 +27,28 @@ CONSTANT MAXCOLWIDTH = 40
 #+ @param wher	The WHERE clause, 1=1 means all, or use result of construct
 #+ @param ordby The ORDER BY clause
 #+ @returns string with the key for selected row or NULL if cancelled or no data.
-FUNCTION g2_lookup(
-		tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING)
-		RETURNS STRING
+FUNCTION g2_lookup(tabnam STRING, cols STRING, colts STRING, wher STRING, ordby STRING) RETURNS STRING
 	DEFINE l_frm, l_grid, l_tabl, l_tabc, l_edit, l_curr om.DomNode
-	DEFINE l_hbx, l_sp, l_titl om.DomNode
-	DEFINE l_tot_recs, x, i INTEGER
-	DEFINE l_tok base.StringTokenizer
-	DEFINE l_col_titles DYNAMIC ARRAY OF STRING
+	DEFINE l_hbx, l_sp, l_titl                           om.DomNode
+	DEFINE l_tot_recs, x, i                              INTEGER
+	DEFINE l_tok                                         base.StringTokenizer
+	DEFINE l_col_titles                                  DYNAMIC ARRAY OF STRING
 	DEFINE l_fields DYNAMIC ARRAY OF RECORD
 		name STRING,
 		type STRING
 	END RECORD
-	DEFINE l_sel_stmt STRING
-	DEFINE l_ret_key STRING
+	DEFINE l_sel_stmt   STRING
+	DEFINE l_ret_key    STRING
 	DEFINE l_sql_handle base.SqlHandle
-	DEFINE l_dlg ui.Dialog
-	DEFINE l_event STRING
+	DEFINE l_dlg        ui.Dialog
+	DEFINE l_event      STRING
 
 -- See "genero_lib.inc" for Macro definitions.
-	GL_DBGMSG(2, SFMT("g2_lookup: table(s)= %1",tabnam))
-	GL_DBGMSG(2, SFMT("g2_lookup: cols    = %1",cols))
-	GL_DBGMSG(2, SFMT("g2_lookup: titles  = %1",colts))
-	GL_DBGMSG(2, SFMT("g2_lookup: where   = %1",wher))
-	GL_DBGMSG(2, SFMT("g2_lookup: orderby = %1",ordby))
+	GL_DBGMSG(2, SFMT("g2_lookup: table(s)= %1", tabnam))
+	GL_DBGMSG(2, SFMT("g2_lookup: cols    = %1", cols))
+	GL_DBGMSG(2, SFMT("g2_lookup: titles  = %1", colts))
+	GL_DBGMSG(2, SFMT("g2_lookup: where   = %1", wher))
+	GL_DBGMSG(2, SFMT("g2_lookup: orderby = %1", ordby))
 	GL_DBGMSG(2, "g2_lookup: Declaring Count Cursor...")
 
 -- Check to make sure there are records.
@@ -65,7 +56,7 @@ FUNCTION g2_lookup(
 		LET l_sel_stmt = "SELECT COUNT(*) FROM " || tabnam || " WHERE " || wher
 		PREPARE listcntpre FROM l_sel_stmt
 	CATCH
-		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(%"Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
 		RETURN NULL --, NULL
 	END TRY
 -- do the count
@@ -74,7 +65,7 @@ FUNCTION g2_lookup(
 	FETCH listcntcur INTO l_tot_recs
 	CLOSE listcntcur
 	IF l_tot_recs < 1 THEN
-		CALL g2_core.g2_errPopup(% "No Records Found")
+		CALL g2_core.g2_errPopup(%"No Records Found")
 		RETURN NULL
 	END IF
 	GL_DBGMSG(2, SFMT("g2_lookup: Counted: %1", l_tot_recs))
@@ -91,13 +82,13 @@ FUNCTION g2_lookup(
 		CALL l_sql_handle.prepare(l_sel_stmt)
 		CALL l_sql_handle.openScrollCursor()
 	CATCH
-		CALL g2_core.g2_errPopup(SFMT(% "Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(%"Failed to prepare:\n%1\n%2", l_sel_stmt, SQLERRMESSAGE))
 		RETURN NULL
 	END TRY
 	CALL l_fields.clear()
 	FOR x = 1 TO l_sql_handle.getResultCount()
 		LET l_fields[x].name = l_sql_handle.getResultName(x)
-		LET l_col_titles[x] = l_fields[x].name -- default column l_titles
+		LET l_col_titles[x]  = l_fields[x].name -- default column l_titles
 		LET l_fields[x].type = l_sql_handle.getResultType(x)
 		GL_DBGMSG(2, SFMT("g2_lookup: %1 Name: %2 Type: %3", x, l_fields[x].name, l_fields[x].type))
 	END FOR
@@ -107,8 +98,7 @@ FUNCTION g2_lookup(
 	GL_DBGMSG(2, "g2_lookup: Opening Window.")
 	OPEN WINDOW listv AT 1, 1 WITH 15 ROWS, 80 COLUMNS ATTRIBUTE(STYLE = "naked")
 	CALL fgl_settitle("Listing from " || tabnam)
-	LET l_frm =
-			g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
+	LET l_frm = g2_aui.g2_genForm("g2_" || tabnam.trim()) -- ensures form name is specific for this lookup
 
 	LET l_grid = l_frm.createChild('Grid')
 {
@@ -160,7 +150,7 @@ FUNCTION g2_lookup(
 	LET l_curr = l_hbx.createChild('Label')
 	CALL l_curr.setAttribute("name", "cur_row")
 	CALL l_curr.setAttribute("sizePolicy", "dynamic")
-	LET l_sp = l_hbx.createChild('SpacerItem')
+	LET l_sp   = l_hbx.createChild('SpacerItem')
 	LET l_titl = l_hbx.createChild('Button')
 	CALL l_titl.setAttribute("name", "firstrow")
 	CALL l_titl.setAttribute("image", "gobegin")
@@ -181,14 +171,14 @@ FUNCTION g2_lookup(
 	LET l_titl = l_hbx.createChild('Button')
 	CALL l_titl.setAttribute("name", "lastrow")
 	CALL l_titl.setAttribute("image", "goend")
-	LET l_sp = l_hbx.createChild('SpacerItem')
+	LET l_sp   = l_hbx.createChild('SpacerItem')
 	LET l_titl = l_hbx.createChild('Label')
 	CALL l_titl.setAttribute("text", l_tot_recs USING "###,###,##&" || " Rows")
 	CALL l_titl.setAttribute("sizePolicy", "dynamic")
 
 -- Setup the dialog
 	LET int_flag = FALSE
-	LET l_dlg = ui.Dialog.createDisplayArrayTo(l_fields, "tablistv")
+	LET l_dlg    = ui.Dialog.createDisplayArrayTo(l_fields, "tablistv")
 	CALL l_dlg.addTrigger("ON ACTION close")
 	CALL l_dlg.addTrigger("ON ACTION accept")
 	CALL l_dlg.addTrigger("ON ACTION cancel")
@@ -229,14 +219,13 @@ FUNCTION g2_lookup(
 				EXIT WHILE
 			WHEN "BEFORE ROW"
 				LET x = l_dlg.arrayToVisualIndex("tablistv", arr_curr())
-				CALL l_curr.setAttribute(
-						"text", SFMT("%1 (%2)", x USING "<<<,##&", arr_curr() USING "<<<,##&"))
+				CALL l_curr.setAttribute("text", SFMT("%1 (%2)", x USING "<<<,##&", arr_curr() USING "<<<,##&"))
 			OTHERWISE
 				GL_DBGMSG(2, SFMT("g2_lookup: Unhandled Event: %1", l_event))
 		END CASE
 	END WHILE
 	LET l_ret_key = l_dlg.getFieldValue(l_fields[1].name) -- get the selected row first field.
-	LET l_dlg = NULL -- FIXME: CALL l_dlg.terminate()
+	LET l_dlg     = NULL                                  -- FIXME: CALL l_dlg.terminate()
 
 	CLOSE WINDOW listv
 	IF int_flag THEN

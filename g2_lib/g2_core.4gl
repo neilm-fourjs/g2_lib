@@ -1,34 +1,28 @@
 --------------------------------------------------------------------------------
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
 #+
 
-&ifdef gen320
-IMPORT FGL g2_appInfo
-IMPORT FGL g2_debug
-IMPORT FGL g2_logging
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_appInfo
 IMPORT FGL g2_lib.g2_debug
 IMPORT FGL g2_lib.g2_logging
-&endif
 
 IMPORT os
 
 &include "g2_debug.inc"
 
-PUBLIC DEFINE m_mdi CHAR(1)
+PUBLIC DEFINE m_mdi         CHAR(1)
 PUBLIC DEFINE m_isUniversal BOOLEAN = TRUE
-PUBLIC DEFINE m_isGDC BOOLEAN = FALSE
-PUBLIC DEFINE m_isWS BOOLEAN = FALSE
-PUBLIC DEFINE m_appInfo appInfo
-PUBLIC DEFINE m_log g2_logging.logger
+PUBLIC DEFINE m_isGDC       BOOLEAN = FALSE
+PUBLIC DEFINE m_isWS        BOOLEAN = FALSE
+PUBLIC DEFINE m_appInfo     appInfo
+PUBLIC DEFINE m_log         g2_logging.logger
 
 --------------------------------------------------------------------------------
 #+ Set MDI or not
@@ -36,7 +30,7 @@ PUBLIC DEFINE m_log g2_logging.logger
 #+ M = MDI Container
 #+ S = Not MDI
 #+ @param l_mdi_sdi S/C/M = default is 'S'
-FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1)) RETURNS ()
+FUNCTION g2_mdisdi(l_mdi_sdi CHAR(1)) RETURNS()
 	DEFINE l_container, l_desc STRING
 	IF l_mdi_sdi IS NULL OR l_mdi_sdi = " " THEN
 		LET l_mdi_sdi = "S"
@@ -69,16 +63,20 @@ END FUNCTION
 #+ Load the style file depending on the client
 FUNCTION g2_loadStyles(l_stName STRING) RETURNS()
 	DEFINE l_fe, l_name STRING
-	DEFINE l_ok BOOLEAN = TRUE
-	IF l_stName IS NULL THEN LET l_stName = "default" END IF
+	DEFINE l_ok         BOOLEAN = TRUE
+	IF l_stName IS NULL THEN
+		LET l_stName = "default"
+	END IF
 	LET l_fe = "GBC"
-	IF m_isGDC AND NOT m_isUniversal THEN LET l_fe = "GDC" END IF
+	IF m_isGDC AND NOT m_isUniversal THEN
+		LET l_fe = "GDC"
+	END IF
 	LET l_name = l_stName || "_" || l_fe
 	TRY
 		CALL ui.Interface.loadStyles(l_name)
 	CATCH
 		LET l_name = l_stName
-		LET l_ok = FALSE
+		LET l_ok   = FALSE
 	END TRY
 	IF NOT l_ok THEN
 		TRY
@@ -101,12 +99,14 @@ END FUNCTION
 #+ Load the Action Defaults file depending on the client
 FUNCTION g2_loadActions(l_adName STRING) RETURNS()
 	DEFINE l_ok BOOLEAN = TRUE
-	IF l_adName IS NULL THEN LET l_adName = "default" END IF
+	IF l_adName IS NULL THEN
+		LET l_adName = "default"
+	END IF
 	TRY
 		CALL ui.Interface.loadActionDefaults(l_adName)
 	CATCH
 		LET l_adName = "default"
-		LET l_ok = FALSE
+		LET l_ok     = FALSE
 	END TRY
 	IF NOT l_ok THEN
 		TRY
@@ -121,7 +121,9 @@ END FUNCTION
 #+ Load the ToolBar file depending on the client
 FUNCTION g2_loadToolBar(l_tbName STRING) RETURNS()
 	DEFINE l_f ui.Form
-	IF l_tbName IS NULL THEN LET l_tbName = "default" END IF
+	IF l_tbName IS NULL THEN
+		LET l_tbName = "default"
+	END IF
 	TRY
 		LET l_f = ui.Window.getCurrent().getForm()
 	CATCH
@@ -217,19 +219,17 @@ END FUNCTION
 #+ @param l_items List of Answers ie "Yes|No|Cancel"
 #+ @param l_icon	Icon name, "exclamation"
 #+ @return string: Entered value.
-FUNCTION g2_winQuestion(
-		l_title STRING, l_message STRING, l_ans STRING, l_items STRING, l_icon STRING)
-		RETURNS STRING
+FUNCTION g2_winQuestion(l_title STRING, l_message STRING, l_ans STRING, l_items STRING, l_icon STRING) RETURNS STRING
 	DEFINE l_result STRING
-	DEFINE l_toks base.StringTokenizer
-	DEFINE l_dum BOOLEAN
-	DEFINE l_opt DYNAMIC ARRAY OF STRING
-	DEFINE x SMALLINT
+	DEFINE l_toks   base.StringTokenizer
+	DEFINE l_dum    BOOLEAN
+	DEFINE l_opt    DYNAMIC ARRAY OF STRING
+	DEFINE x        SMALLINT
 
-	LET l_icon = l_icon.trim()
-	LET l_title = l_title.trim()
+	LET l_icon    = l_icon.trim()
+	LET l_title   = l_title.trim()
 	LET l_message = l_message.trim()
-	LET l_icon = l_icon.trim()
+	LET l_icon    = l_icon.trim()
 	IF l_icon = "info" THEN
 		LET l_icon = "information"
 	END IF
@@ -256,8 +256,7 @@ FUNCTION g2_winQuestion(
 	MENU l_title ATTRIBUTE(STYLE = "dialog", COMMENT = l_message, IMAGE = l_icon)
 		BEFORE MENU
 			FOR x = 1 TO 10
-				CALL DIALOG.setActionHidden(
-						l_opt[x].toLowerCase(), IIF(l_opt[x].subString(1, 2) = "__", TRUE, FALSE))
+				CALL DIALOG.setActionHidden(l_opt[x].toLowerCase(), IIF(l_opt[x].subString(1, 2) = "__", TRUE, FALSE))
 				IF l_opt[x] IS NOT NULL THEN
 					IF l_ans.equalsIgnoreCase(l_opt[x]) THEN
 						NEXT OPTION l_opt[x]
@@ -294,7 +293,7 @@ END FUNCTION
 #+ Simple message with ui refresh
 #+
 #+ @return Nothing
-FUNCTION g2_message(l_msg STRING) RETURNS ()
+FUNCTION g2_message(l_msg STRING) RETURNS()
 	MESSAGE NVL(l_msg, "NULL")
 	CALL ui.Interface.refresh()
 END FUNCTION
@@ -302,15 +301,15 @@ END FUNCTION
 #+ Simple error message
 #+
 #+ @return Nothing.
-FUNCTION g2_errPopup(l_msg STRING) RETURNS ()
-	CALL g2_winMessage(% "Error!", l_msg, "exclamation")
+FUNCTION g2_errPopup(l_msg STRING) RETURNS()
+	CALL g2_winMessage(%"Error!", l_msg, "exclamation")
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Simple error message
 #+
 #+ @return Nothing
-FUNCTION g2_warnPopup(l_msg STRING) RETURNS ()
-	CALL g2_winMessage(% "Warning!", l_msg, "exclamation")
+FUNCTION g2_warnPopup(l_msg STRING) RETURNS()
+	CALL g2_winMessage(%"Warning!", l_msg, "exclamation")
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Display an error message in a window, console & logfile.
@@ -319,7 +318,7 @@ END FUNCTION
 #+ @param l_lno __LINE__ - Line Number
 #+ @param l_err Error Message.
 #+ @return Nothing.
-FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING) RETURNS ()
+FUNCTION g2_errMsg(l_fil STRING, l_lno INT, l_err STRING) RETURNS()
 	CALL g2_errPopup(l_err)
 	ERROR "* ", l_err.trim(), " *"
 	IF l_fil IS NOT NULL THEN
@@ -348,8 +347,7 @@ FUNCTION g2_chkClientVer(l_cli STRING, l_ver STRING, l_feature STRING) RETURNS B
 		-- client matched by version is too old
 		CALL g2_winMessage(
 				"Error",
-				SFMT("Your Client '%1' version doesn't support feature '%2'!\nNeed min version of %3", 
-						l_cli, l_feature, l_ver),
+				SFMT("Your Client '%1' version doesn't support feature '%2'!\nNeed min version of %3", l_cli, l_feature, l_ver),
 				"exclamation")
 		RETURN FALSE
 	END IF
@@ -360,7 +358,7 @@ END FUNCTION
 FUNCTION g2_getVer(l_str STRING) RETURNS(DECIMAL(4, 2), INT)
 	DEFINE l_major DECIMAL(4, 2)
 	DEFINE l_minor SMALLINT
-	DEFINE l_st base.StringTokenizer
+	DEFINE l_st    base.StringTokenizer
 	LET l_minor = l_str.getIndexOf("-", 1)
 	IF l_minor > 0 THEN
 		LET l_str = l_str.subString(1, l_minor - 1)
@@ -381,25 +379,25 @@ END FUNCTION
 #+ Default error handler
 #+
 #+ @return Nothing
-FUNCTION g2_error() RETURNS ()
+FUNCTION g2_error() RETURNS()
 	DEFINE l_err, l_mod STRING
-	DEFINE l_st STRING
-	DEFINE l_stat INTEGER
-	DEFINE x, y SMALLINT
+	DEFINE l_st         STRING
+	DEFINE l_stat       INTEGER
+	DEFINE x, y         SMALLINT
 
 	LET l_stat = status
 
 	LET l_st = base.Application.getStackTrace()
- -- try and get just the module and line that caused the problem
-	LET x = l_st.getIndexOf("#", 2) + 3
-	LET y = l_st.getIndexOf("#", x + 1) - 1
+	-- try and get just the module and line that caused the problem
+	LET x     = l_st.getIndexOf("#", 2) + 3
+	LET y     = l_st.getIndexOf("#", x + 1) - 1
 	LET l_mod = l_st.subString(x, y)
 	IF y < 1 THEN
-		LET y = l_st.getLength()
+		LET y     = l_st.getLength()
 		LET l_mod = l_st.subString(x, y)
 	END IF
 	IF l_mod IS NULL THEN
-		GL_DBGMSG(0, SFMT("Failed to get module from stackTrace! x=%1 y%2 \n%3",x ,y, l_st))
+		GL_DBGMSG(0, SFMT("Failed to get module from stackTrace! x=%1 y%2 \n%3", x, y, l_st))
 		LET l_mod = "(null module)"
 	END IF
 
@@ -410,7 +408,7 @@ FUNCTION g2_error() RETURNS ()
 	IF l_err IS NULL THEN
 		LET l_err = "Unknown!"
 	END IF
-	LET l_err = SFMT("%1:%2:%3",l_mod, l_stat, l_err)
+	LET l_err = SFMT("%1:%2:%3", l_mod, l_stat, l_err)
 --	CALL gl_logIt("Error:"||l_err)
 	IF l_stat != -6300 AND NOT m_isWS THEN
 		CALL g2_errPopup(l_err)
@@ -425,7 +423,7 @@ END FUNCTION
 #+ @param l_w Image Width
 #+ @param l_h Image Height
 #+ @return Nothing.
-FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALLINT) RETURNS ()
+FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALLINT) RETURNS()
 	DEFINE f, g, n om.DomNode
 
 	IF l_dur = -1 THEN
@@ -435,10 +433,7 @@ FUNCTION g2_splash(l_dur SMALLINT, l_splashImage STRING, l_w SMALLINT, l_h SMALL
 	END IF
 
 	GL_DBGMSG(3, "Open splash.")
-	OPEN WINDOW splash
-			AT 1, 1
-			WITH 1 ROWS, 1 COLUMNS
-			ATTRIBUTE(STYLE = "default noborder dialog2 bg_white")
+	OPEN WINDOW splash AT 1, 1 WITH 1 ROWS, 1 COLUMNS ATTRIBUTE(STYLE = "default noborder dialog2 bg_white")
 	LET f = ui.Window.getCurrent().createForm("splash").getNode()
 	LET g = f.createChild("Grid")
 	LET n = g.createChild("Image")
@@ -476,11 +471,11 @@ END FUNCTION
 #+ Returns the image from the 1st path found in FGLIMAGEPATH
 FUNCTION g2_getImagePath() RETURNS STRING
 	DEFINE l_imgPath STRING
-	DEFINE x SMALLINT
+	DEFINE x         SMALLINT
 	LET l_imgPath = fgl_getenv("FGLIMAGEPATH")
-	LET x = l_imgPath.getIndexOf(os.Path.pathSeparator(),1)
+	LET x         = l_imgPath.getIndexOf(os.Path.pathSeparator(), 1)
 	IF x > 0 THEN
-		LET l_imgPath = l_imgPath.subString(1,x-1)
+		LET l_imgPath = l_imgPath.subString(1, x - 1)
 	END IF
 	RETURN l_imgPath
 END FUNCTION
@@ -490,7 +485,7 @@ END FUNCTION
 #+ @param stat Exit status 0 or -1 normally.
 #+ @param reason For Exit, clean, crash, closed, terminated etc
 #+ @return none
-FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS ()
+FUNCTION g2_exitProgram(l_stat SMALLINT, l_reason STRING) RETURNS()
 	GL_DBGMSG(0, SFMT("g2_exitProgram: stat=%1 reason:%2", l_stat, l_reason))
 	CALL m_log.logProgramRun(FALSE, NULL, l_reason)
 	EXIT PROGRAM l_stat

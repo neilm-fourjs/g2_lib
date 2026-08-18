@@ -4,31 +4,27 @@
 #+ Calendar functions
 #+
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
-#+  
+#+ Genero 4.01 and above
+#+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
-#+  
+#+
 #+ No includes required.
 
-&ifdef gen320
-&else
 PACKAGE g2_lib
-&endif
 
 IMPORT util
 
-PUBLIC CONSTANT C_MONTHS_IS
-		= "Janúar|Febrúar|Mars|Apríl|Maí|Júní|Júlí|Agúst|September|Október|Nóvember|Desember"
-PUBLIC CONSTANT C_DAYS3_IS = "Mán|Þri|Mið|Fim|Fös|Lau|Sun"
-PUBLIC CONSTANT C_DAYS1_IS = "M|Þ|M|F|F|L|S"
-PUBLIC CONSTANT C_MONTHS_ES
-		= "Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre"
-PUBLIC CONSTANT C_DAYS3_ES = "Lun|Mar|Mie|Jue|Vie|Sab|Dom"
-PUBLIC CONSTANT C_DAYS1_ES = "L|M|M|J|V|S|D"
-PUBLIC CONSTANT C_MONTHS_PT
-		= "Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro"
+PUBLIC CONSTANT C_MONTHS_IS =
+		"Janúar|Febrúar|Mars|Apríl|Maí|Júní|Júlí|Agúst|September|Október|Nóvember|Desember"
+PUBLIC CONSTANT C_DAYS3_IS  = "Mán|Þri|Mið|Fim|Fös|Lau|Sun"
+PUBLIC CONSTANT C_DAYS1_IS  = "M|Þ|M|F|F|L|S"
+PUBLIC CONSTANT C_MONTHS_ES = "Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre"
+PUBLIC CONSTANT C_DAYS3_ES  = "Lun|Mar|Mie|Jue|Vie|Sab|Dom"
+PUBLIC CONSTANT C_DAYS1_ES  = "L|M|M|J|V|S|D"
+PUBLIC CONSTANT C_MONTHS_PT =
+		"Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro"
 PUBLIC CONSTANT C_DAYS3_PT = "Seg|Ter|Qua|Qui|Sex|Sáb|Dom"
 PUBLIC CONSTANT C_DAYS1_PT = "S|T|Q|Q|S|S|D"
 

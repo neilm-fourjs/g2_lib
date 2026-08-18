@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 #+ Genero Logging Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -9,24 +9,20 @@
 #+
 #+ Non GUI functions only
 
-&ifdef gen320
-IMPORT FGL g2_core
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_core
-&endif
 
 IMPORT os
 
 CONSTANT C_DEFAULT_LOGDIR = "../logs/" -- Default logdir if nothing set
 
 PUBLIC TYPE logger RECORD
-	dirName STRING,
-	fileName STRING,
-	fileExt STRING,
-	logFullPath STRING,
+	dirName        STRING,
+	fileName       STRING,
+	fileExt        STRING,
+	logFullPath    STRING,
 	runLogFullPath STRING,
-	useDate BOOLEAN
+	useDate        BOOLEAN
 END RECORD
 
 #+ Set the logging Dir / Name / Ext / useDate
@@ -40,14 +36,14 @@ FUNCTION (this logger) init(l_dir STRING, l_name STRING, l_ext STRING, l_useDate
 	CALL this.setLogExt(l_ext)
 	CALL this.setUseDate(l_useDate)
 	CALL this.setLogName(l_name)
-	LET this.runLogFullPath = os.Path.join(this.dirName,SFMT("%1_runlog%2",(TODAY USING "YYYYMMDD"),this.fileExt))
+	LET this.runLogFullPath = os.Path.join(this.dirName, SFMT("%1_runlog%2", (TODAY USING "YYYYMMDD"), this.fileExt))
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Write a message to an audit file.
 #+
 #+ @param l_mess Message to write to audit file.
 FUNCTION (this logger) logIt(l_mess STRING) --{{{
-	DEFINE c base.Channel
+	DEFINE c        base.Channel
 	DEFINE l_module STRING
 	LET c = base.Channel.create()
 	IF this.logFullPath IS NULL THEN
@@ -91,19 +87,19 @@ FUNCTION (this logger) setLogDir(l_dir STRING) RETURNS()
 
 	IF NOT os.Path.exists(this.dirName) THEN
 		IF NOT os.Path.mkdir(this.dirName) THEN
-			CALL g2_core.g2_errPopup(SFMT(% "Failed to make logdir '%1.\nProgram aborting", this.dirName))
+			CALL g2_core.g2_errPopup(SFMT(%"Failed to make logdir '%1.\nProgram aborting", this.dirName))
 			CALL g2_core.g2_exitProgram(200, "log dir issues")
 		ELSE
 			IF os.Path.pathSeparator() = ":" THEN -- Linux/Unix/Mac/Android - ie not MSDOS!
 				IF NOT os.Path.chRwx(this.dirName, ((7 * 64) + (7 * 8) + 5)) THEN
-					CALL g2_core.g2_errPopup(SFMT(% "Failed set permissions on logdir '%1'", this.dirName))
+					CALL g2_core.g2_errPopup(SFMT(%"Failed set permissions on logdir '%1'", this.dirName))
 					CALL g2_core.g2_exitProgram(201, "log permissions")
 				END IF
 			END IF
 		END IF
 	END IF
 	IF NOT os.Path.isDirectory(this.dirName) THEN
-		CALL g2_core.g2_errPopup(SFMT(% "Logdir '%1' not a directory.\nProgram aborting", this.dirName))
+		CALL g2_core.g2_errPopup(SFMT(%"Logdir '%1' not a directory.\nProgram aborting", this.dirName))
 		CALL g2_core.g2_exitProgram(202, "logdir not a dir")
 	END IF
 
@@ -133,8 +129,7 @@ FUNCTION (this logger) setLogName(l_file STRING) RETURNS()
 		END IF
 		--LET this.fileName = (TODAY USING "YYYYMMDD")||"-"||base.application.getProgramName()
 		IF this.useDate THEN
-			LET this.fileName = SFMT("%1_%2_%3", (TODAY USING "YYYYMMDD"), 
-					base.Application.getProgramName(), l_user)
+			LET this.fileName = SFMT("%1_%2_%3", (TODAY USING "YYYYMMDD"), base.Application.getProgramName(), l_user)
 		ELSE
 			LET this.fileName = base.Application.getProgramName()
 		END IF
@@ -196,17 +191,17 @@ END FUNCTION
 #+ @return sourcefile.module:line
 FUNCTION getCallingModuleName() RETURNS STRING
 	DEFINE l_fil, l_mod, l_lin STRING
-	DEFINE x, y SMALLINT
+	DEFINE x, y                SMALLINT
 	LET l_fil = base.Application.getStackTrace()
 	IF l_fil IS NULL THEN
 		DISPLAY "Failed to get getStackTrace!!"
 		RETURN "getStackTrace-failed!"
 	END IF
 
-	LET x = l_fil.getIndexOf("#", 2) -- skip passed this func
-	LET x = l_fil.getIndexOf("#", x + 1) -- skip passed func that called this func
-	LET x = l_fil.getIndexOf(" ", x) + 1
-	LET y = l_fil.getIndexOf("(", x) - 1
+	LET x     = l_fil.getIndexOf("#", 2)     -- skip passed this func
+	LET x     = l_fil.getIndexOf("#", x + 1) -- skip passed func that called this func
+	LET x     = l_fil.getIndexOf(" ", x) + 1
+	LET y     = l_fil.getIndexOf("(", x) - 1
 	LET l_mod = l_fil.subString(x, y)
 
 	LET x = l_fil.getIndexOf(" ", y) + 4
@@ -219,7 +214,7 @@ FUNCTION getCallingModuleName() RETURNS STRING
 	-- strip the .4gl from the fil name
 	LET x = l_fil.getIndexOf(".", 1)
 	IF x > 0 THEN
-		LET y = l_fil.getIndexOf(":", x)
+		LET y     = l_fil.getIndexOf(":", x)
 		LET l_lin = l_fil.subString(y + 1, l_fil.getLength())
 		LET l_fil = l_fil.subString(1, x - 1)
 	END IF
@@ -229,15 +224,17 @@ FUNCTION getCallingModuleName() RETURNS STRING
 END FUNCTION
 --------------------------------------------------------------------------------
 #+ Log Program Run
-FUNCTION (this logger) logProgramRun(l_isParent BOOLEAN, l_user STRING, l_msg STRING) RETURNS ()
-	DEFINE c base.Channel
+FUNCTION (this logger) logProgramRun(l_isParent BOOLEAN, l_user STRING, l_msg STRING) RETURNS()
+	DEFINE c      base.Channel
 	DEFINE l_line STRING
 	DEFINE l_time STRING
 	LET l_time = TIME
-	LET c = base.Channel.create()
+	LET c      = base.Channel.create()
 	CALL c.openFile(this.runLogFullPath, "a")
-	IF l_user IS NULL THEN LET l_user = fgl_getenv("G2_USER") END IF
-	LET l_line = SFMT("%1|%2|%3|%4|", l_time, l_user, base.Application.getProgramName(),fgl_getenv("G2_PARENTPID"))
+	IF l_user IS NULL THEN
+		LET l_user = fgl_getenv("G2_USER")
+	END IF
+	LET l_line = SFMT("%1|%2|%3|%4|", l_time, l_user, base.Application.getProgramName(), fgl_getenv("G2_PARENTPID"))
 	IF l_isParent THEN
 		LET l_line = l_line.append("Parent")
 		CALL fgl_setenv("G2_USER", l_user)

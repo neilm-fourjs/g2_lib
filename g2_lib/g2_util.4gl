@@ -1,4 +1,4 @@
-#+ Genero 4.00 and above
+#+ Genero 4.01 and above
 #+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
@@ -6,10 +6,7 @@
 #+
 #+ No includes required.
 
-&ifdef gen320
-&else
 PACKAGE g2_lib
-&endif
 
 IMPORT util
 IMPORT os
@@ -56,7 +53,7 @@ END FUNCTION
 #+ @return uname of the OS
 FUNCTION g2_getHostname() RETURNS STRING
 	DEFINE l_hostname STRING
-	DEFINE c base.Channel
+	DEFINE c          base.Channel
 	IF os.Path.pathSeparator() = ";" THEN -- Windows
 		LET l_hostname = fgl_getenv("COMPUTERNAME")
 	ELSE -- Unix / Linux<builtin>.fgl_getenvndroid
@@ -76,7 +73,7 @@ END FUNCTION
 #+ @return uname of the OS
 FUNCTION g2_getUname() RETURNS STRING
 	DEFINE l_uname STRING
-	DEFINE c base.Channel
+	DEFINE c       base.Channel
 	LET c = base.Channel.create()
 	CALL c.openPipe("uname", "r")
 	LET l_uname = c.readLine()
@@ -88,10 +85,10 @@ END FUNCTION
 #+
 #+ @return OS Version
 FUNCTION g2_getLinuxVer() RETURNS STRING
-	DEFINE l_ver STRING
-	DEFINE c base.Channel
+	DEFINE l_ver  STRING
+	DEFINE c      base.Channel
 	DEFINE l_file DYNAMIC ARRAY OF STRING
-	DEFINE x SMALLINT
+	DEFINE x      SMALLINT
 
 -- possible files containing version info
 	LET l_file[l_file.getLength() + 1] = "/etc/redhat-release"

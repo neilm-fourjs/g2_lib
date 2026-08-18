@@ -1,53 +1,49 @@
 --------------------------------------------------------------------------------
 #+ Genero Genero Library Functions - by Neil J Martin ( neilm@4js.com )
 #+ This library is intended as an example of useful library code for use with
-#+ Genero 4.00 and above
-#+  
+#+ Genero 4.01 and above
+#+
 #+ No warrantee of any kind, express or implied, is included with this software;
 #+ use at your own risk, responsibility for damages (if any) to anyone resulting
 #+ from the use of this software rests entirely with the user.
-#+  
+#+
 #+ No includes required.
 
-&ifdef gen320
-IMPORT FGL g2_core
-&else
 PACKAGE g2_lib
 IMPORT FGL g2_lib.g2_db
 IMPORT FGL g2_lib.g2_core
-&endif
 
 IMPORT util
 
 CONSTANT SQL_FIRST = 0
-CONSTANT SQL_PREV = -1
-CONSTANT SQL_NEXT = -2
-CONSTANT SQL_LAST = -3
+CONSTANT SQL_PREV  = -1
+CONSTANT SQL_NEXT  = -2
+CONSTANT SQL_LAST  = -3
 
 PUBLIC TYPE t_fields RECORD
-	colName STRING,
-	colType STRING,
+	colName   STRING,
+	colType   STRING,
 	colLength SMALLINT,
 	isNumeric BOOLEAN,
-	isKey BOOLEAN,
-	value STRING,
-	para_no SMALLINT,
-	formOnly BOOLEAN,
-	noEntry BOOLEAN,
-	defValue STRING
+	isKey     BOOLEAN,
+	value     STRING,
+	para_no   SMALLINT,
+	formOnly  BOOLEAN,
+	noEntry   BOOLEAN,
+	defValue  STRING
 END RECORD
 
 PUBLIC TYPE sql RECORD
-	handle base.SqlHandle,
-	table_name STRING,
-	key_field STRING,
+	handle        base.SqlHandle,
+	table_name    STRING,
+	key_field     STRING,
 	key_field_num SMALLINT,
-	where_clause STRING,
-	column_list STRING,
-	rows_count INTEGER,
-	current_row INTEGER,
-	fields DYNAMIC ARRAY OF t_fields,
-	json_rec util.JSONObject
+	where_clause  STRING,
+	column_list   STRING,
+	rows_count    INTEGER,
+	current_row   INTEGER,
+	fields        DYNAMIC ARRAY OF t_fields,
+	json_rec      util.JSONObject
 END RECORD
 
 ----------------------------------------------------------------------------------------------------
@@ -58,9 +54,9 @@ END RECORD
 -- @param l_keyField the column to use for the primary key
 -- @param l_where the WHERE clause
 FUNCTION (this sql) g2_SQLinit(l_tabName STRING, l_cols STRING, l_keyField STRING, l_where STRING)
-	LET this.table_name = l_tabName
+	LET this.table_name  = l_tabName
 	LET this.column_list = l_cols
-	LET this.key_field = l_keyField
+	LET this.key_field   = l_keyField
 	IF l_where.getLength() < 1 THEN
 		LET l_where = "1=1"
 	END IF
@@ -71,49 +67,45 @@ END FUNCTION
 -- Open the SQL cursor as a SCROLL cursor
 FUNCTION (this sql) g2_SQLcursor()
 	DEFINE l_sql STRING
-	DEFINE x SMALLINT
+	DEFINE x     SMALLINT
 	IF this.handle IS NOT NULL THEN
 		CALL this.g2_SQLclose()
 	END IF
-	LET l_sql =
-			"select " || this.column_list || " from " || this.table_name || " where " || this.where_clause
+	LET l_sql       = "select " || this.column_list || " from " || this.table_name || " where " || this.where_clause
 	LET this.handle = base.SqlHandle.create()
 	TRY
 		CALL this.handle.prepare(l_sql)
 	CATCH
-		CALL g2_core.g2_errPopup(
-				SFMT(% "Failed to doing prepare for select from '%1'\n%2!", this.table_name, SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(%"Failed to doing prepare for select from '%1'\n%2!", this.table_name, SQLERRMESSAGE))
 		EXIT PROGRAM
 	END TRY
 	CALL this.handle.openScrollCursor()
 	CALL this.fields.clear()
 	FOR x = 1 TO this.handle.getResultCount()
-		LET this.fields[x].colName = this.handle.getResultName(x)
-		LET this.fields[x].colType = this.handle.getResultType(x)
+		LET this.fields[x].colName  = this.handle.getResultName(x)
+		LET this.fields[x].colType  = this.handle.getResultType(x)
 		LET this.fields[x].formOnly = FALSE
-		LET this.fields[x].isKey = FALSE
+		LET this.fields[x].isKey    = FALSE
 		IF this.fields[x].colName.trim() = this.key_field.trim() THEN
 			LET this.fields[x].isKey = TRUE
-			LET this.key_field_num = x
+			LET this.key_field_num   = x
 		END IF
 		CALL this.g2_SQLsetColumnProps(x)
 	END FOR
 	IF this.key_field_num = 0 THEN
-		CALL g2_core.g2_errPopup(
-				SFMT(% "The key field '%1' doesn't appear to be in the table!", this.key_field.trim()))
+		CALL g2_core.g2_errPopup(SFMT(%"The key field '%1' doesn't appear to be in the table!", this.key_field.trim()))
 		EXIT PROGRAM
 	END IF
 	IF this.where_clause != "1=2" THEN -- count all the rows for the where clause
 -- TODO: Error handling!
-		PREPARE count_pre
-				FROM "SELECT COUNT(*) FROM " || this.table_name || " WHERE " || this.where_clause
+		PREPARE count_pre FROM "SELECT COUNT(*) FROM " || this.table_name || " WHERE " || this.where_clause
 		DECLARE count_cur CURSOR FOR count_pre
 		OPEN count_cur
 		FETCH count_cur INTO this.rows_count
 		CLOSE count_cur
 		LET this.current_row = 1
 	ELSE
-		LET this.rows_count = 0
+		LET this.rows_count  = 0
 		LET this.current_row = 0
 	END IF
 --	MESSAGE "Rows "||this.current_row||" of "||this.rows_count
@@ -131,9 +123,9 @@ END FUNCTION
 -- @param l_colNo Column in the array
 FUNCTION (this sql) g2_SQLsetColumnProps(l_colNo SMALLINT)
 	DEFINE l_typ STRING
-	LET l_typ = this.fields[l_colNo].colType
+	LET l_typ                          = this.fields[l_colNo].colType
 	LET this.fields[l_colNo].isNumeric = FALSE
-	LET this.fields[l_colNo].colLength = g2_db.g2_getColumnLength( l_typ, 0)
+	LET this.fields[l_colNo].colLength = g2_db.g2_getColumnLength(l_typ, 0)
 	CASE l_typ
 		WHEN "INTEGER"
 			LET this.fields[l_colNo].isNumeric = TRUE
@@ -183,7 +175,7 @@ FUNCTION (this sql) g2_SQLgetRow(l_row INTEGER, l_msg BOOLEAN)
 			LET this.fields[x].value = this.handle.getResultValue(x)
 		END FOR
 		IF l_msg THEN
-			MESSAGE SFMT(% "Rows %1 of %2", this.current_row, this.rows_count)
+			MESSAGE SFMT(%"Rows %1 of %2", this.current_row, this.rows_count)
 		END IF
 	END IF
 END FUNCTION
@@ -191,10 +183,10 @@ END FUNCTION
 -- Update a row using the current data values
 FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 	DEFINE l_sql, l_val, l_key STRING
-	DEFINE l_valNumeric DECIMAL(20, 5)
-	DEFINE l_updsql base.SqlHandle
-	DEFINE x SMALLINT
-	DEFINE l_para_no SMALLINT = 1
+	DEFINE l_valNumeric        DECIMAL(20, 5)
+	DEFINE l_updsql            base.SqlHandle
+	DEFINE x                   SMALLINT
+	DEFINE l_para_no           SMALLINT = 1
 	LET l_updsql = base.SqlHandle.create()
 
 -- Build the SQL
@@ -211,7 +203,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 	FOR x = 1 TO this.fields.getLength()
 		IF NOT this.fields[x].isKey AND NOT this.fields[x].formOnly THEN
 			LET this.fields[x].para_no = l_para_no
-			LET l_para_no = l_para_no + 1
+			LET l_para_no              = l_para_no + 1
 			IF x != this.fields.getLength() THEN
 				LET l_sql = l_sql.append("?,")
 			ELSE
@@ -226,7 +218,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 -- Update the Parameters.
 	FOR x = 1 TO this.fields.getLength()
 		IF NOT this.fields[x].formOnly THEN
-			LET l_val = this.fields[x].value
+			LET l_val        = this.fields[x].value
 			LET l_valNumeric = this.fields[x].value.trim()
 			IF this.fields[x].isKey THEN
 				LET l_key = this.fields[x].value.trimRight()
@@ -253,7 +245,7 @@ FUNCTION (this sql) g2_SQLupdate() RETURNS BOOLEAN
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(this.current_row, FALSE)
 	ELSE
-		CALL g2_core.g2_errPopup(SFMT(% "Failed to update record!\n%1!", SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(%"Failed to update record!\n%1!", SQLERRMESSAGE))
 		RETURN FALSE
 	END IF
 	RETURN TRUE
@@ -263,8 +255,8 @@ END FUNCTION
 FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 	DEFINE l_sql, l_val STRING
 	DEFINE l_valNumeric DECIMAL(20, 5)
-	DEFINE l_inssql base.SqlHandle
-	DEFINE x SMALLINT
+	DEFINE l_inssql     base.SqlHandle
+	DEFINE x            SMALLINT
 	LET l_inssql = base.SqlHandle.create()
 
 -- Build the SQL
@@ -292,7 +284,7 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 -- Update the Parameters.
 	FOR x = 1 TO this.fields.getLength()
 		IF NOT this.fields[x].formOnly THEN
-			LET l_val = this.fields[x].value
+			LET l_val        = this.fields[x].value
 			LET l_valNumeric = this.fields[x].value.trim()
 			IF this.fields[x].isNumeric THEN
 				CALL l_inssql.setParameter(x, l_valNumeric)
@@ -312,7 +304,7 @@ FUNCTION (this sql) g2_SQLinsert() RETURNS BOOLEAN
 		CALL this.g2_SQLcursor()
 		CALL this.g2_SQLgetRow(SQL_LAST, FALSE)
 	ELSE
-		CALL g2_core.g2_errPopup(SFMT(% "Failed to insert record!\n%1!", SQLERRMESSAGE))
+		CALL g2_core.g2_errPopup(SFMT(%"Failed to insert record!\n%1!", SQLERRMESSAGE))
 		RETURN FALSE
 	END IF
 	RETURN TRUE
@@ -324,13 +316,9 @@ FUNCTION (this sql) g2_SQLdelete() RETURNS BOOLEAN
 	LET l_val = this.handle.getResultValue(this.key_field_num)
 	LET l_sql = "DELETE FROM " || this.table_name || " WHERE " || this.key_field || " = ?"
 	IF g2_core.g2_winQuestion(
-							% "Confirm",
-							SFMT(% "Are you sure you want to delete this record?\n\n%1\nKey = %2", l_sql, l_val),
-							% "No",
-							% "Yes|No",
-							"question")
-					= % "Yes"
-			THEN
+					%"Confirm", SFMT(%"Are you sure you want to delete this record?\n\n%1\nKey = %2", l_sql, l_val), %"No",
+					%"Yes|No", "question")
+			= %"Yes" THEN
 		TRY
 			PREPARE del_stmt FROM l_sql
 			EXECUTE del_stmt USING l_val
@@ -341,11 +329,11 @@ FUNCTION (this sql) g2_SQLdelete() RETURNS BOOLEAN
 			LET this.rows_count = this.rows_count - 1
 			CALL this.g2_SQLgetRow(this.current_row, FALSE)
 		ELSE
-			CALL g2_core.g2_errPopup(SFMT(% "Failed to delete record!\n%1!", SQLERRMESSAGE))
+			CALL g2_core.g2_errPopup(SFMT(%"Failed to delete record!\n%1!", SQLERRMESSAGE))
 			RETURN FALSE
 		END IF
 	ELSE
-		MESSAGE % "Delete aborted."
+		MESSAGE %"Delete aborted."
 		RETURN FALSE
 	END IF
 	RETURN TRUE
